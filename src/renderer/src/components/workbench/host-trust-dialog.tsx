@@ -84,9 +84,11 @@ export function HostTrustDialogHost() {
           </AlertDialogTitle>
         </AlertDialogHeader>
         <div className="px-4 py-4">
-          <AlertDialogDescription>
-            <p>{message}</p>
-            <pre className="mt-2 whitespace-pre-wrap text-xs font-mono opacity-80">{detail}</pre>
+          <AlertDialogDescription asChild>
+            <div>
+              <p>{message}</p>
+              <pre className="mt-2 whitespace-pre-wrap text-xs font-mono opacity-80">{detail}</pre>
+            </div>
           </AlertDialogDescription>
         </div>
         <AlertDialogFooter className="border-t border-[var(--workbench-border)] px-4 py-3">

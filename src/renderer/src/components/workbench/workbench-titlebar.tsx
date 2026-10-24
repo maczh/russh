@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { queryKeys } from '@/features/shared/query-keys'
@@ -195,8 +196,17 @@ export function WorkbenchTitlebar() {
   const useNativeWindowsCaptionButtons =
     customTitleBar && isWindows && nativeWindowControlsRightInset > 0
 
+  const handleTitlebarMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+    if (event.button !== 0 || (event.target instanceof HTMLElement && event.target.closest('button'))) {
+      return
+    }
+    void getCurrentWindow().startDragging()
+  }
+
   return (
     <header
+      data-tauri-drag-region
+      onMouseDown={handleTitlebarMouseDown}
       className="relative flex h-9 shrink-0 items-center border-b border-[var(--workbench-border)] bg-[var(--workbench-titlebar)] px-2 text-xs"
       style={
         {
@@ -216,7 +226,7 @@ export function WorkbenchTitlebar() {
         >
           <WinsshLogo
             role="img"
-            aria-label="WinSSH"
+            aria-label="RuSSH"
             className="winssh-logo-sprite size-6"
             style={{ color: 'var(--workbench-logo)' }}
           />
@@ -269,7 +279,7 @@ export function WorkbenchTitlebar() {
           <TogglePanelIcon className="size-4" />
         </WindowControlButton>
 
-        {customTitleBar && !isMac && !useNativeWindowsCaptionButtons ? (
+        {!useNativeWindowsCaptionButtons ? (
           <>
             <WindowControlButton
               tooltip={t('workbench.titleBar.minimizeWindow')}

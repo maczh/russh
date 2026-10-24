@@ -22,7 +22,7 @@ import { sftpClient } from '@/features/sftp/api/sftp-client'
 import { sftpBookmarksClient } from '@/features/sftp/api/sftp-bookmarks-client'
 import { queryKeys } from '@/features/shared/query-keys'
 import { systemClient } from '@/features/system/api/system-client'
-import { formatFileSize, getResolvedLocale } from '@/i18n/format'
+import { formatDateTime, formatFileSize } from '@/i18n/format'
 import { actionIcons } from '@/lib/action-icons'
 import type { SessionTab } from '@/store/sessions-store'
 import { cn } from '@/lib/utils'
@@ -624,7 +624,7 @@ export function SftpPanel({
       : t('common.labels.none')
 
     const modifiedText = entry.modifiedAt
-      ? new Intl.DateTimeFormat(getResolvedLocale(), {
+      ? formatDateTime(entry.modifiedAt, {
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
@@ -632,7 +632,7 @@ export function SftpPanel({
           minute: '2-digit',
           second: '2-digit',
           hour12: false
-        }).format(new Date(entry.modifiedAt))
+        })
       : null
     const kindText =
       entry.kind === 'directory'

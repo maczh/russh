@@ -227,7 +227,7 @@ body,
 
 body {
   @apply bg-background text-foreground antialiased;
-  font-family: var(--app-font-family, 'WinSSH UI Default', sans-serif);
+  font-family: var(--app-font-family, 'RuSSH UI Default', sans-serif);
   overflow: hidden;
 }
 

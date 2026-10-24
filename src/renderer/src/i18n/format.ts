@@ -21,21 +21,41 @@ export function formatDateTime(
   value: Date | string | number,
   options?: Intl.DateTimeFormatOptions
 ): string {
-  return new Intl.DateTimeFormat(getResolvedLocale(), {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    ...options
-  }).format(new Date(value))
+  const date = toDate(value)
+  const hasComponentOptions = options && Object.keys(options).some((key) =>
+    ['weekday', 'year', 'month', 'day', 'dayPeriod', 'hour', 'minute', 'second', 'fractionalSecondDigits', 'timeZoneName'].includes(key)
+  )
+  const formatterOptions: Intl.DateTimeFormatOptions = hasComponentOptions
+    ? options
+    : { dateStyle: 'medium', timeStyle: 'short', ...options }
+  return new Intl.DateTimeFormat(getResolvedLocale(), formatterOptions).format(date)
 }
 
 export function formatTime(
   value: Date | string | number,
   options?: Intl.DateTimeFormatOptions
 ): string {
-  return new Intl.DateTimeFormat(getResolvedLocale(), {
-    timeStyle: 'medium',
-    ...options
-  }).format(new Date(value))
+  const date = toDate(value)
+  const hasComponentOptions = options && Object.keys(options).some((key) =>
+    ['weekday', 'year', 'month', 'day', 'dayPeriod', 'hour', 'minute', 'second', 'fractionalSecondDigits', 'timeZoneName'].includes(key)
+  )
+  const formatterOptions: Intl.DateTimeFormatOptions = hasComponentOptions ? options : { timeStyle: 'medium', ...options }
+  return new Intl.DateTimeFormat(getResolvedLocale(), formatterOptions).format(date)
+}
+
+function toDate(value: Date | string | number): Date {
+  if (value instanceof Date) {
+    return Number.isFinite(value.getTime()) ? value : new Date(0)
+  }
+
+  if (typeof value === 'number' || (typeof value === 'string' && /^\d+(?:\.\d+)?$/.test(value))) {
+    const numericValue = Number(value)
+    const milliseconds = numericValue < 1_000_000_000_000 ? numericValue * 1000 : numericValue
+    return Number.isFinite(milliseconds) ? new Date(milliseconds) : new Date(0)
+  }
+
+  const date = new Date(value)
+  return Number.isFinite(date.getTime()) ? date : new Date(0)
 }
 
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'] as const

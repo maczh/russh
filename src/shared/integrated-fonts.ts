@@ -54,9 +54,9 @@ const ALL_SCOPES: IntegratedFontScope[] = ['ui', 'terminal', 'editor']
 
 export const INTEGRATED_FONTS: IntegratedFontDefinition[] = [
   {
-    cssFamily: 'WinSSH UI Default',
+    cssFamily: 'RuSSH UI Default',
     id: 'winssh-default',
-    label: 'WinSSH Default',
+    label: 'RuSSH Default',
     legacyNames: [
       'segoe ui variable text',
       'segoe ui',
@@ -69,98 +69,98 @@ export const INTEGRATED_FONTS: IntegratedFontDefinition[] = [
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH UI Inter',
+    cssFamily: 'RuSSH UI Inter',
     id: 'inter',
     label: 'Inter',
     legacyNames: ['inter'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH UI Open Sans',
+    cssFamily: 'RuSSH UI Open Sans',
     id: 'open-sans',
     label: 'Open Sans',
     legacyNames: ['open sans'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH UI Source Sans Pro',
+    cssFamily: 'RuSSH UI Source Sans Pro',
     id: 'source-sans-pro',
     label: 'Source Sans Pro',
     legacyNames: ['source sans pro'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH JetBrains Mono',
+    cssFamily: 'RuSSH JetBrains Mono',
     id: 'jetbrains-mono',
     label: 'JetBrains Mono',
     legacyNames: ['jetbrains mono'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH Fira Code',
+    cssFamily: 'RuSSH Fira Code',
     id: 'fira-code',
     label: 'Fira Code',
     legacyNames: ['fira code'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH Roboto Mono',
+    cssFamily: 'RuSSH Roboto Mono',
     id: 'roboto-mono',
     label: 'Roboto Mono',
     legacyNames: ['roboto mono'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH Source Code Pro',
+    cssFamily: 'RuSSH Source Code Pro',
     id: 'source-code-pro',
     label: 'Source Code Pro',
     legacyNames: ['source code pro'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH Cascadia Mono',
+    cssFamily: 'RuSSH Cascadia Mono',
     id: 'cascadia-mono',
     label: 'Cascadia Mono',
     legacyNames: ['cascadia mono', 'consolas', 'lucida console'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH Cascadia Code',
+    cssFamily: 'RuSSH Cascadia Code',
     id: 'cascadia-code',
     label: 'Cascadia Code',
     legacyNames: ['cascadia code'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH IBM Plex Mono',
+    cssFamily: 'RuSSH IBM Plex Mono',
     id: 'ibm-plex-mono',
     label: 'IBM Plex Mono',
     legacyNames: ['ibm plex mono'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH Ubuntu Mono',
+    cssFamily: 'RuSSH Ubuntu Mono',
     id: 'ubuntu-mono',
     label: 'Ubuntu Mono',
     legacyNames: ['ubuntu mono'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH Ubuntu Sans Mono',
+    cssFamily: 'RuSSH Ubuntu Sans Mono',
     id: 'ubuntu-sans-mono',
     label: 'Ubuntu Sans Mono',
     legacyNames: ['ubuntu sans mono'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH PT Mono',
+    cssFamily: 'RuSSH PT Mono',
     id: 'pt-mono',
     label: 'PT Mono',
     legacyNames: ['pt mono'],
     scopes: ALL_SCOPES
   },
   {
-    cssFamily: 'WinSSH VT323',
+    cssFamily: 'RuSSH VT323',
     id: 'vt323',
     label: 'VT323',
     legacyNames: ['vt323'],

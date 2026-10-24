@@ -16,7 +16,7 @@ const workbench = {
     },
     commandCenter: {
       commandPalette: {
-        description: '搜索并执行 WinSSH 命令',
+        description: '搜索并执行 RuSSH 命令',
         empty: '没有匹配的命令。',
         groups: {
           currentServer: '当前服务器',
@@ -93,7 +93,7 @@ const workbench = {
         title: '最近连接'
       },
       subtitle: '通过资源管理器、编辑器标签和集成终端管理所有 SSH 工作流。',
-      title: 'WinSSH 工作台',
+      title: 'RuSSH 工作台',
       favorites: {
         title: '收藏连接'
       },
@@ -582,8 +582,8 @@ const workbench = {
         },
         intro: {
           description:
-            'WinSSH 是一个正式版桌面 SSH 工作台，围绕终端、文件、端口转发和可复用连接管理构建。更新、平台细节和工作台体验会沿着正式发布线继续完善。',
-          title: '关于 WinSSH'
+            'RuSSH 是一个正式版桌面 SSH 工作台，围绕终端、文件、端口转发和可复用连接管理构建。更新、平台细节和工作台体验会沿着正式发布线继续完善。',
+          title: '关于 RuSSH'
         },
         version: {
           channelLabel: '发布通道',
@@ -614,7 +614,7 @@ const workbench = {
           error: '更新失败。',
           feedMissing: '当前构建没有配置更新源。',
           idle: '你可以随时手动检查更新。',
-          manualDownload: '发现新版本 WinSSH {{version}}，请前往下载页面下载最新版本并手动安装。',
+            manualDownload: '发现新版本 RuSSH {{version}}，请前往下载页面下载最新版本并手动安装。',
           notAvailable: '当前已经是最新版本。',
           platformUnsupported: '当前构建暂不支持在 {{platform}} 上自动更新。'
         },
@@ -641,7 +641,7 @@ const workbench = {
         deleteTitle: '删除导入主题包',
         empty: '还没有导入主题包。导入 ZIP 主题包后，新的主题会出现在列表中。',
         importDescription:
-          '以 ZIP 压缩包形式导入 WinSSH 主题包，导入成功后会立即出现在主题列表中。',
+          '以 ZIP 压缩包形式导入 RuSSH 主题包，导入成功后会立即出现在主题列表中。',
         importedThemes: '包含的主题',
         title: '主题包'
       },
@@ -665,11 +665,11 @@ const workbench = {
         goToDownload: '前往下载页面',
         later: '稍后'
       },
-      description: '发现新版本 WinSSH {{version}}。你可以现在下载，也可以稍后处理。',
+      description: '发现新版本 RuSSH {{version}}。你可以现在下载，也可以稍后处理。',
       descriptions: {
         checking: '正在检查更新源。',
         downloaded: '更新已下载完成，可以立即安装。',
-        manualDownload: '发现新版本 WinSSH {{version}}，请前往下载页面下载最新版本并手动安装。',
+        manualDownload: '发现新版本 RuSSH {{version}}，请前往下载页面下载最新版本并手动安装。',
         downloading: '正在下载更新... {{percent}}%',
         error: '检查或下载更新时发生错误。',
         idle: '正在准备更新流程。',

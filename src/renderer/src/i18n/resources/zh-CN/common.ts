@@ -1,5 +1,5 @@
 const common = {
-  appName: 'WinSSH',
+  appName: 'RuSSH',
   actions: {
     add: '新增',
     browse: '浏览',

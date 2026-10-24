@@ -286,6 +286,11 @@ function WorkbenchShellContent() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'q') {
+        event.preventDefault()
+        void window.winsshApi.system.window.close()
+        return
+      }
       const action = resolveWorkbenchShortcutAction(event, isMac)
 
       if (!action) {

@@ -1,0 +1,33 @@
+[package]
+name = "winssh-tauri"
+version = "1.2.4"
+description = "RuSSH native runtime powered by Tauri"
+authors = ["RuSSH"]
+edition = "2021"
+
+[lib]
+name = "winssh_tauri_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+portable-pty = "0.8"
+ssh2 = "0.9"
+base64 = "0.22"
+png = "0.18"
+specta = { version = "2.0.0-rc.26", features = ["derive"] }
+specta-typescript = "0.0.13"
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-specta = { version = "2.0.0-rc.26", features = ["typescript"] }
+tauri-plugin-dialog = "2"
+zip = "2"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+urlencoding = "2"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

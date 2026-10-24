@@ -16,7 +16,7 @@ const workbench = {
     },
     commandCenter: {
       commandPalette: {
-        description: 'Search WinSSH commands',
+        description: 'Search RuSSH commands',
         empty: 'No matching commands.',
         groups: {
           currentServer: 'Current Server',
@@ -95,7 +95,7 @@ const workbench = {
       },
       subtitle:
         'Manage all SSH workflows through Explorer, editor tabs, and the integrated terminal.',
-      title: 'WinSSH Workbench',
+      title: 'RuSSH Workbench',
       favorites: {
         title: 'Favorite Connections'
       },
@@ -597,8 +597,8 @@ const workbench = {
         },
         intro: {
           description:
-            'WinSSH is a stable desktop SSH workspace focused on terminals, files, forwarding, and reusable connection management. Updates, platform details, and workbench polish continue to improve from this official release line.',
-          title: 'About WinSSH'
+            'RuSSH is a stable desktop SSH workspace focused on terminals, files, forwarding, and reusable connection management. Updates, platform details, and workbench polish continue to improve from this official release line.',
+          title: 'About RuSSH'
         },
         version: {
           channelLabel: 'Release channel',
@@ -632,7 +632,7 @@ const workbench = {
           feedMissing: 'This build was not configured with an update feed.',
           idle: 'Automatic updates are ready when you want to check.',
           manualDownload:
-            'WinSSH {{version}} is available. Please visit the download page to get the latest version and install it manually.',
+            'RuSSH {{version}} is available. Please visit the download page to get the latest version and install it manually.',
           notAvailable: 'You are already on the latest version.',
           platformUnsupported: 'Automatic updates are not supported on {{platform}} in this build.'
         },
@@ -662,7 +662,7 @@ const workbench = {
         deleteTitle: 'Delete Imported Theme Pack',
         empty: 'No imported theme packs yet. Import a ZIP theme pack to add more themes.',
         importDescription:
-          'Import WinSSH theme packs as ZIP archives. Imported themes appear in the theme list immediately.',
+          'Import RuSSH theme packs as ZIP archives. Imported themes appear in the theme list immediately.',
         importedThemes: 'Imported themes',
         title: 'Theme Packs'
       },
@@ -686,12 +686,12 @@ const workbench = {
         goToDownload: 'Go to Download Page',
         later: 'Later'
       },
-      description: 'WinSSH {{version}} is available. Download it now or come back to it later.',
+      description: 'RuSSH {{version}} is available. Download it now or come back to it later.',
       descriptions: {
         checking: 'Checking the update feed now.',
         downloaded: 'The update has finished downloading and is ready to install.',
         manualDownload:
-          'WinSSH {{version}} is available. Please visit the download page to get the latest version and install it manually.',
+          'RuSSH {{version}} is available. Please visit the download page to get the latest version and install it manually.',
         downloading: 'Downloading the update... {{percent}}%',
         error: 'Something went wrong while checking or downloading updates.',
         idle: 'Preparing the update workflow.',

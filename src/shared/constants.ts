@@ -7,7 +7,7 @@ import {
 } from './integrated-fonts'
 
 export const APP_ID = 'com.winssh.app'
-export const APP_NAME = 'WinSSH'
+export const APP_NAME = 'RuSSH'
 export const SECURE_STORE_SERVICE = 'winssh.credentials'
 
 export const COMMAND_HISTORY_CAP = 5000

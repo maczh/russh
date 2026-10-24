@@ -2,6 +2,7 @@ node_modules
 dist
 out
 release
+src-tauri/target/
 .DS_Store
 .eslintcache
 *.log*
