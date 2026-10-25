@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize as SerdeSerialize};
 use std::sync::Mutex;
 use std::sync::Arc;
 use std::collections::HashMap;
-use std::io::{Read, Write, Cursor};
+use std::io::{Cursor, Read, Seek, SeekFrom, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc::{self, Sender};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -862,82 +862,127 @@ fn connect_through_jump(
     target_port: u16,
     tag: &str,
 ) -> Result<TcpStream, String> {
-    let jump_tcp = TcpStream::connect((jump.host.as_str(), jump.port)).map_err(|error| error.to_string())?;
+    let jump_tcp = TcpStream::connect((jump.host.as_str(), jump.port)).map_err(|error| {
+        format!("jump host {}:{} connection failed: {error}", jump.host, jump.port)
+    })?;
     let mut jump_session = ssh2::Session::new().map_err(|error| error.to_string())?;
+    jump_session.set_timeout(30_000);
     jump_session.set_tcp_stream(jump_tcp);
-    jump_session.handshake().map_err(|error| error.to_string())?;
-    authenticate_session(&mut jump_session, jump, &format!("{tag}-jump"))?;
-    let mut channel = jump_session
+    jump_session.handshake().map_err(|error| {
+        format!("jump host {}:{} SSH handshake failed: {error}", jump.host, jump.port)
+    })?;
+    authenticate_session(&mut jump_session, jump, &format!("{tag}-jump")).map_err(|error| {
+        format!("jump host {}:{} authentication failed: {error}", jump.host, jump.port)
+    })?;
+    let channel = jump_session
         .channel_direct_tcpip(target_host, target_port, None)
-        .map_err(|error| error.to_string())?;
+        .map_err(|error| {
+            format!(
+                "jump host {}:{} cannot forward to target {}:{}: {error}",
+                jump.host, jump.port, target_host, target_port
+            )
+        })?;
+    // The two relay directions share libssh2's session lock. Keep channel I/O
+    // non-blocking so a read waiting for target output cannot prevent the
+    // opposite direction from forwarding the client's SSH banner.
+    jump_session.set_blocking(false);
 
     let listener = TcpListener::bind(("127.0.0.1", 0)).map_err(|error| error.to_string())?;
     let address = listener.local_addr().map_err(|error| error.to_string())?;
-    let relay = std::thread::spawn(move || {
-        let Ok((mut local, _)) = listener.accept() else { return };
-        let _ = local.set_nonblocking(true);
-        jump_session.set_blocking(false);
-        let mut local_to_jump = Vec::new();
-        let mut jump_to_local = Vec::new();
-        let mut local_buffer = [0_u8; 8192];
-        let mut jump_buffer = [0_u8; 8192];
-        loop {
-            let mut did_work = false;
-            match local.read(&mut local_buffer) {
-                Ok(0) => break,
-                Ok(size) => {
-                    local_to_jump.extend_from_slice(&local_buffer[..size]);
-                    did_work = true;
-                }
-                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
-                Err(_) => break,
-            }
-            if !local_to_jump.is_empty() {
-                match channel.write(&local_to_jump) {
-                    Ok(size) => {
-                        local_to_jump.drain(..size);
-                        did_work = true;
-                        if size > 0 {
-                            let _ = channel.flush();
-                        }
-                    }
-                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
-                    Err(_) => break,
-                }
-            }
-            match channel.read(&mut jump_buffer) {
-                Ok(0) => break,
-                Ok(size) => {
-                    jump_to_local.extend_from_slice(&jump_buffer[..size]);
-                    did_work = true;
-                }
-                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
-                Err(_) => break,
-            }
-            if !jump_to_local.is_empty() {
-                match local.write(&jump_to_local) {
-                    Ok(size) => {
-                        jump_to_local.drain(..size);
-                        did_work = true;
-                    }
-                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
-                    Err(_) => break,
-                }
-            }
-            if channel.eof() { break; }
-            // Both endpoints are non-blocking. Avoid spinning when a jump
-            // connection is idle or the target stops consuming data.
-            std::thread::sleep(if did_work {
-                std::time::Duration::from_millis(2)
-            } else {
-                std::time::Duration::from_millis(20)
-            });
-        }
-        let _ = channel.close();
-    });
     let target = TcpStream::connect(address).map_err(|error| error.to_string())?;
     target.set_nodelay(true).map_err(|error| error.to_string())?;
-    drop(relay);
+    let Ok((local_for_read, _)) = listener.accept() else {
+        return Err("jump relay listener closed before target connected".into());
+    };
+    // `target` is the client side consumed by libssh2. Both relay directions
+    // must use clones of the accepted server side; cloning `target` here
+    // sends remote output back into the relay instead of into libssh2.
+    let local_for_write = local_for_read.try_clone().map_err(|error| error.to_string())?;
+    // This is the accepted relay-side socket. It is distinct from `target`,
+    // which is owned by libssh2, so non-blocking mode here cannot alter the
+    // target SSH session's socket.
+    local_for_read.set_nonblocking(true).map_err(|error| error.to_string())?;
+    local_for_write.set_nonblocking(true).map_err(|error| error.to_string())?;
+    let stop = Arc::new(AtomicBool::new(false));
+
+    let mut channel_to_jump = channel.clone();
+    let stop_to_jump = stop.clone();
+    std::thread::spawn(move || {
+        let mut local = local_for_read;
+        let mut pending = Vec::new();
+        let mut buffer = [0_u8; 64 * 1024];
+        let mut flush_pending = false;
+        while !stop_to_jump.load(Ordering::Relaxed) {
+            if pending.len() < 256 * 1024 {
+                match local.read(&mut buffer) {
+                    Ok(0) => break,
+                    Ok(size) => pending.extend_from_slice(&buffer[..size]),
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => continue,
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    Err(_) => break,
+                }
+            }
+            if flush_pending {
+                match channel_to_jump.flush() {
+                    Ok(()) => flush_pending = false,
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        std::thread::sleep(std::time::Duration::from_millis(1));
+                        continue;
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    Err(_) => break,
+                }
+            }
+            if !pending.is_empty() {
+                match channel_to_jump.write(&pending) {
+                    Ok(size) if size > 0 => {
+                        pending.drain(..size);
+                        flush_pending = true;
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    Err(_) => break,
+                    Ok(_) => {}
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_millis(if pending.is_empty() { 2 } else { 1 }));
+        }
+        stop_to_jump.store(true, Ordering::Relaxed);
+    });
+
+    let mut channel_from_jump = channel;
+    let stop_from_jump = stop.clone();
+    std::thread::spawn(move || {
+        let mut local = local_for_write;
+        let mut pending = Vec::new();
+        let mut buffer = [0_u8; 64 * 1024];
+        while !stop_from_jump.load(Ordering::Relaxed) {
+            if pending.len() < 256 * 1024 {
+                match channel_from_jump.read(&mut buffer) {
+                    Ok(0) => break,
+                    Ok(size) => pending.extend_from_slice(&buffer[..size]),
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    Err(_) => break,
+                }
+            }
+            if !pending.is_empty() {
+                match local.write(&pending) {
+                    Ok(size) if size > 0 => { pending.drain(..size); }
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        std::thread::sleep(std::time::Duration::from_millis(1));
+                        continue;
+                    }
+                    Err(_) => break,
+                    Ok(_) => {}
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_millis(if pending.is_empty() { 2 } else { 1 }));
+        }
+        stop_from_jump.store(true, Ordering::Relaxed);
+    });
+
     Ok(target)
 }
 
@@ -1369,6 +1414,7 @@ fn connect_session(app: AppHandle, state: tauri::State<'_, RuntimeState>, input:
             match TcpStream::connect((connection_host.as_str(), port)) { Ok(tcp) => tcp, Err(error) => { emit_state("error", Some(&error.to_string())); return; } }
         };
         let mut session = match ssh2::Session::new() { Ok(session) => session, Err(error) => { emit_state("error", Some(&error.to_string())); return; } };
+        session.set_timeout(30_000);
         session.set_tcp_stream(tcp);
         let authenticated = session.handshake().and_then(|_| {
             let actual_fingerprint = host_fingerprint(&session).map_err(|_| ssh2::Error::new(ssh2::ErrorCode::Session(-1), "SSH host key unavailable"))?;
@@ -1525,7 +1571,9 @@ fn list_sftp(app: AppHandle, state: tauri::State<'_, RuntimeState>, session_id: 
     let info = state.connection_info.lock().map_err(|error| error.to_string())?.get(&session_id).cloned().ok_or("session not found")?;
     let sftp = open_sftp(&info)?;
     let resolved_path = resolve_sftp_path(&sftp, &remote_path)?;
-    let entries = sftp.readdir(std::path::Path::new(&resolved_path)).map_err(|error| error.to_string())?;
+    let entries = sftp.readdir(std::path::Path::new(&resolved_path)).map_err(|error| {
+        format!("SFTP list {} failed: {error}", resolved_path)
+    })?;
     let mapped: Vec<serde_json::Value> = entries.into_iter().map(|(path, stat)| {
         let name = path.file_name().and_then(|value| value.to_str()).unwrap_or_default().to_owned();
         let kind = if stat.is_dir() { "directory" } else { "file" };
@@ -1548,15 +1596,25 @@ fn resolve_sftp_path(sftp: &ssh2::Sftp, path: &str) -> Result<String, String> {
 
 fn open_sftp(info: &SessionConnectionInfo) -> Result<ssh2::Sftp, String> {
     let tcp = if let Some(jump) = info.jump.as_deref() {
-        connect_through_jump(jump, info.host.as_str(), info.port, &format!("{}-sftp", info.server_id))?
+        connect_through_jump(jump, info.host.as_str(), info.port, &format!("{}-sftp", info.server_id))
+            .map_err(|error| format!("SFTP via jump {}:{} to {}:{} failed: {error}", jump.host, jump.port, info.host, info.port))?
     } else {
-        TcpStream::connect((info.host.as_str(), info.port)).map_err(|error| error.to_string())?
+        TcpStream::connect((info.host.as_str(), info.port)).map_err(|error| {
+            format!("SFTP target {}:{} connection failed: {error}", info.host, info.port)
+        })?
     };
     let mut session = ssh2::Session::new().map_err(|error| error.to_string())?;
+    session.set_timeout(30_000);
     session.set_tcp_stream(tcp);
-    session.handshake().map_err(|error| error.to_string())?;
-    authenticate_session(&mut session, info, "sftp")?;
-    session.sftp().map_err(|error| error.to_string())
+    session.handshake().map_err(|error| {
+        format!("SFTP target {}:{} SSH handshake failed: {error}", info.host, info.port)
+    })?;
+    authenticate_session(&mut session, info, "sftp").map_err(|error| {
+        format!("SFTP target {}:{} authentication failed: {error}", info.host, info.port)
+    })?;
+    session.sftp().map_err(|error| {
+        format!("SFTP target {}:{} subsystem failed: {error}", info.host, info.port)
+    })
 }
 
 #[tauri::command]
@@ -1770,18 +1828,47 @@ fn download_sftp_file(app: AppHandle, state: tauri::State<'_, RuntimeState>, ses
         std::thread::spawn(move || {
             let result = (|| -> Result<u64, String> {
                 let sftp = open_sftp(&info)?;
-                let mut remote = sftp.open(std::path::Path::new(&download_remote_path)).map_err(|error| error.to_string())?;
-                let total = remote.stat().ok().and_then(|stat| stat.size).unwrap_or(0);
-                let mut local = std::fs::File::create(&path).map_err(|error| error.to_string())?;
-                let _ = download_app.emit("sftp:transferProgress", serde_json::json!({"sessionId": download_session_id, "direction": "download", "fileName": file_name, "localPath": path, "remotePath": download_remote_path, "transferred": 0, "total": total, "status": "running"}));
-                let mut transferred = 0_u64;
+                let mut remote = sftp.open(std::path::Path::new(&download_remote_path)).map_err(|error| {
+                    format!("SFTP open {}:{} failed for {}: {error}", info.host, info.port, download_remote_path)
+                })?;
+                let total = remote.stat().map_err(|error| {
+                    format!("SFTP stat {}:{} failed for {}: {error}", info.host, info.port, download_remote_path)
+                })?.size.unwrap_or(0);
+                let local_size = std::fs::metadata(&path).map(|metadata| metadata.len()).unwrap_or(0);
+                let resume_offset = if local_size > 0 && local_size < total { local_size } else { 0 };
+                if resume_offset > 0 {
+                    remote.seek(SeekFrom::Start(resume_offset)).map_err(|error| {
+                        format!("SFTP resume seek {}:{} failed at {} bytes: {error}", info.host, info.port, resume_offset)
+                    })?;
+                }
+                let mut local = if resume_offset > 0 {
+                    std::fs::OpenOptions::new().write(true).open(&path).map_err(|error| error.to_string())?
+                } else {
+                    std::fs::File::create(&path).map_err(|error| error.to_string())?
+                };
+                if resume_offset > 0 {
+                    local.seek(SeekFrom::Start(resume_offset)).map_err(|error| error.to_string())?;
+                }
+                let _ = download_app.emit("sftp:transferProgress", serde_json::json!({"sessionId": download_session_id, "direction": "download", "fileName": file_name, "localPath": path, "remotePath": download_remote_path, "transferred": resume_offset, "total": total, "status": "running"}));
+                let mut transferred = resume_offset;
+                let mut last_reported = std::time::Instant::now();
                 let mut buffer = [0_u8; 64 * 1024];
                 loop {
-                    let size = remote.read(&mut buffer).map_err(|error| error.to_string())?;
+                    let size = remote.read(&mut buffer).map_err(|error| {
+                        format!("SFTP read {}:{} failed for {} after {} bytes: {error}", info.host, info.port, download_remote_path, transferred)
+                    })?;
                     if size == 0 { break; }
                     local.write_all(&buffer[..size]).map_err(|error| error.to_string())?;
                     transferred += size as u64;
-                    let _ = download_app.emit("sftp:transferProgress", serde_json::json!({"sessionId": download_session_id, "direction": "download", "fileName": file_name, "localPath": path, "remotePath": download_remote_path, "transferred": transferred, "total": total, "status": "running"}));
+                    // Progress is UI telemetry, not part of the data path.
+                    // Emitting once per SFTP read can flood the webview when
+                    // libssh2 returns small packets over a jump connection.
+                    if last_reported.elapsed() >= std::time::Duration::from_millis(100)
+                        || (total > 0 && transferred >= total)
+                    {
+                        let _ = download_app.emit("sftp:transferProgress", serde_json::json!({"sessionId": download_session_id, "direction": "download", "fileName": file_name, "localPath": path, "remotePath": download_remote_path, "transferred": transferred, "total": total, "status": "running"}));
+                        last_reported = std::time::Instant::now();
+                    }
                 }
                 Ok(transferred)
             })();
