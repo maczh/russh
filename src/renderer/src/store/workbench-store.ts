@@ -441,7 +441,7 @@ export const useWorkbenchStore = create<WorkbenchState>()(
         })
     }),
     {
-      name: 'winssh-workbench',
+      name: 'russh-workbench',
       partialize: (state) => ({
         activeActivityId: state.activeActivityId,
         activePanelId: state.activePanelId,

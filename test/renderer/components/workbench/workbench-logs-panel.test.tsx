@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '@/i18n'
 import { WorkbenchLogsPanel } from '@/components/workbench/workbench-logs-panel'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 
 vi.mock('sonner', () => ({
   toast: {
@@ -31,10 +31,10 @@ describe('WorkbenchLogsPanel', () => {
     const clear = vi.fn(async () => undefined)
     const updatePath = vi.fn(async (logFilePath: string) => ({ logFilePath }))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       logs: {
         clear,
-        getState: async () => ({ logFilePath: '/tmp/winssh.log' }),
+        getState: async () => ({ logFilePath: '/tmp/russh.log' }),
         list: async () => [
           {
             id: 'entry-1',
@@ -57,9 +57,9 @@ describe('WorkbenchLogsPanel', () => {
     )
 
     expect(await screen.findByText('renderer booted')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('/tmp/winssh.log')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('/tmp/russh.log')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByDisplayValue('/tmp/winssh.log'), {
+    fireEvent.change(screen.getByDisplayValue('/tmp/russh.log'), {
       target: { value: '/tmp/next.log' }
     })
     fireEvent.click(screen.getByRole('button', { name: 'Save Path' }))

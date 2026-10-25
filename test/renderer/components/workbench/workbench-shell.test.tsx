@@ -11,7 +11,7 @@ import {
   createServerEditorDocument,
   createSessionEditorDocument
 } from '@/lib/workbench'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
@@ -111,7 +111,7 @@ describe('WorkbenchShell shortcuts', () => {
   it('saves the active server editor with Cmd+S', async () => {
     const createServer = vi.fn().mockResolvedValue(createdServer)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         create: createServer,
         list: vi.fn().mockResolvedValue([])
@@ -145,7 +145,7 @@ describe('WorkbenchShell shortcuts', () => {
   }, 10000)
 
   it('opens the settings editor with Cmd+,', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([])
       }
@@ -165,7 +165,7 @@ describe('WorkbenchShell shortcuts', () => {
   it('opens the updates editor from a native menu action', async () => {
     let menuActionHandler: ((action: SystemMenuAction) => void) | null = null
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([])
       },
@@ -195,7 +195,7 @@ describe('WorkbenchShell shortcuts', () => {
   })
 
   it('closes the active server editor with Cmd+W', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([])
       }
@@ -216,7 +216,7 @@ describe('WorkbenchShell shortcuts', () => {
   it('disconnects the active session with Cmd+W', async () => {
     const disconnect = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },
@@ -241,7 +241,7 @@ describe('WorkbenchShell shortcuts', () => {
   it('closes the active local terminal with Cmd+W', async () => {
     const closeLocalTerminal = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       localTerminals: {
         close: closeLocalTerminal
       },
@@ -273,7 +273,7 @@ describe('WorkbenchShell shortcuts', () => {
 
 describe('WorkbenchShell terminal document visibility', () => {
   it('keeps inactive terminal documents mounted and updates their active state', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       }
@@ -332,7 +332,7 @@ describe('WorkbenchShell terminal document visibility', () => {
   })
 
   it('does not remount the active session editor when toggling the sidebar or panel', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       }

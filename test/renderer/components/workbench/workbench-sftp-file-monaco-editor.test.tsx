@@ -8,7 +8,7 @@ import { createThemeDefinition } from '@shared/themes'
 import i18n from '@/i18n'
 import { WorkbenchSftpFileMonacoEditor } from '@/components/workbench/workbench-sftp-file-monaco-editor'
 import type { SftpFileEditorDocument } from '@/lib/workbench'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useSessionsStore } from '@/store/sessions-store'
 
 let modelValue = ''
@@ -289,8 +289,8 @@ const highContrastDarkTheme = createThemeDefinition({
   appearance: 'dark',
   id: 'acme.accessible-dark',
   label: 'High Contrast Dark',
-  pluginDisplayName: 'WinSSH High Contrast Themes',
-  pluginId: 'winssh.high-contrast-themes',
+  pluginDisplayName: 'RuSSH High Contrast Themes',
+  pluginId: 'russh.high-contrast-themes',
   source: 'builtin',
   terminal: {
     background: '#000000',
@@ -329,12 +329,12 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
     vi.mocked(monaco.editor.defineTheme).mockClear()
     vi.mocked(monaco.editor.setTheme).mockClear()
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
   })
 
   it('shows server identity above the remote file path', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -362,7 +362,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('starts read streams only after the active stream id is set', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -396,7 +396,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('defines Monaco themes on the native high contrast base', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           ...DEFAULT_APP_SETTINGS,
@@ -415,7 +415,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
     await waitFor(() => {
       expect(monaco.editor.defineTheme).toHaveBeenCalledWith(
-        'winssh-acme-accessible-dark',
+        'russh-acme-accessible-dark',
         expect.objectContaining({
           base: 'hc-black'
         })
@@ -426,7 +426,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
   it('temporarily zooms only the current Monaco editor with ctrl wheel', async () => {
     const updateSettings = vi.fn()
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         update: updateSettings
       },
@@ -453,7 +453,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
   it('temporarily zooms the Monaco editor when the editor surface handles wheel propagation', async () => {
     const updateSettings = vi.fn()
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         update: updateSettings
       },
@@ -490,7 +490,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
   it('temporarily zooms and resets the current Monaco editor with keyboard shortcuts', async () => {
     const updateSettings = vi.fn()
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         update: updateSettings
       },
@@ -519,7 +519,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('appends streamed chunks and marks the editor clean after completion', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -542,7 +542,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('does not read the full editor value for every streamed load chunk', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -580,7 +580,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('joins streamed chunks once when completing a multi-chunk load', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -631,7 +631,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('ignores chunks from stale read streams', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
     const nextDocument: SftpFileEditorDocument = {
       ...sftpDocument,
       id: 'sftp-file-editor:session-1:%2Fetc%2Fnginx%2Fsites-enabled%2Fdefault',
@@ -673,7 +673,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('drops failed streamed chunks before a reload completes', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -713,7 +713,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
     const readStream =
       createDeferred<Awaited<ReturnType<typeof sftpStream.api.openFileReadStream>>>()
     sftpStream.api.openFileReadStream.mockReturnValueOnce(readStream.promise)
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     const view = renderEditor()
 
@@ -740,7 +740,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('shows progress from streamed read state events', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -773,7 +773,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('saves editor content in bounded chunks and marks clean after close succeeds', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -821,7 +821,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('uses the final streamed encoding when saving after load', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -872,7 +872,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('does not split an emoji surrogate pair at the save chunk boundary', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 
@@ -911,7 +911,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('does not save partial content after a streamed load fails', async () => {
     const sftpStream = createSftpStreamMock()
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     const { container } = renderEditor()
 
@@ -943,7 +943,7 @@ describe('WorkbenchSftpFileMonacoEditor', () => {
 
   it('keeps the editor dirty when streamed save fails', async () => {
     const sftpStream = createSftpStreamMock({ failClose: true })
-    window.winsshApi = createWinsshApiMock({ sftp: sftpStream.api })
+    window.russhApi = createRuSSHApiMock({ sftp: sftpStream.api })
 
     renderEditor()
 

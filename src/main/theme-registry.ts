@@ -124,8 +124,8 @@ function createFallbackTheme(appearance: ThemeAppearance): ThemeDefinition {
     appearance,
     id: getDefaultThemeId(appearance),
     label: appearance === 'dark' ? 'Dark+' : 'Light+',
-    pluginDisplayName: 'WinSSH Fallback Theme',
-    pluginId: 'winssh.fallback-theme',
+    pluginDisplayName: 'RuSSH Fallback Theme',
+    pluginId: 'russh.fallback-theme',
     source: 'builtin',
     version: '0.0.0'
   })
@@ -289,9 +289,9 @@ export class ThemeRegistry {
   async importArchive(archivePath: string): Promise<ThemeImportResult> {
     await mkdir(this.userRoot, { recursive: true })
 
-    const extractionRoot = await mkdtemp(join(tmpdir(), 'winssh-theme-import-'))
-    const stagingRoot = await mkdtemp(join(this.userRoot, '.winssh-theme-stage-'))
-    const backupRoot = await mkdtemp(join(tmpdir(), 'winssh-theme-backup-'))
+    const extractionRoot = await mkdtemp(join(tmpdir(), 'russh-theme-import-'))
+    const stagingRoot = await mkdtemp(join(this.userRoot, '.russh-theme-stage-'))
+    const backupRoot = await mkdtemp(join(tmpdir(), 'russh-theme-backup-'))
     const backups: Array<{ backupPath: string; originalPath: string }> = []
     let finalPluginPath = ''
     let installCompleted = false

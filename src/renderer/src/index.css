@@ -426,7 +426,7 @@ button,
   animation-delay: 0.28s;
 }
 
-@keyframes winssh-logo-float {
+@keyframes russh-logo-float {
   0%,
   100% {
     transform: translateY(0) rotate(0deg) scale(1);
@@ -449,7 +449,7 @@ button,
   }
 }
 
-@keyframes winssh-logo-sparkle {
+@keyframes russh-logo-sparkle {
   0%,
   100% {
     opacity: 0;
@@ -467,15 +467,15 @@ button,
   }
 }
 
-.winssh-logo-orbit {
+.russh-logo-orbit {
   position: relative;
   color: var(--workbench-logo);
   cursor: default;
   -webkit-app-region: no-drag;
 }
 
-.winssh-logo-orbit::before,
-.winssh-logo-orbit::after {
+.russh-logo-orbit::before,
+.russh-logo-orbit::after {
   position: absolute;
   width: 4px;
   height: 4px;
@@ -486,28 +486,28 @@ button,
   pointer-events: none;
 }
 
-.winssh-logo-orbit:hover::before {
-  animation: winssh-logo-sparkle 1.15s ease-out both;
+.russh-logo-orbit:hover::before {
+  animation: russh-logo-sparkle 1.15s ease-out both;
 }
 
-.winssh-logo-orbit:hover::after {
-  animation: winssh-logo-sparkle 1.15s ease-out 0.16s reverse both;
+.russh-logo-orbit:hover::after {
+  animation: russh-logo-sparkle 1.15s ease-out 0.16s reverse both;
 }
 
-.winssh-logo-sprite {
+.russh-logo-sprite {
   transform-origin: 50% 58%;
   transition: filter 180ms ease-out;
 }
 
-.winssh-logo-orbit:hover .winssh-logo-sprite {
-  animation: winssh-logo-float 0.95s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+.russh-logo-orbit:hover .russh-logo-sprite {
+  animation: russh-logo-float 0.95s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--workbench-logo) 28%, transparent));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .winssh-logo-orbit::before,
-  .winssh-logo-orbit::after,
-  .winssh-logo-sprite {
+  .russh-logo-orbit::before,
+  .russh-logo-orbit::after,
+  .russh-logo-sprite {
     animation: none;
   }
 }

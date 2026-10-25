@@ -1,22 +1,22 @@
 {
   "name": "high-contrast-themes",
-  "displayName": "WinSSH High Contrast Themes",
-  "publisher": "winssh",
+  "displayName": "RuSSH High Contrast Themes",
+  "publisher": "russh",
   "version": "1.0.0",
   "engines": {
-    "winssh": "^1.0.0"
+    "russh": "^1.0.0"
   },
   "contributes": {
     "themes": [
       {
-        "id": "winssh.high-contrast-light",
+        "id": "russh.high-contrast-light",
         "label": "High Contrast Light",
         "description": "A high contrast light theme for maximum readability.",
         "uiTheme": "hc-light",
         "path": "./themes/high-contrast-light.json"
       },
       {
-        "id": "winssh.high-contrast-dark",
+        "id": "russh.high-contrast-dark",
         "label": "High Contrast Dark",
         "description": "A high contrast dark theme for maximum readability.",
         "uiTheme": "hc-black",

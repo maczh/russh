@@ -81,7 +81,7 @@ describe('WebDAVBackupService delete', () => {
     }
 
     const service = createService(baseUrl)
-    const fileName = 'winssh-win32-2026-04-24T08-00-00-000Z.db'
+    const fileName = 'russh-win32-2026-04-24T08-00-00-000Z.db'
 
     await service.delete(fileName)
 

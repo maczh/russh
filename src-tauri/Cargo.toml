@@ -1,12 +1,12 @@
 [package]
-name = "winssh-tauri"
+name = "russh-tauri"
 version = "1.2.4"
 description = "RuSSH native runtime powered by Tauri"
 authors = ["RuSSH"]
 edition = "2021"
 
 [lib]
-name = "winssh_tauri_lib"
+name = "russh_tauri_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

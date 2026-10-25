@@ -361,10 +361,10 @@ it('uses terminal worker host for SSH sessions when enabled', async () => {
 确保 renderer feature API 暴露：
 
 ```ts
-export const sessionsClient = getWinsshDomainClient('sessions')
+export const sessionsClient = getRuSSHDomainClient('sessions')
 ```
 
-如果需要显式包装，必须仍通过 `getWinsshDomainClient('sessions')`，不要在 renderer 组件中直接访问 `window.winsshApi`。
+如果需要显式包装，必须仍通过 `getRuSSHDomainClient('sessions')`，不要在 renderer 组件中直接访问 `window.russhApi`。
 
 - [ ] **步骤 4：修改 `use-terminal.ts`**
 

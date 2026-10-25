@@ -5,7 +5,7 @@ import { DEFAULT_PIXEL_THEME_ID } from '@shared/themes'
 import i18n from '@/i18n'
 import { WorkbenchCommandCenter } from '@/components/workbench/workbench-command-center'
 import { WorkbenchProvider } from '@/components/workbench/workbench-context'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
@@ -46,7 +46,7 @@ describe('WorkbenchCommandCenter quick connect', () => {
       title: 'zsh'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       localTerminals: {
         create: createLocalTerminal
       }
@@ -66,7 +66,7 @@ describe('WorkbenchCommandCenter quick connect', () => {
   })
 
   it('shows a synthetic quick-connect action for a valid ssh user@host input', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([])
       }
@@ -100,7 +100,7 @@ describe('WorkbenchCommandCenter quick connect', () => {
       }
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([
           {
@@ -156,7 +156,7 @@ describe('WorkbenchCommandCenter quick connect', () => {
       windowTitleBarStyle: 'custom'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         update: updateSettings
       }

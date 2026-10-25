@@ -68,7 +68,7 @@ import {
 } from '@/components/ui/table'
 import { CredentialVault } from '@/components/credential-vault'
 import { ShellCodeHighlight } from './shell-code-highlight'
-import WinsshFullLogo from '@/assets/logo-full.svg?react'
+import RuSSHFullLogo from '@/assets/logo-full.svg?react'
 
 const settingsSections = [
   { id: 'appearance', labelKey: 'workbench.settings.sections.appearance' },
@@ -1650,7 +1650,7 @@ export function WorkbenchSettingsEditor() {
 
                   <div className="rounded-sm border border-[var(--workbench-border)] px-4 py-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                      <WinsshFullLogo
+                      <RuSSHFullLogo
                         aria-hidden="true"
                         className="size-14 shrink-0 text-primary sm:size-16"
                       />

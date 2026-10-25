@@ -1,7 +1,7 @@
-import { getWinsshDomainClient } from '@/features/shared/api/winssh-client'
+import { getRuSSHDomainClient } from '@/features/shared/api/russh-client'
 import type { UpdateState } from '@shared/types'
 
-const baseClient = getWinsshDomainClient('updates')
+const baseClient = getRuSSHDomainClient('updates')
 
 export const updatesClient = new Proxy(baseClient, {
   get(target, property) {

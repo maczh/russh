@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import i18n from '@/i18n'
 import { WorkbenchProvider, useWorkbenchContext } from '@/components/workbench/workbench-context'
 import { WorkbenchQuickInput } from '@/components/workbench/workbench-quick-input'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
 
@@ -122,7 +122,7 @@ describe('WorkbenchQuickInput quick connect flow', () => {
       })
       .mockImplementationOnce(() => secondConnect.promise)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         create: serversCreate,
         list: serversList

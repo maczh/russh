@@ -3,13 +3,13 @@
 </p>
 
 <div align="center">
-  <img src="resources/icon.png" width="120" alt="WinSSH Logo" />
-  <h1>WinSSH</h1>
+  <img src="resources/icon.png" width="120" alt="RuSSH Logo" />
+  <h1>RuSSH</h1>
   <p>🚀 <strong>A modern, powerful, and beautiful cross-platform desktop SSH / SFTP client</strong> 🚀</p>
   <p>Built with Electron 39 · React 19 · TypeScript 5 · Tailwind CSS 4</p>
 
   <p>
-    <a href="https://github.com/lantongxue/winssh/releases">
+    <a href="https://github.com/lantongxue/russh/releases">
       <img src="https://img.shields.io/badge/version-1.2.4-blue?style=flat-square&logo=gittag" alt="version" />
     </a>
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square" alt="platform" />
@@ -22,17 +22,17 @@
 
 ## 📖 Introduction
 
-**WinSSH** is a cross-platform SSH and SFTP client designed for developers and system administrators. Moving away from the cluttered and cumbersome UI of traditional terminal tools, we aim to integrate **SSH sessions, local terminals, SFTP file transfers, port forwarding, command palettes, credential vaults, away reminder**, and a **personalized theme system** all within a single window. No more frequent context-switching between tools — WinSSH delivers a fast, smooth, and immersive operations experience.
+**RuSSH** is a cross-platform SSH and SFTP client designed for developers and system administrators. Moving away from the cluttered and cumbersome UI of traditional terminal tools, we aim to integrate **SSH sessions, local terminals, SFTP file transfers, port forwarding, command palettes, credential vaults, away reminder**, and a **personalized theme system** all within a single window. No more frequent context-switching between tools — RuSSH delivers a fast, smooth, and immersive operations experience.
 
 <div align="center">
-  <img src="official-website/public/winssh-shell-en.png" width="100%" alt="WinSSH Dark Preview" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+  <img src="official-website/public/russh-shell-en.png" width="100%" alt="RuSSH Dark Preview" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
 </div>
 
 ---
 
 ## ✨ Key Features
 
-WinSSH is more than just a terminal emulator; it is a complete, closed-loop operations workbench:
+RuSSH is more than just a terminal emulator; it is a complete, closed-loop operations workbench:
 
 - 🏠 **Unified Workbench** — Manage SSH remote sessions and local terminals under a single tabbed interface. Utilizing a **keep-mounted strategy**, terminal instances (xterm.js) remain resident in memory when switching tabs, preventing disruption to active commands and output context.
 - 📁 **Deeply Integrated SFTP** — Provides a visual remote file manager supporting **two-way drag-and-drop upload/download** with local file explorers, batch actions, and permission management. **Integrated with Monaco Editor**, double-clicking remote text files allows inline editing with instant background sync on save.
@@ -48,7 +48,7 @@ WinSSH is more than just a terminal emulator; it is a complete, closed-loop oper
 
 ## 🛠️ Tech Stack
 
-WinSSH is built on top of a mature and modern frontend ecosystem for high performance:
+RuSSH is built on top of a mature and modern frontend ecosystem for high performance:
 
 - **Shell Environment**: Electron 39
 - **Frontend Framework**: React 19 (Hooks) + TypeScript 5
@@ -76,8 +76,8 @@ WinSSH is built on top of a mature and modern frontend ecosystem for high perfor
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/lantongxue/winssh.git
-   cd winssh
+   git clone https://github.com/lantongxue/russh.git
+   cd russh
    ```
 
 2. **Install dependencies** (this automatically triggers compilation of C++ native modules):
@@ -111,7 +111,7 @@ npm run dist:linux
 ## 📂 Project Directory Structure
 
 ```text
-winssh/
+russh/
 ├── src/
 │   ├── main/              # Electron main process (Node.js) - handles DB operations, SSH/SFTP connections, away activity, and auto-updates
 │   ├── preload/           # contextBridge secure IPC channel definitions (only index.ts and index.d.ts)
@@ -140,11 +140,11 @@ winssh/
 
 ## 💡 Environment Variables
 
-WinSSH supports configuring specific runtime behaviors via environment variables:
+RuSSH supports configuring specific runtime behaviors via environment variables:
 
 | Environment Variable           | Default | Description                                                                                                    |
 | :----------------------------- | :------ | :------------------------------------------------------------------------------------------------------------- |
-| `WINSSH_HARDWARE_ACCELERATION` | -       | Set to `false` to disable hardware acceleration on Windows (useful for solving rendering lag on some hardware) |
+| `RUSSH_HARDWARE_ACCELERATION` | -       | Set to `false` to disable hardware acceleration on Windows (useful for solving rendering lag on some hardware) |
 
 ---
 
@@ -165,6 +165,6 @@ npm run typecheck && npm run test
 ---
 
 <div align="center">
-  <p>Made with ❤️ by the WinSSH Team.</p>
+  <p>Made with ❤️ by the RuSSH Team.</p>
   <p>Released under the <a href="LICENSE.en">License</a>.</p>
 </div>

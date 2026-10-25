@@ -24,7 +24,7 @@ afterEach(async () => {
 
 describe('LogFileService', () => {
   it('appends, reads, clears, and moves the log file', async () => {
-    const tempDir = await mkdtemp(join(tmpdir(), 'winssh-logs-'))
+    const tempDir = await mkdtemp(join(tmpdir(), 'russh-logs-'))
     createdDirs.push(tempDir)
 
     const firstPath = join(tempDir, 'first', 'app.log')

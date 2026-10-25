@@ -1,5 +1,5 @@
 export const INTEGRATED_FONT_IDS = [
-  'winssh-default',
+  'russh-default',
   'inter',
   'open-sans',
   'source-sans-pro',
@@ -18,7 +18,7 @@ export const INTEGRATED_FONT_IDS = [
 
 export type IntegratedFontId = (typeof INTEGRATED_FONT_IDS)[number]
 
-export const DEFAULT_UI_FONT_ID: IntegratedFontId = 'winssh-default'
+export const DEFAULT_UI_FONT_ID: IntegratedFontId = 'russh-default'
 export const DEFAULT_TERMINAL_FONT_ID: IntegratedFontId = 'jetbrains-mono'
 export const DEFAULT_EDITOR_FONT_ID: IntegratedFontId | null = null
 
@@ -55,7 +55,7 @@ const ALL_SCOPES: IntegratedFontScope[] = ['ui', 'terminal', 'editor']
 export const INTEGRATED_FONTS: IntegratedFontDefinition[] = [
   {
     cssFamily: 'RuSSH UI Default',
-    id: 'winssh-default',
+    id: 'russh-default',
     label: 'RuSSH Default',
     legacyNames: [
       'segoe ui variable text',

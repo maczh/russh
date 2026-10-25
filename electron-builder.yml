@@ -1,5 +1,5 @@
-appId: com.winssh.app
-productName: WinSSH
+appId: com.russh.app
+productName: RuSSH
 directories:
   buildResources: build
   output: release/${version}
@@ -16,7 +16,7 @@ asarUnpack:
 extraMetadata:
   main: ./out/main/index.js
 win:
-  executableName: winssh
+  executableName: russh
   target:
     - nsis
     - zip
@@ -24,7 +24,7 @@ win:
   publish:
     - provider: github
       owner: lantongxue
-      repo: winssh
+      repo: russh
 nsis:
   include: build/installer.nsh
   artifactName: ${productName}-Windows-${version}-${arch}-Setup.${ext}
@@ -47,7 +47,7 @@ mac:
 dmg:
   artifactName: ${productName}-Mac-${version}-${arch}.${ext}
 linux:
-  maintainer: winssh
+  maintainer: russh
   category: Development
   target:
     - AppImage
@@ -56,6 +56,6 @@ linux:
 publish:
   provider: github
   owner: lantongxue
-  repo: winssh
+  repo: russh
 electronUpdaterCompatibility: '>=2.16'
 npmRebuild: false

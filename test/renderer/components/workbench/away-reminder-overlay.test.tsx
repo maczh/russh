@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import i18n from '@/i18n'
 import { WorkbenchAwayReminderOverlay } from '@/components/workbench/workbench-away-reminder-overlay'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useAwayReminderStore } from '@/store/away-reminder-store'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
@@ -62,7 +62,7 @@ beforeEach(async () => {
 
 describe('WorkbenchAwayReminderOverlay', () => {
   it('does not render when overlay is not visible', () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({ awayReminderEnabled: true })
       }
@@ -76,7 +76,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('does not render when awayReminderEnabled is false', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({ awayReminderEnabled: false })
       }
@@ -92,7 +92,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('does not render when there are no open documents', () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({ awayReminderEnabled: true })
       }
@@ -105,7 +105,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('does not render when only local terminal documents are open (no SSH sessions)', () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({ awayReminderEnabled: true })
       }
@@ -128,7 +128,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('renders overlay with title and description when visible with open documents', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },
@@ -162,7 +162,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('displays SSH session identity with username from servers cache', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },
@@ -194,7 +194,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('displays local terminal identity with shell type when SSH session is also open', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },
@@ -235,7 +235,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('calls dismissOverlay when confirm button is clicked', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },
@@ -271,7 +271,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('calls dismissOverlay when Enter key is pressed', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },
@@ -310,7 +310,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('shows server identity section label', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },
@@ -340,7 +340,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('shows shell type label for local terminals when SSH session is also open', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },
@@ -381,7 +381,7 @@ describe('WorkbenchAwayReminderOverlay', () => {
   })
 
   it('does not call dismissOverlay on other key presses', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([createdServer])
       },

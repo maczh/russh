@@ -37,9 +37,9 @@ describe('main localization', () => {
     expect(en('session.workerCrashed')).toContain('SSH worker crashed')
     expect(
       zh('errors.themeBuiltinConflict', {
-        value: 'winssh.dark-plus'
+        value: 'russh.dark-plus'
       })
-    ).toContain('winssh.dark-plus')
+    ).toContain('russh.dark-plus')
     expect(zh('session.workerCrashed')).toContain('SSH 工作线程')
   })
 })

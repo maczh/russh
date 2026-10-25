@@ -26,7 +26,7 @@ describe('app menu', () => {
     const translate = createMainTranslator(() => 'zh-CN')
     const onMenuAction = vi.fn()
     const template = createMacApplicationMenuTemplate({
-      appName: 'WinSSH',
+      appName: 'RuSSH',
       isDevelopment: false,
       onCheckForUpdates: vi.fn(),
       onMenuAction,
@@ -49,7 +49,7 @@ describe('app menu', () => {
   it('includes development-only view actions when requested', () => {
     const translate = createMainTranslator(() => 'en-US')
     const template = createMacApplicationMenuTemplate({
-      appName: 'WinSSH',
+      appName: 'RuSSH',
       isDevelopment: true,
       onCheckForUpdates: vi.fn(),
       onMenuAction: vi.fn(),
@@ -78,7 +78,7 @@ describe('app menu', () => {
     const translate = createMainTranslator(() => 'en-US')
 
     syncApplicationMenu({
-      appName: 'WinSSH',
+      appName: 'RuSSH',
       getMainWindow: () =>
         ({
           webContents: {
@@ -106,7 +106,7 @@ describe('app menu', () => {
 
   it('removes the application menu outside macOS', () => {
     syncApplicationMenu({
-      appName: 'WinSSH',
+      appName: 'RuSSH',
       getMainWindow: () => null,
       isDevelopment: false,
       platform: 'linux',

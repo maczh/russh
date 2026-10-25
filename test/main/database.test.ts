@@ -13,8 +13,8 @@ const canUseBetterSqlite = (() => {
     return false
   }
 
-  const directory = mkdtempSync(join(tmpdir(), 'winssh-db-check-'))
-  const databasePath = join(directory, 'winssh.db')
+  const directory = mkdtempSync(join(tmpdir(), 'russh-db-check-'))
+  const databasePath = join(directory, 'russh.db')
 
   try {
     const database = new Database(databasePath)
@@ -32,9 +32,9 @@ const describeDatabase =
 const tempDirectories: string[] = []
 
 function createTempDatabasePath() {
-  const directory = mkdtempSync(join(tmpdir(), 'winssh-db-'))
+  const directory = mkdtempSync(join(tmpdir(), 'russh-db-'))
   tempDirectories.push(directory)
-  return join(directory, 'winssh.db')
+  return join(directory, 'russh.db')
 }
 
 function createServerInput(overrides: Partial<ServerUpsertInput> = {}): ServerUpsertInput {

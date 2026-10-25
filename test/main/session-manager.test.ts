@@ -261,20 +261,20 @@ function createResourceMonitorOutput({
   networkInterfaces?: string[]
   platform?: string
 }) {
-  const sections = ['__WINSSH_PLATFORM__', platform]
+  const sections = ['__RUSSH_PLATFORM__', platform]
 
   if (platform === 'Linux') {
     sections.push(
-      '__WINSSH_PROC_STAT__',
+      '__RUSSH_PROC_STAT__',
       cpuLine ?? 'cpu  100 0 100 900 0 0 0 0 0 0',
-      '__WINSSH_PROC_MEMINFO__',
+      '__RUSSH_PROC_MEMINFO__',
       `MemTotal:       ${memTotalKb} kB`,
       `MemAvailable:   ${memAvailableKb} kB`,
-      '__WINSSH_PROC_NET_DEV__',
+      '__RUSSH_PROC_NET_DEV__',
       'Inter-|   Receive                                                |  Transmit',
       ' face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed',
       ...networkInterfaces,
-      '__WINSSH_DF__',
+      '__RUSSH_DF__',
       'Filesystem     1B-blocks        Used   Available Use% Mounted on',
       '/dev/root      1073741824   268435456   805306368  25% /'
     )
@@ -877,7 +877,7 @@ describe('SessionManager port forwarding', () => {
     expect(sftp.close).not.toHaveBeenCalled()
     expect(runtime.shell.write).toHaveBeenCalledTimes(1)
     const written = runtime.shell.write.mock.calls[0]?.[0] as string
-    expect(written).not.toContain('.winssh_init_')
+    expect(written).not.toContain('.russh_init_')
     expect(written).not.toContain(' && rm -f ')
     expect(written).toMatch(/\r$/)
   })
@@ -1061,7 +1061,7 @@ describe('SessionManager port forwarding', () => {
   it('uploads local directories recursively and preserves empty folders', async () => {
     const manager = createManager()
     const client = new MockClient()
-    const rootDir = await fs.mkdtemp(join(tmpdir(), 'winssh-sftp-upload-'))
+    const rootDir = await fs.mkdtemp(join(tmpdir(), 'russh-sftp-upload-'))
     const localProjectPath = join(rootDir, 'project')
     temporaryPaths.push(rootDir)
 
@@ -1138,7 +1138,7 @@ describe('SessionManager port forwarding', () => {
   it('downloads remote directories recursively and preserves empty folders', async () => {
     const manager = createManager()
     const client = new MockClient()
-    const rootDir = await fs.mkdtemp(join(tmpdir(), 'winssh-sftp-download-'))
+    const rootDir = await fs.mkdtemp(join(tmpdir(), 'russh-sftp-download-'))
     temporaryPaths.push(rootDir)
     vi.mocked(dialog.showOpenDialog).mockResolvedValue({
       canceled: false,

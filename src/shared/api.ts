@@ -62,7 +62,7 @@ import type { ThemeDefinition, ThemeDeleteResult, ThemeImportResult } from './th
 
 export type Unsubscribe = () => void
 
-export interface WinsshApi {
+export interface RuSSHApi {
   groups: {
     list: () => Promise<ServerGroup[]>
     create: (input: GroupInput) => Promise<ServerGroup>

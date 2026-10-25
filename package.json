@@ -1,13 +1,13 @@
 {
-  "name": "winssh",
+  "name": "russh",
   "version": "1.2.4",
-  "description": "WinSSH is a cross-platform SSH and SFTP client.",
+  "description": "RuSSH is a cross-platform SSH and SFTP client.",
   "main": "./out/main/index.js",
-  "author": "winssh",
-  "homepage": "https://github.com/lantongxue/winssh",
+  "author": "russh",
+  "homepage": "https://github.com/lantongxue/russh",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lantongxue/winssh.git"
+    "url": "git+https://github.com/lantongxue/russh.git"
   },
   "scripts": {
     "format": "prettier --write .",

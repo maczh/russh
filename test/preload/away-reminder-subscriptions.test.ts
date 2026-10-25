@@ -1,4 +1,4 @@
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import type {
   AppFocusEvent,
   AppActivityEvent,
@@ -7,7 +7,7 @@ import type {
   SftpFileStreamStateEvent,
   SftpFileWriteStreamStart
 } from '@shared/types'
-import type { WinsshApi } from '@shared/api'
+import type { RuSSHApi } from '@shared/api'
 import type { IpcChannelMap } from '@shared/ipc-channels'
 
 describe('away-reminder preload subscriptions', () => {
@@ -30,10 +30,10 @@ describe('away-reminder preload subscriptions', () => {
     })
   })
 
-  describe('WinsshApi contract includes appFocus and appActivity', () => {
+  describe('RuSSHApi contract includes appFocus and appActivity', () => {
     it('system.appFocus.onStateChange accepts AppFocusEvent callback and returns Unsubscribe', () => {
-      // Type-level check: WinsshApi.system.appFocus.onStateChange signature
-      type MethodSig = WinsshApi['system']['appFocus']['onStateChange']
+      // Type-level check: RuSSHApi.system.appFocus.onStateChange signature
+      type MethodSig = RuSSHApi['system']['appFocus']['onStateChange']
       type ExpectedSig = (callback: (event: AppFocusEvent) => void) => () => void
       type Match = MethodSig extends ExpectedSig ? true : false
       const _typeCheck: Match = true
@@ -41,7 +41,7 @@ describe('away-reminder preload subscriptions', () => {
     })
 
     it('system.appActivity.onStateChange accepts AppActivityEvent callback and returns Unsubscribe', () => {
-      type MethodSig = WinsshApi['system']['appActivity']['onStateChange']
+      type MethodSig = RuSSHApi['system']['appActivity']['onStateChange']
       type ExpectedSig = (callback: (event: AppActivityEvent) => void) => () => void
       type Match = MethodSig extends ExpectedSig ? true : false
       const _typeCheck: Match = true
@@ -49,16 +49,16 @@ describe('away-reminder preload subscriptions', () => {
     })
   })
 
-  describe('createWinsshApiMock includes appFocus and appActivity subscriptions', () => {
+  describe('createRuSSHApiMock includes appFocus and appActivity subscriptions', () => {
     it('default mock provides appFocus.onStateChange returning unsubscribe', () => {
-      const api = createWinsshApiMock()
+      const api = createRuSSHApiMock()
       const unsubscribe = api.system.appFocus.onStateChange(() => {})
       expect(typeof unsubscribe).toBe('function')
       expect(unsubscribe()).toBeUndefined()
     })
 
     it('default mock provides appActivity.onStateChange returning unsubscribe', () => {
-      const api = createWinsshApiMock()
+      const api = createRuSSHApiMock()
       const unsubscribe = api.system.appActivity.onStateChange(() => {})
       expect(typeof unsubscribe).toBe('function')
       expect(unsubscribe()).toBeUndefined()
@@ -66,7 +66,7 @@ describe('away-reminder preload subscriptions', () => {
 
     it('appFocus.onStateChange callback is invoked when override provides it', () => {
       const received: AppFocusEvent[] = []
-      const api = createWinsshApiMock({
+      const api = createRuSSHApiMock({
         system: {
           appFocus: {
             onStateChange: (callback) => {
@@ -83,7 +83,7 @@ describe('away-reminder preload subscriptions', () => {
 
     it('appActivity.onStateChange callback is invoked when override provides it', () => {
       const received: AppActivityEvent[] = []
-      const api = createWinsshApiMock({
+      const api = createRuSSHApiMock({
         system: {
           appActivity: {
             onStateChange: (callback) => {
@@ -101,7 +101,7 @@ describe('away-reminder preload subscriptions', () => {
     it('unsubscribe stops further callbacks via override', () => {
       let unsubscribed = false
       const received: AppFocusEvent[] = []
-      const api = createWinsshApiMock({
+      const api = createRuSSHApiMock({
         system: {
           appFocus: {
             onStateChange: (callback) => {
@@ -122,7 +122,7 @@ describe('away-reminder preload subscriptions', () => {
 
 describe('SFTP file stream API contract', () => {
   it('exposes stream methods instead of whole-file editor methods', async () => {
-    type SftpApi = WinsshApi['sftp']
+    type SftpApi = RuSSHApi['sftp']
     const _readStart: Awaited<ReturnType<SftpApi['openFileReadStream']>> =
       {} as SftpFileReadStreamStart
     const _writeStart: Awaited<ReturnType<SftpApi['openFileWriteStream']>> =
@@ -133,7 +133,7 @@ describe('SFTP file stream API contract', () => {
       _event: SftpFileStreamStateEvent
     ) => {}
 
-    const api = createWinsshApiMock()
+    const api = createRuSSHApiMock()
 
     const sftpApiRecord = api.sftp as unknown as Record<string, unknown>
     expect(sftpApiRecord['readFile']).toBeUndefined()

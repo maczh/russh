@@ -6,9 +6,9 @@ import {
   DEFAULT_UI_FONT_ID
 } from './integrated-fonts'
 
-export const APP_ID = 'com.winssh.app'
+export const APP_ID = 'com.russh.app'
 export const APP_NAME = 'RuSSH'
-export const SECURE_STORE_SERVICE = 'winssh.credentials'
+export const SECURE_STORE_SERVICE = 'russh.credentials'
 
 export const COMMAND_HISTORY_CAP = 5000
 export const COMMAND_HISTORY_LOCAL_SCOPE = 'default'
@@ -52,7 +52,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   webdavUrl: null,
   webdavUsername: null,
   webdavBackupIntervalMinutes: 60,
-  webdavBackupPath: '/winssh-backup/',
+  webdavBackupPath: '/russh-backup/',
   resourceMonitorIntervalMs: 2000,
   sftpUploadConcurrency: 3,
   sftpDownloadConcurrency: 3,

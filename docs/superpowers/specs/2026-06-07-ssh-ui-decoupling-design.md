@@ -3,11 +3,11 @@
 **日期**：2026-06-07
 **作者**：Brainstorming session
 **状态**：Draft（待用户书面审查）
-**目标版本**：winssh 持续演进，分 5 个里程碑交付
+**目标版本**：russh 持续演进，分 5 个里程碑交付
 
 ## 背景与目标
 
-winssh 当前的主进程 `SessionManager`（2658 行）是一个"上帝类"，同时承担 SSH 连接、shell 通道、SFTP、端口转发、命令历史、OSC 解析、shell 集成、主机信任、资源监控、状态事件等职责。终端数据流 `ssh2 → IPC → preload Hub → renderer → xterm.write` 走单一序列化通道，多会话、高吞吐、键入响应三类场景均存在感知到的卡顿。
+russh 当前的主进程 `SessionManager`（2658 行）是一个"上帝类"，同时承担 SSH 连接、shell 通道、SFTP、端口转发、命令历史、OSC 解析、shell 集成、主机信任、资源监控、状态事件等职责。终端数据流 `ssh2 → IPC → preload Hub → renderer → xterm.write` 走单一序列化通道，多会话、高吞吐、键入响应三类场景均存在感知到的卡顿。
 
 本次设计的**单一目标**：通过**进程级隔离**把 SSH 核心从 Electron 主进程和 React 渲染主线程上挪开，使所有 4 类性能痛点（输入延迟 / 主事件循环阻塞 / 冷启动 / 高吞吐数据延迟）都得到根因层解决。
 
@@ -29,7 +29,7 @@ winssh 当前的主进程 `SessionManager`（2658 行）是一个"上帝类"，�
 | M4  | xterm Web Worker | OffscreenCanvas + SharedArrayBuffer                                   | 5 会话 `tail -f` 单核 < 30%                        |
 | M5  | 其他服务拆分     | SFTP/port-forward/osc-history/resource-monitor/host-trust 各入 worker | 主进程 CPU idle > 80% @ 5 session                  |
 
-每个 M 保留 `WINSSH_LEGACY_TERMINAL=1` 开关回退到上一阶段。
+每个 M 保留 `RUSSH_LEGACY_TERMINAL=1` 开关回退到上一阶段。
 
 ## §1 架构总览
 
@@ -88,7 +88,7 @@ winssh 当前的主进程 `SessionManager`（2658 行）是一个"上帝类"，�
 
 | 组件                    | 路径                                           | 职责                                                                                                 |
 | ----------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `WinsshApiBridge`       | `src/preload/index.ts`（重写）                 | 保留 `window.winsshApi` 形状（破坏性变更最小化），内部用 `MessagePort` 直连主进程的 `SshControlPort` |
+| `RuSSHApiBridge`       | `src/preload/index.ts`（重写）                 | 保留 `window.russhApi` 形状（破坏性变更最小化），内部用 `MessagePort` 直连主进程的 `SshControlPort` |
 | `TerminalPortAllocator` | `src/preload/terminal-port-allocator.ts`（新） | 为每个 session 分配 Web `MessageChannel` 与 SharedArrayBuffer 槽位                                   |
 | `BinaryChannel`         | `src/preload/binary-channel.ts`（新）          | 二进制帧协议（长度前缀 + 序号 + payload），背压感知                                                  |
 
@@ -381,7 +381,7 @@ export type SshCoreOutbound =
 - **保留所有现有测试**：M1 不删任何 `*.test.ts`，只增加
 - 回归对比：M3 后跑 `npm run test`，断言不通过即 fail
 - M2 后必须能做：`npm run dev` 启动 → 现有功能全部可用
-- 金丝雀发布：M3-M5 阶段保留 `WINSSH_LEGACY_TERMINAL=1` 开关，让内测用户切换验证
+- 金丝雀发布：M3-M5 阶段保留 `RUSSH_LEGACY_TERMINAL=1` 开关，让内测用户切换验证
 
 ### 5.8 测试工具
 
@@ -431,13 +431,13 @@ export type SshCoreOutbound =
 | ------------------------------------------ | ---- | ----------------- | ------------------------------------- |
 | `crossOriginIsolated` 配不上               | 中   | M4 失效           | 走降级链 2                            |
 | OffscreenCanvas + WebGL 兼容性             | 低   | M4 部分失效       | 走降级链 1                            |
-| worker_threads 在 Electron 39 的稳定性     | 低   | M2 不可用         | `WINSSH_LEGACY_TERMINAL=1` 保留旧路径 |
+| worker_threads 在 Electron 39 的稳定性     | 低   | M2 不可用         | `RUSSH_LEGACY_TERMINAL=1` 保留旧路径 |
 | SharedArrayBuffer 大小超过 V8 限制         | 极低 | 单 session 不可用 | 改 4MB SAB 或回退到 Transferable      |
 | xterm addon DOM 依赖（如 `WebLinksAddon`） | 中   | Worker 内需 mock  | 改 addon 初始化位置（部分留在 main）  |
 
 ## 与现有规则的兼容性
 
-- ✅ ESLint 规则：`window.winsshApi` 仍只在 `features/shared/api/**`（Preload 暴露不变）
+- ✅ ESLint 规则：`window.russhApi` 仍只在 `features/shared/api/**`（Preload 暴露不变）
 - ✅ 凭据模型：keytar 仍由 main 独占；worker 只接 secret 的明文副本
 - ✅ 跳板：单跳规则不变
 - ✅ 平台更新：仅 Windows 仍由 NSIS 触发

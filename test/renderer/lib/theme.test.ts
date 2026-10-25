@@ -13,8 +13,8 @@ const themes = [
     appearance: 'light',
     id: DEFAULT_LIGHT_THEME_ID,
     label: 'Light+',
-    pluginDisplayName: 'WinSSH Default Themes',
-    pluginId: 'winssh.default-themes',
+    pluginDisplayName: 'RuSSH Default Themes',
+    pluginId: 'russh.default-themes',
     source: 'builtin',
     terminal: {
       background: '#ffffff',
@@ -28,8 +28,8 @@ const themes = [
     appearance: 'dark',
     id: DEFAULT_DARK_THEME_ID,
     label: 'Dark+',
-    pluginDisplayName: 'WinSSH Default Themes',
-    pluginId: 'winssh.default-themes',
+    pluginDisplayName: 'RuSSH Default Themes',
+    pluginId: 'russh.default-themes',
     source: 'builtin',
     terminal: {
       background: '#181a1f',
@@ -50,8 +50,8 @@ const themes = [
       'workbench-window-control-hover': 'rgba(125, 255, 155, 0.16)',
       'workbench-window-control-hover-foreground': '#d7ffe0'
     },
-    pluginDisplayName: 'WinSSH Default Themes',
-    pluginId: 'winssh.default-themes',
+    pluginDisplayName: 'RuSSH Default Themes',
+    pluginId: 'russh.default-themes',
     source: 'builtin',
     terminal: {
       background: '#0b1811',
@@ -73,8 +73,8 @@ const themes = [
     colors: {
       'workbench-active': '#ffff00'
     },
-    pluginDisplayName: 'WinSSH High Contrast Themes',
-    pluginId: 'winssh.high-contrast-themes',
+    pluginDisplayName: 'RuSSH High Contrast Themes',
+    pluginId: 'russh.high-contrast-themes',
     source: 'builtin',
     terminal: {
       background: '#000000',

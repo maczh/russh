@@ -39,8 +39,8 @@ describe('bootstrap session runtime wiring', () => {
     expect(source).toContain(
       'const legacySessionRuntime = new LegacySessionRuntime(sessionManager)'
     )
-    expect(source).toContain("process.env['WINSSH_WORKER_TERMINAL'] === '1'")
-    expect(source).toContain("process.env['WINSSH_LEGACY_TERMINAL'] !== '1'")
+    expect(source).toContain("process.env['RUSSH_WORKER_TERMINAL'] === '1'")
+    expect(source).toContain("process.env['RUSSH_LEGACY_TERMINAL'] !== '1'")
     expect(source).toContain('new WorkerSessionRuntime({')
     expect(source).toContain(': legacySessionRuntime')
     expect(source).toContain(

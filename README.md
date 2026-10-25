@@ -3,13 +3,13 @@
 </p>
 
 <div align="center">
-  <img src="resources/icon.png" width="120" alt="WinSSH Logo" />
-  <h1>WinSSH</h1>
+  <img src="resources/icon.png" width="120" alt="RuSSH Logo" />
+  <h1>RuSSH</h1>
   <p>🚀 <strong>现代、强大、高颜值的跨平台桌面 SSH / SFTP 客户端</strong> 🚀</p>
   <p>基于 Electron 39 · React 19 · TypeScript 5 · Tailwind CSS 4 构建</p>
 
   <p>
-    <a href="https://github.com/lantongxue/winssh/releases">
+    <a href="https://github.com/lantongxue/russh/releases">
       <img src="https://img.shields.io/badge/version-1.2.4-blue?style=flat-square&logo=gittag" alt="version" />
     </a>
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square" alt="platform" />
@@ -22,17 +22,17 @@
 
 ## 📖 简介
 
-**WinSSH** 是一款专为开发者与系统管理员打造的跨平台 SSH 和 SFTP 客户端。我们摒弃了传统终端工具杂乱繁琐的界面设计，致力于在单个窗口内将 **SSH 会话、本地终端、SFTP 文件传输、端口转发、命令面板、凭据保险箱、暂离保护** 和 **个性化主题系统** 深度融合。免去频繁切换工具的烦恼，为您提供极速、流畅的沉浸式运维体验。
+**RuSSH** 是一款专为开发者与系统管理员打造的跨平台 SSH 和 SFTP 客户端。我们摒弃了传统终端工具杂乱繁琐的界面设计，致力于在单个窗口内将 **SSH 会话、本地终端、SFTP 文件传输、端口转发、命令面板、凭据保险箱、暂离保护** 和 **个性化主题系统** 深度融合。免去频繁切换工具的烦恼，为您提供极速、流畅的沉浸式运维体验。
 
 <div align="center">
-  <img src="official-website/public/winssh-shell-zh.png" width="100%" alt="WinSSH Dark Preview" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+  <img src="official-website/public/russh-shell-zh.png" width="100%" alt="RuSSH Dark Preview" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
 </div>
 
 ---
 
 ## ✨ 特性亮点
 
-WinSSH 不仅仅是一个终端渲染器，它是一个完整、闭环的运维工作台：
+RuSSH 不仅仅是一个终端渲染器，它是一个完整、闭环的运维工作台：
 
 - 🏠 **统一 Workbench** — 将 SSH 远端会话与本地终端以 Tab 标签页形式统一管理。支持 **keep-mounted 策略**，切换标签时终端实例（xterm.js）常驻内存不销毁，保证操作状态与输出上下文不中断。
 - 📁 **深度整合的 SFTP 模块** — 提供可视化的远端文件管理器，支持与本地资源管理器**双向拖拽上传/下载**、批量操作及权限管理。**集成 Monaco Editor**，双击远端文本文件即可内联编辑，保存即刻后台同步。
@@ -48,7 +48,7 @@ WinSSH 不仅仅是一个终端渲染器，它是一个完整、闭环的运维�
 
 ## 🛠️ 技术选型
 
-WinSSH 基于成熟的前沿前端生态构建，性能卓越：
+RuSSH 基于成熟的前沿前端生态构建，性能卓越：
 
 - **壳体环境**: Electron 39
 - **前端框架**: React 19 (Hooks) + TypeScript 5
@@ -76,8 +76,8 @@ WinSSH 基于成熟的前沿前端生态构建，性能卓越：
 1. **克隆仓库**：
 
    ```bash
-   git clone https://github.com/lantongxue/winssh.git
-   cd winssh
+   git clone https://github.com/lantongxue/russh.git
+   cd russh
    ```
 
 2. **安装依赖** (自动包含 C++ 原生模块的重构编译)：
@@ -111,7 +111,7 @@ npm run dist:linux
 ## 📂 项目目录结构
 
 ```text
-winssh/
+russh/
 ├── src/
 │   ├── main/              # Electron 主进程 (Node.js) — 处理底层数据库、SSH/SFTP连接、暂离活动、自动更新
 │   ├── preload/           # contextBridge 双向安全 IPC 通道定义 (仅包含 index.ts 与 index.d.ts)
@@ -140,11 +140,11 @@ winssh/
 
 ## 💡 环境变量参考
 
-WinSSH 支持通过环境变量修改特定运行时行为：
+RuSSH 支持通过环境变量修改特定运行时行为：
 
 | 环境变量                       | 默认值 | 说明                                                                  |
 | :----------------------------- | :----- | :-------------------------------------------------------------------- |
-| `WINSSH_HARDWARE_ACCELERATION` | -      | 设为 `false` 可在 Windows 平台强制关闭硬件加速 (解决部分设备渲染卡顿) |
+| `RUSSH_HARDWARE_ACCELERATION` | -      | 设为 `false` 可在 Windows 平台强制关闭硬件加速 (解决部分设备渲染卡顿) |
 
 ---
 
@@ -165,6 +165,6 @@ npm run typecheck && npm run test
 ---
 
 <div align="center">
-  <p>Made with ❤️ by the WinSSH Team.</p>
+  <p>Made with ❤️ by the RuSSH Team.</p>
   <p>Released under the <a href="LICENSE">License</a>.</p>
 </div>

@@ -17,10 +17,10 @@ function createService(overrides: Partial<ConstructorParameters<typeof UpdateSer
     autoCheckEnabled: true,
     currentVersion: '1.0.0',
     githubOwner: 'lantongxue',
-    githubRepo: 'winssh',
+    githubRepo: 'russh',
     isPackaged: true,
     platform: 'win32',
-    productName: 'WinSSH',
+    productName: 'RuSSH',
     updaterFactory: () => updater,
     ...overrides
   })
@@ -183,7 +183,7 @@ describe('UpdateService', () => {
 
   it('exposes releasesUrl when githubOwner and githubRepo are set', () => {
     const { service } = createService()
-    expect(service.getState().releasesUrl).toBe('https://github.com/lantongxue/winssh/releases')
+    expect(service.getState().releasesUrl).toBe('https://github.com/lantongxue/russh/releases')
   })
 
   it('sets releasesUrl to null when githubOwner is empty', () => {

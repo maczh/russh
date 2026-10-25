@@ -1,5 +1,5 @@
 import type { AppLogEvent, LogLevel } from '@shared/observability'
-import { winsshClient } from '@/features/shared/api/winssh-client'
+import { russhClient } from '@/features/shared/api/russh-client'
 
 function log(level: LogLevel, message: string, data?: unknown) {
   const event: AppLogEvent = {
@@ -10,7 +10,7 @@ function log(level: LogLevel, message: string, data?: unknown) {
     timestamp: new Date().toISOString()
   }
 
-  void winsshClient.logs.write(event).catch(() => undefined)
+  void russhClient.logs.write(event).catch(() => undefined)
 
   if (level === 'error') {
     console.error(JSON.stringify(event))

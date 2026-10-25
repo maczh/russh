@@ -6,7 +6,7 @@ Improve command history capture and SFTP directory following while keeping the f
 
 ## Problems
 
-- Remote SSH sessions currently upload a temporary `~/.winssh_init_<sessionId>` file over SFTP and then visibly run a source command in the terminal.
+- Remote SSH sessions currently upload a temporary `~/.russh_init_<sessionId>` file over SFTP and then visibly run a source command in the terminal.
 - The visible source command creates a poor first-session experience and can leak implementation details into scrollback.
 - The current shell script relies on patterns that are fragile across older bash versions and user shell customizations.
 - SFTP follow mode depends on cwd events produced by shell integration, and the renderer follow effect currently clears its own timer immediately.

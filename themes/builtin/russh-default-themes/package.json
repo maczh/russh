@@ -1,29 +1,29 @@
 {
   "name": "default-themes",
-  "displayName": "WinSSH Default Themes",
-  "publisher": "winssh",
+  "displayName": "RuSSH Default Themes",
+  "publisher": "russh",
   "version": "1.0.0",
   "engines": {
-    "winssh": "^1.0.0"
+    "russh": "^1.0.0"
   },
   "contributes": {
     "themes": [
       {
-        "id": "winssh.light-plus",
+        "id": "russh.light-plus",
         "label": "Light+",
-        "description": "The default light theme shipped with WinSSH.",
+        "description": "The default light theme shipped with RuSSH.",
         "uiTheme": "vs",
         "path": "./themes/light-plus.json"
       },
       {
-        "id": "winssh.dark-plus",
+        "id": "russh.dark-plus",
         "label": "Dark+",
-        "description": "The default dark theme shipped with WinSSH.",
+        "description": "The default dark theme shipped with RuSSH.",
         "uiTheme": "vs-dark",
         "path": "./themes/dark-plus.json"
       },
       {
-        "id": "winssh.pixel-crt",
+        "id": "russh.pixel-crt",
         "label": "Pixel CRT",
         "description": "A retro phosphor theme with pixel terminal defaults.",
         "uiTheme": "vs-dark",

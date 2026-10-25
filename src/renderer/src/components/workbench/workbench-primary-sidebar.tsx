@@ -79,7 +79,7 @@ function TooltipAction({
 }
 
 const UNGROUPED_GROUP_ID = '__ungrouped__'
-const SERVER_DRAG_MIME = 'application/x-winssh-server-id'
+const SERVER_DRAG_MIME = 'application/x-russh-server-id'
 
 type GroupTreeNode = {
   group: ServerGroup

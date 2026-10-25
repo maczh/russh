@@ -12,7 +12,7 @@
 
 **目标：** 将 SSH 连接、终端数据流、SFTP、端口转发、OSC/命令历史、资源监控和主机信任从 Electron 主进程与 React 主线程逐步解耦到 worker 边界，同时保持现有 IPC API 和 UI 行为可回退。
 
-**架构：** 分 5 个可独立发布的里程碑推进：M1 先建立服务端口和协议边界但继续走旧 `SessionManager`；M2 将 SSH 核心迁入 `worker_threads`；M3 引入二进制数据通道与背压；M4 将 xterm 生命周期迁入 Web Worker 并保留主线程 fallback；M5 再拆出 SFTP、端口转发、OSC/历史、资源监控、主机信任子 worker。每个里程碑都通过 `WINSSH_LEGACY_TERMINAL=1` 或更细粒度 feature flag 回到上一稳定阶段。
+**架构：** 分 5 个可独立发布的里程碑推进：M1 先建立服务端口和协议边界但继续走旧 `SessionManager`；M2 将 SSH 核心迁入 `worker_threads`；M3 引入二进制数据通道与背压；M4 将 xterm 生命周期迁入 Web Worker 并保留主线程 fallback；M5 再拆出 SFTP、端口转发、OSC/历史、资源监控、主机信任子 worker。每个里程碑都通过 `RUSSH_LEGACY_TERMINAL=1` 或更细粒度 feature flag 回到上一稳定阶段。
 
 **技术栈：** Electron 39、React 19、TypeScript 5、Vite 7、Vitest、ssh2、worker_threads、MessageChannel/MessagePort、SharedArrayBuffer/Transferable ArrayBuffer、xterm.js、Zod。
 
@@ -30,7 +30,7 @@
 ## 不变量
 
 - `LocalTerminalManager` 不纳入本计划，local terminal 继续在 main 中使用 `node-pty`。
-- Renderer 不直接访问 `window.winsshApi`，新增调用必须通过 `src/renderer/src/features/*/api`。
+- Renderer 不直接访问 `window.russhApi`，新增调用必须通过 `src/renderer/src/features/*/api`。
 - `session-editor` 和 `local-terminal-editor` 继续 keep-mounted，不能改成条件渲染。
 - SFTP 远程编辑继续保持 text-only：`readFile` / `writeFile` 的外部 API 仍返回和写入 string。
 - 服务器密码和 passphrase 继续由 main 侧解析；worker 只接收连接所需的明文副本，并在 session 结束时清零。
@@ -49,7 +49,7 @@
 - 创建：`src/shared/worker-protocol.ts`  
   职责：定义 renderer 主线程与 terminal worker 的消息类型、降级原因、terminal lifecycle 事件。
 - 修改：`src/shared/api.ts`  
-  职责：在不破坏现有 `WinsshApi` 的前提下增加 terminal data channel opt-in 方法。
+  职责：在不破坏现有 `RuSSHApi` 的前提下增加 terminal data channel opt-in 方法。
 - 修改：`src/shared/ipc-channels.ts`  
   职责：补充 `terminal:degraded`、`terminal:backpressure`、worker 指标事件类型。
 
@@ -119,7 +119,7 @@
 - 创建：`src/renderer/src/workers/terminal-worker-types.ts`  
   职责：renderer worker 专用类型，复用 `@shared/worker-protocol`。
 - 修改：`src/renderer/src/features/sessions/api/sessions-client.ts`  
-  职责：增加 data channel 方法，仍通过 `features/shared/api/winssh-client.ts`。
+  职责：增加 data channel 方法，仍通过 `features/shared/api/russh-client.ts`。
 - 修改：`src/renderer/src/hooks/use-terminal.ts`  
   职责：M4 前维持旧主线程 xterm，M4 后变为 worker host 的薄 adapter；local terminal 走旧路径。
 - 修改：`src/renderer/src/hooks/use-session-events.ts`  
@@ -147,7 +147,7 @@
 - 创建：`test/preload/terminal-port-allocator.test.ts`
 - 创建：`test/renderer/workers/terminal-worker-host.test.ts`
 - 修改：`test/renderer/hooks/use-terminal.test.tsx`
-- 修改：`test/renderer/helpers/create-winssh-api.ts`
+- 修改：`test/renderer/helpers/create-russh-api.ts`
 
 ## 执行顺序
 
@@ -1254,7 +1254,7 @@ describe('WorkerSessionRuntime', () => {
 在 `bootstrap()` 中加入：
 
 ```ts
-const useLegacyTerminal = process.env['WINSSH_LEGACY_TERMINAL'] === '1'
+const useLegacyTerminal = process.env['RUSSH_LEGACY_TERMINAL'] === '1'
 const sessionRuntime = useLegacyTerminal
   ? new LegacySessionRuntime(sessionManager)
   : new WorkerSessionRuntime({
@@ -1410,7 +1410,7 @@ describe('BinaryChannel', () => {
 - `flush()` 按顺序 `postMessage({ type: 'data', frame }, [frame])`。
 - `dispose()` 清空队列并关闭 port。
 
-- [ ] **步骤 4：扩展 WinsshApi**
+- [ ] **步骤 4：扩展 RuSSHApi**
 
 `src/shared/api.ts` 的 `sessions` 增加：
 
@@ -1428,7 +1428,7 @@ createDataChannel: (sessionId) => terminalPortAllocator.create(sessionId)
 
 - [ ] **步骤 5：更新测试 mock**
 
-`test/renderer/helpers/create-winssh-api.ts` 的 `sessions` 默认值增加：
+`test/renderer/helpers/create-russh-api.ts` 的 `sessions` 默认值增加：
 
 ```ts
 createDataChannel: async () => {
@@ -1451,7 +1451,7 @@ npm run typecheck
 - [ ] **步骤 7：Commit**
 
 ```bash
-git add src/preload/binary-channel.ts src/preload/terminal-port-allocator.ts src/preload/index.ts src/preload/index.d.ts src/shared/api.ts test/preload test/renderer/helpers/create-winssh-api.ts
+git add src/preload/binary-channel.ts src/preload/terminal-port-allocator.ts src/preload/index.ts src/preload/index.d.ts src/shared/api.ts test/preload test/renderer/helpers/create-russh-api.ts
 git commit -m "feat: add terminal data channel bridge"
 ```
 
@@ -1923,7 +1923,7 @@ git commit -m "test: add ssh data performance benchmarks"
 
 - `npm run typecheck` 通过。
 - `npm run test` 通过。
-- `WINSSH_LEGACY_TERMINAL=1 npm run dev` 可连接 SSH、输入命令、打开 SFTP。
+- `RUSSH_LEGACY_TERMINAL=1 npm run dev` 可连接 SSH、输入命令、打开 SFTP。
 - 默认模式与 legacy 模式行为一致。
 
 ## M2
@@ -1969,7 +1969,7 @@ git commit -m "docs: add ssh decoupling acceptance checklist"
 
 1. `npm run typecheck`
 2. `npm run test`
-3. `WINSSH_LEGACY_TERMINAL=1 npm run dev`
+3. `RUSSH_LEGACY_TERMINAL=1 npm run dev`
 4. 默认模式 `npm run dev`
 5. 手工验证：连接 SSH、输入 `pwd`、resize terminal、断开重连、打开 SFTP、读取文本文件、启动和停止一个端口转发规则。
 6. M3 之后增加：5 个 session 同时输出大量文本，观察 UI 是否可交互。
@@ -1979,7 +1979,7 @@ git commit -m "docs: add ssh decoupling acceptance checklist"
 ## 回退策略
 
 - M1 回退：删除新增 service adapter 并让 `SessionsApplicationService` 重新依赖 `SessionManager`。
-- M2 回退：设置 `WINSSH_LEGACY_TERMINAL=1`，默认装配 `LegacySessionRuntime`。
+- M2 回退：设置 `RUSSH_LEGACY_TERMINAL=1`，默认装配 `LegacySessionRuntime`。
 - M3 回退：保留 `sessions:onData` IPC 通道，关闭 `createDataChannel` 使用路径。
 - M4 回退：TerminalWorkerHost 发送 `terminal:degraded` 后走原 `use-terminal.ts` 主线程 xterm 路径。
 - M5 回退：每个 dispatcher 都保留 `useWorker: false` 的 legacy delegate。
@@ -1989,4 +1989,4 @@ git commit -m "docs: add ssh decoupling acceptance checklist"
 - 规格覆盖度：M1 覆盖服务边界；M2 覆盖 ssh-core worker；M3 覆盖二进制数据通道和背压；M4 覆盖 xterm Web Worker、OffscreenCanvas、SharedArrayBuffer 降级；M5 覆盖 SFTP、端口转发、OSC/命令历史、资源监控、主机信任拆分。
 - 占位符扫描：计划正文没有使用禁止占位表达作为任务内容；每个任务都有具体文件、测试命令、预期结果和 commit。
 - 类型一致性：`SessionRuntime`、`LegacySessionRuntime`、`WorkerSessionRuntime`、`SshControlPort`、`SshDataAggregator`、`BinaryChannel`、`TerminalWorkerHost` 在任务中使用的命名保持一致。
-- 仓库约束：不直接在 renderer 组件访问 `window.winsshApi`；不改变 local terminal；不改变 keep-mounted 策略；不扩大 SFTP text-only API。
+- 仓库约束：不直接在 renderer 组件访问 `window.russhApi`；不改变 local terminal；不改变 keep-mounted 策略；不扩大 SFTP text-only API。

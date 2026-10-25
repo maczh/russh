@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { toast } from 'sonner'
 import i18n from '@/i18n'
 import { WorkbenchUpdatesEditor } from '@/components/workbench/workbench-updates-editor'
-import { createWinsshApiMock, APP_PACKAGE_VERSION } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock, APP_PACKAGE_VERSION } from '@test/renderer/helpers/create-russh-api'
 
 vi.mock('sonner', () => ({
   toast: {
@@ -38,10 +38,10 @@ beforeEach(async () => {
 
 describe('WorkbenchUpdatesEditor', () => {
   it('renders current app version details', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       system: {
         getAppInfo: vi.fn().mockResolvedValue({
-          name: 'WinSSH',
+          name: 'RuSSH',
           platform: 'win32',
           releaseChannel: 'latest',
           version: APP_PACKAGE_VERSION
@@ -72,7 +72,7 @@ describe('WorkbenchUpdatesEditor', () => {
       windowTitleBarStyle: 'custom'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           autoUpdateCheckEnabled: true,
@@ -117,7 +117,7 @@ describe('WorkbenchUpdatesEditor', () => {
   })
 
   it('does not render a save button for updates settings', async () => {
-    window.winsshApi = createWinsshApiMock()
+    window.russhApi = createRuSSHApiMock()
 
     renderUpdatesEditor()
 
@@ -129,7 +129,7 @@ describe('WorkbenchUpdatesEditor', () => {
     const queryClient = createTestQueryClient()
     const updateSettings = vi.fn().mockRejectedValue(new Error('Unable to persist settings'))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           autoUpdateCheckEnabled: true,
@@ -223,7 +223,7 @@ describe('WorkbenchUpdatesEditor', () => {
       unsupportedReason: null
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         check,
         getState: vi.fn().mockResolvedValue({
@@ -252,7 +252,7 @@ describe('WorkbenchUpdatesEditor', () => {
   it('shows install action when the update has been downloaded', async () => {
     const quitAndInstall = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         getState: vi.fn().mockResolvedValue({
           autoCheckEnabled: true,
@@ -283,7 +283,7 @@ describe('WorkbenchUpdatesEditor', () => {
   })
 
   it('renders unsupported update state', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         getState: vi.fn().mockResolvedValue({
           autoCheckEnabled: true,
@@ -306,7 +306,7 @@ describe('WorkbenchUpdatesEditor', () => {
   })
 
   it('renders update errors', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         getState: vi.fn().mockResolvedValue({
           autoCheckEnabled: true,
@@ -327,7 +327,7 @@ describe('WorkbenchUpdatesEditor', () => {
   })
 
   it('renders HTML release notes as rich text and fallback plain text correctly', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         getState: vi.fn().mockResolvedValue({
           autoCheckEnabled: true,

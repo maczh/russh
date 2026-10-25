@@ -288,7 +288,7 @@ function WorkbenchShellContent() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'q') {
         event.preventDefault()
-        void window.winsshApi.system.window.close()
+        void window.russhApi.system.window.close()
         return
       }
       const action = resolveWorkbenchShortcutAction(event, isMac)
@@ -307,7 +307,7 @@ function WorkbenchShellContent() {
   }, [isMac])
 
   useEffect(() => {
-    return window.winsshApi.system.menu.onAction((action) => {
+    return window.russhApi.system.menu.onAction((action) => {
       void handleWorkbenchAction(action)
     })
   }, [])
@@ -450,7 +450,7 @@ function WorkbenchShellContent() {
             <ResizablePanel
               collapsedSize={0}
               collapsible
-              defaultSize="22%"
+              defaultSize="16%"
               id="workbench-primary-sidebar"
               maxSize="30%"
               minSize="16%"

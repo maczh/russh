@@ -79,11 +79,11 @@ jobs:
             npm run dist:mac
           fi
         env:
-          WINSSH_UPDATE_BASE_URL: ${{ secrets.WINSSH_UPDATE_BASE_URL }}
+          RUSSH_UPDATE_BASE_URL: ${{ secrets.RUSSH_UPDATE_BASE_URL }}
           SKIP_PUBLISH: 'true'
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: winssh-${{ matrix.os }}
+          name: russh-${{ matrix.os }}
           path: release/

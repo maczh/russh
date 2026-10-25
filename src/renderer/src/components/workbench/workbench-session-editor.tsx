@@ -25,7 +25,7 @@ import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
 
 const TERMINAL_PANEL_MIN_SIZE = '320px'
-const AUX_PANEL_DRAG_MIME = 'application/x-winssh-aux-panel'
+const AUX_PANEL_DRAG_MIME = 'application/x-russh-aux-panel'
 
 const AUX_PANEL_DEFAULT_SIZE_PX = 360
 const AUX_PANEL_MIN_SIZE = '280px'

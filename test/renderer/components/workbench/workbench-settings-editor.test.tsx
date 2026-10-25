@@ -11,7 +11,7 @@ import type { AppSettings } from '@shared/types'
 import { toast } from 'sonner'
 import i18n from '@/i18n'
 import { WorkbenchSettingsEditor } from '@/components/workbench/workbench-settings-editor'
-import { createWinsshApiMock, APP_PACKAGE_VERSION } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock, APP_PACKAGE_VERSION } from '@test/renderer/helpers/create-russh-api'
 import { useWorkbenchStore } from '@/store/workbench-store'
 
 vi.mock('sonner', () => ({
@@ -53,7 +53,7 @@ const persistedDarkSettings: AppSettings = {
   cursorStyle: 'block',
   experimentalTerminalWebgl: false,
   language: 'system',
-  logFilePath: '/tmp/winssh.log',
+  logFilePath: '/tmp/russh.log',
   localTerminalShell: 'zsh',
   uiFontId: 'inter',
   terminalFontId: 'jetbrains-mono',
@@ -62,7 +62,7 @@ const persistedDarkSettings: AppSettings = {
   theme: DEFAULT_DARK_THEME_ID,
   webdavBackupEnabled: false,
   webdavBackupIntervalMinutes: 60,
-  webdavBackupPath: '/winssh-backup/',
+  webdavBackupPath: '/russh-backup/',
   resourceMonitorIntervalMs: 2000,
   webdavUrl: null,
   webdavUsername: null,
@@ -96,7 +96,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       persistedSettings = { ...persistedSettings, ...patch }
       return persistedSettings
     })
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(persistedSettings),
         update: updateSettings
@@ -126,13 +126,13 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   })
 
   it('uses cached settings on the first render when the workbench has already bootstrapped', async () => {
-    const api = createWinsshApiMock()
+    const api = createRuSSHApiMock()
     const queryClient = createTestQueryClient()
 
     queryClient.setQueryData(['settings'], persistedDarkSettings)
     queryClient.setQueryData(['themes'], await api.themes.list())
 
-    window.winsshApi = api
+    window.russhApi = api
 
     renderSettingsEditor(queryClient)
 
@@ -143,7 +143,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   })
 
   it('shows the persisted built-in dark theme and custom title bar selections', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           autoUpdateCheckEnabled: true,
@@ -173,7 +173,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   })
 
   it('shows the persisted theme and title bar selections after loading settings', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           autoUpdateCheckEnabled: true,
@@ -219,7 +219,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       windowTitleBarStyle: 'custom'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           autoUpdateCheckEnabled: true,
@@ -253,7 +253,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   })
 
   it('does not render a save button for application settings', async () => {
-    window.winsshApi = createWinsshApiMock()
+    window.russhApi = createRuSSHApiMock()
 
     renderSettingsEditor()
 
@@ -262,7 +262,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   })
 
   it('imports a ZIP theme pack and refreshes the available theme list', async () => {
-    const baseApi = createWinsshApiMock()
+    const baseApi = createRuSSHApiMock()
     const initialThemes = await baseApi.themes.list()
     const listThemes = vi
       .fn()
@@ -279,7 +279,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       ]
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       themes: {
         importArchive,
         list: listThemes
@@ -298,7 +298,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   })
 
   it('deletes an imported theme pack and refreshes the selected theme', async () => {
-    const baseApi = createWinsshApiMock()
+    const baseApi = createRuSSHApiMock()
     const initialThemes = [...(await baseApi.themes.list()), importedTheme]
     const listThemes = vi
       .fn()
@@ -321,7 +321,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       pluginId: 'acme.nebula-pack'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: getSettings
       },
@@ -358,7 +358,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       editorFontId: null,
       experimentalTerminalWebgl: false,
       language: 'en-US',
-      logFilePath: '/tmp/winssh.log',
+      logFilePath: '/tmp/russh.log',
       localTerminalShell: 'zsh',
       terminalFontId: 'cascadia-mono',
       terminalFontSize: 14,
@@ -366,7 +366,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       uiFontId: 'inter',
       webdavBackupEnabled: false,
       webdavBackupIntervalMinutes: 60,
-      webdavBackupPath: '/winssh-backup/',
+      webdavBackupPath: '/russh-backup/',
       resourceMonitorIntervalMs: 2000,
       webdavUrl: null,
       webdavUsername: null,
@@ -380,7 +380,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       return persistedSettings
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(persistedSettings),
         update: updateSettings
@@ -448,7 +448,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       windowTitleBarStyle: 'custom'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           autoUpdateCheckEnabled: true,
@@ -513,7 +513,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       windowTitleBarStyle: persistedDarkSettings.windowTitleBarStyle
     }))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(persistedDarkSettings),
         update: updateSettings
@@ -556,7 +556,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       windowTitleBarStyle: 'custom'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           autoUpdateCheckEnabled: true,
@@ -593,7 +593,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       terminalFontSize: 16
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(persistedDarkSettings),
         update: updateSettings
@@ -621,7 +621,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   it('rolls back an invalid terminal font size on blur and shows an error toast', async () => {
     const updateSettings = vi.fn()
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(persistedDarkSettings),
         update: updateSettings
@@ -646,7 +646,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   it('shows the saved value again when an automatic save fails', async () => {
     const updateSettings = vi.fn().mockRejectedValue(new Error('Unable to persist settings'))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(persistedDarkSettings),
         update: updateSettings
@@ -685,7 +685,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       .mockResolvedValueOnce([])
     const removeKnownHost = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       system: {
         getKnownHosts,
         removeKnownHost
@@ -710,18 +710,18 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   it('opens a restore dialog, lists WebDAV backups, and relaunches after restoring the selected backup', async () => {
     const listBackups = vi.fn().mockResolvedValue([
       {
-        fileName: 'winssh-win32-2026-04-24T08-00-00-000Z.db',
+        fileName: 'russh-win32-2026-04-24T08-00-00-000Z.db',
         modifiedAt: '2026-04-24T08:00:00.000Z'
       },
       {
-        fileName: 'winssh-win32-2026-04-23T08-00-00-000Z.db',
+        fileName: 'russh-win32-2026-04-23T08-00-00-000Z.db',
         modifiedAt: '2026-04-23T08:00:00.000Z'
       }
     ])
     const restore = vi.fn().mockResolvedValue(undefined)
     const relaunch = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       backup: {
         list: listBackups,
         restore
@@ -738,14 +738,14 @@ describe('WorkbenchSettingsEditor theme selection', () => {
 
     expect(await screen.findByText('Choose a Backup to Restore')).toBeInTheDocument()
     expect(listBackups).toHaveBeenCalledTimes(1)
-    expect(await screen.findByText('winssh-win32-2026-04-24T08-00-00-000Z.db')).toBeInTheDocument()
+    expect(await screen.findByText('russh-win32-2026-04-24T08-00-00-000Z.db')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Restore Selected Backup' })).toBeDisabled()
 
-    fireEvent.click(screen.getByText('winssh-win32-2026-04-23T08-00-00-000Z.db'))
+    fireEvent.click(screen.getByText('russh-win32-2026-04-23T08-00-00-000Z.db'))
     fireEvent.click(screen.getByRole('button', { name: 'Restore Selected Backup' }))
 
     await waitFor(() => {
-      expect(restore).toHaveBeenCalledWith('winssh-win32-2026-04-23T08-00-00-000Z.db')
+      expect(restore).toHaveBeenCalledWith('russh-win32-2026-04-23T08-00-00-000Z.db')
     })
     await waitFor(() => {
       expect(relaunch).toHaveBeenCalledTimes(1)
@@ -758,11 +758,11 @@ describe('WorkbenchSettingsEditor theme selection', () => {
 
   it('confirms before deleting a WebDAV backup and refreshes the backup list', async () => {
     const firstBackup = {
-      fileName: 'winssh-win32-2026-04-24T08-00-00-000Z.db',
+      fileName: 'russh-win32-2026-04-24T08-00-00-000Z.db',
       modifiedAt: '2026-04-24T08:00:00.000Z'
     }
     const secondBackup = {
-      fileName: 'winssh-win32-2026-04-23T08-00-00-000Z.db',
+      fileName: 'russh-win32-2026-04-23T08-00-00-000Z.db',
       modifiedAt: '2026-04-23T08:00:00.000Z'
     }
     const listBackups = vi
@@ -771,7 +771,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
       .mockResolvedValueOnce([secondBackup])
     const deleteBackup = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       backup: {
         delete: deleteBackup,
         list: listBackups
@@ -810,10 +810,10 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   })
 
   it('renders app version details in the about section', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       system: {
         getAppInfo: vi.fn().mockResolvedValue({
-          name: 'WinSSH',
+          name: 'RuSSH',
           platform: 'win32',
           releaseChannel: 'latest',
           version: APP_PACKAGE_VERSION
@@ -831,7 +831,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
   })
 
   it('does not render an updates section in the settings navigation anymore', async () => {
-    window.winsshApi = createWinsshApiMock()
+    window.russhApi = createRuSSHApiMock()
 
     renderSettingsEditor()
 
@@ -843,7 +843,7 @@ describe('WorkbenchSettingsEditor theme selection', () => {
     const getShellIntegrationScript = vi
       .fn()
       .mockResolvedValue('__wsh_emit() { printf "\\033]%s\\033\\134" "$1"; };')
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue({
           ...persistedDarkSettings,

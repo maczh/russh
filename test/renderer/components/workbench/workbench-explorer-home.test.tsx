@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import i18n from '@/i18n'
 import { WorkbenchExplorerHome } from '@/components/workbench/workbench-explorer-home'
 import { WorkbenchProvider } from '@/components/workbench/workbench-context'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
 
@@ -43,7 +43,7 @@ describe('WorkbenchExplorerHome', () => {
       title: 'zsh'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       localTerminals: {
         create: createLocalTerminal
       }
@@ -63,7 +63,7 @@ describe('WorkbenchExplorerHome', () => {
   it('renders stale recent sessions as disabled shortcuts when the server is missing', async () => {
     const connect = vi.fn()
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([]),
         listRecent: vi.fn().mockResolvedValue([

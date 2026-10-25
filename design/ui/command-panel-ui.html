@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WinSSH 命令面板 - 规范范式原型</title>
+    <title>RuSSH 命令面板 - 规范范式原型</title>
     <!-- 引入 Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,7 +13,7 @@
     />
 
     <style>
-      /* 1. 主应用设计规范变量声明 (符合 VSCode/WinSSH FLAT 设计范式) */
+      /* 1. 主应用设计规范变量声明 (符合 VSCode/RuSSH FLAT 设计范式) */
       :root {
         /* 模拟主题变量，默认使用 Dark Plus */
         --bg-page: #0b0f19;
@@ -188,7 +188,7 @@
         background: var(--workbench-hover);
       }
 
-      /* 4. WinSSH App 主窗口仿真布局 (100% 还原主应用设计范式) */
+      /* 4. RuSSH App 主窗口仿真布局 (100% 还原主应用设计范式) */
       .app-window {
         width: 1000px;
         height: 620px;
@@ -914,11 +914,11 @@
       <button class="demo-btn" onclick="resizeSidebar(420)">宽 (420px)</button>
     </div>
 
-    <!-- WinSSH App 主窗口仿真布局 -->
+    <!-- RuSSH App 主窗口仿真布局 -->
     <div class="app-window">
       <!-- 顶部标题栏 -->
       <div class="titlebar">
-        <div>WinSSH Client v1.2.0</div>
+        <div>RuSSH Client v1.2.0</div>
         <div class="titlebar-center">ubuntu-server-prod (SSH)</div>
         <div class="titlebar-windows-btn">
           <span>—</span>
@@ -1778,7 +1778,7 @@
 
               const resultLog = document.createElement('div')
               resultLog.style.color = 'var(--muted-foreground)'
-              resultLog.innerText = `[WinSSH Command Panel] Executed successfully.`
+              resultLog.innerText = `[RuSSH Command Panel] Executed successfully.`
               term.insertBefore(resultLog, line.parentElement)
 
               line.innerText = ''

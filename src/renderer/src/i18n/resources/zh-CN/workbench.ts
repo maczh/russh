@@ -123,7 +123,7 @@ const workbench = {
           savePath: '保存路径'
         },
         description: '查看最近的应用日志、清空当前日志文件，或把后续日志写到新的文件路径。',
-        pathPlaceholder: 'C:\\path\\to\\winssh.log',
+        pathPlaceholder: 'C:\\path\\to\\russh.log',
         title: '应用日志',
         toasts: {
           cleared: '日志已清空。',

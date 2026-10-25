@@ -1,4 +1,4 @@
-Bundled font assets used by WinSSH's integrated font registry.
+Bundled font assets used by RuSSH's integrated font registry.
 
 This directory currently keeps documentation only. Selectable UI and terminal fonts are loaded from `@fontsource/*` packages declared in `package.json`.
 

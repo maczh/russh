@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { type SessionResourceSnapshot } from '@shared/types'
 import i18n from '@/i18n'
 import { SessionResourceMonitor } from '@/components/session-resource-monitor'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import type { SessionTab } from '@/store/sessions-store'
 
 const baseSession: SessionTab = {
@@ -78,7 +78,7 @@ function renderMonitor({
 describe('SessionResourceMonitor', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en-US')
-    window.winsshApi = createWinsshApiMock()
+    window.russhApi = createRuSSHApiMock()
   })
 
   afterEach(() => {
@@ -88,7 +88,7 @@ describe('SessionResourceMonitor', () => {
   it('polls only while the session tab is active and ready', async () => {
     vi.useFakeTimers()
     const getResourceSnapshot = vi.fn().mockResolvedValue(createSnapshot())
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sessions: {
         getResourceSnapshot
       }
@@ -133,7 +133,7 @@ describe('SessionResourceMonitor', () => {
 
   it('does not poll when the session is not ready', async () => {
     const getResourceSnapshot = vi.fn().mockResolvedValue(createSnapshot())
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sessions: {
         getResourceSnapshot
       }
@@ -151,7 +151,7 @@ describe('SessionResourceMonitor', () => {
   })
 
   it('shows a Linux-only hint for unsupported platforms', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sessions: {
         getResourceSnapshot: vi.fn().mockResolvedValue({
           sessionId: 'session-1',
@@ -173,7 +173,7 @@ describe('SessionResourceMonitor', () => {
   })
 
   it('shows an unavailable hint for sampling failures', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sessions: {
         getResourceSnapshot: vi.fn().mockRejectedValue(new Error('boom'))
       }

@@ -29,11 +29,11 @@ const LIST_PROPFIND_BODY =
   '<D:propfind xmlns:D="DAV:"><D:prop><D:displayname/><D:getlastmodified/></D:prop></D:propfind>'
 
 function getBackupFileName(): string {
-  return `winssh-${process.platform}-${new Date().toISOString().replace(/[:.]/g, '-')}.db`
+  return `russh-${process.platform}-${new Date().toISOString().replace(/[:.]/g, '-')}.db`
 }
 
 function normalizeRemotePath(value: string | null | undefined): string {
-  const trimmed = value?.trim() || '/winssh-backup'
+  const trimmed = value?.trim() || '/russh-backup'
   const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
   return normalized.replace(/\/+$/, '') || '/'
 }
@@ -69,7 +69,7 @@ function isValidSqliteBuffer(buffer: Buffer): boolean {
 }
 
 function isBackupFileName(name: string): boolean {
-  return /^winssh-[a-z0-9-]+-.+\.db$/i.test(name)
+  return /^russh-[a-z0-9-]+-.+\.db$/i.test(name)
 }
 
 function parseBackupEntries(xml: string): WebDAVBackupEntry[] {
@@ -240,7 +240,7 @@ export class WebDAVBackupService {
     }
 
     const databasePath = this.database.getDatabasePath()
-    const tempBackupPath = join(dirname(databasePath), `.winssh-webdav-backup-${Date.now()}.db`)
+    const tempBackupPath = join(dirname(databasePath), `.russh-webdav-backup-${Date.now()}.db`)
 
     try {
       this.logger.info('Starting WebDAV backup upload', { context })
@@ -349,7 +349,7 @@ export class WebDAVBackupService {
       this.logger.info('Starting WebDAV restore', { context })
       const targetBackupFileName = await this.resolveRestoreBackupFileName(config, fileName)
       if (!targetBackupFileName) {
-        throw new Error('No remote WinSSH backup was found on WebDAV')
+        throw new Error('No remote RuSSH backup was found on WebDAV')
       }
 
       const downloadResponse = await sendWebDAVRequest({

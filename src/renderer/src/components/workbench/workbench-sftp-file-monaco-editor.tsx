@@ -173,7 +173,7 @@ function getFallbackMonacoThemeId() {
 }
 
 function getMonacoThemeId(theme: ThemeDefinition) {
-  return `winssh-${theme.id.replace(/[^a-z0-9_-]/gi, '-')}`
+  return `russh-${theme.id.replace(/[^a-z0-9_-]/gi, '-')}`
 }
 
 function getMonacoBaseTheme(theme: ThemeDefinition) {
@@ -497,7 +497,7 @@ export function WorkbenchSftpFileMonacoEditor({
     const modelUri = monaco.Uri.from({
       authority: document.sessionId,
       path: document.remotePath,
-      scheme: 'winssh-sftp'
+      scheme: 'russh-sftp'
     })
     monaco.editor.getModel(modelUri)?.dispose()
 

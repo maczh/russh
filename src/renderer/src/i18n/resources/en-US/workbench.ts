@@ -126,7 +126,7 @@ const workbench = {
         },
         description:
           'Read recent application logs, clear the current file, or move future logs to another file path.',
-        pathPlaceholder: 'C:\\path\\to\\winssh.log',
+        pathPlaceholder: 'C:\\path\\to\\russh.log',
         title: 'Application Logs',
         toasts: {
           cleared: 'Logs cleared.',

@@ -32,7 +32,7 @@ build/              # NSIS installer.nsh + platform icons + macOS entitlements
 | Add server table column  | main/database + main/application/servers-app-service + shared/validation                                                                                                                                       | Also update ServerUpsertInput/serverSchema       |
 | Add SFTP feature         | main/session-manager editor file streaming API (`openFileReadStream`/`openFileWriteStream`/`writeFileChunk`/`closeFileWriteStream`/`cancelFileStream`) + renderer/features/sftp/api + workbench-sftp-\*-editor | SFTP editor streaming is text-only               |
 | Work on UI layout        | renderer/components/workbench/                                                                                                                                                                                 | Keep-mounted for session/local-terminal editors  |
-| Write renderer tests     | test/renderer/ + test/renderer/helpers/create-winssh-api                                                                                                                                                       | Never co-locate tests in src/                    |
+| Write renderer tests     | test/renderer/ + test/renderer/helpers/create-russh-api                                                                                                                                                       | Never co-locate tests in src/                    |
 | Work on web/ site        | web/src/                                                                                                                                                                                                       | Separate package.json, tsconfig, vite config     |
 
 ## Commands
@@ -76,7 +76,7 @@ Use these aliases in imports; both src and tests consume them.
 - **`src/main/index.ts`** is a thin entry (`app.whenReady().then(bootstrap)`). All assembly is in **`src/main/bootstrap.ts`**.
 - **`src/main/application/`** is a use-case orchestration layer (servers/sessions/settings services).
 - **`src/main/ipc/`** has 4 registrars: `register-server-ipc.ts`, `register-session-ipc.ts`, `register-system-ipc.ts`, `register-command-history-ipc.ts`.
-- **`src/renderer/src/features/*/api`** is the ONLY approved entry point for renderer code to call preload bridge. ESLint enforces this: `window.winsshApi` is banned in `src/renderer/src/**` except in `features/shared/api/`.
+- **`src/renderer/src/features/*/api`** is the ONLY approved entry point for renderer code to call preload bridge. ESLint enforces this: `window.russhApi` is banned in `src/renderer/src/**` except in `features/shared/api/`.
 - **`src/renderer/src/features/shared/query-keys.ts`** centralizes all React Query keys. Never hardcode new keys.
 - Theme definitions live in `themes/builtin/`, loaded by `src/main/theme-registry.ts`.
 - `web/` is a **fully independent** Vite subproject with its own `package.json`, `tsconfig.json`, and tests.
@@ -86,7 +86,7 @@ Use these aliases in imports; both src and tests consume them.
 - Tests live in **`test/`**, mirroring the `src/` structure — they are **NOT co-located** with source files.
 - File pattern: `test/**/*.test.{ts,tsx}`. Setup file: `test/renderer/helpers/setup.ts`.
 - Environment: `jsdom` with `globals: true` (no explicit imports of describe/it/expect needed).
-- Renderer tests mock `window.winsshApi` via `test/renderer/helpers/create-winssh-api.ts`.
+- Renderer tests mock `window.russhApi` via `test/renderer/helpers/create-russh-api.ts`.
 - Main process test mocks live near tests in `test/main/`.
 
 ## i18n
@@ -100,7 +100,7 @@ Use these aliases in imports; both src and tests consume them.
 - `better-sqlite3`, `node-pty`, and `ssh2` are native modules.
 - `electron.vite.config.ts` externalizes them via `externalizeDepsPlugin()`.
 - `electron-builder.yml` has `asarUnpack` entries for `better-sqlite3`. If adding a new native module that must load from disk at runtime, add it to `asarUnpack` too.
-- `postinstall` runs `electron-builder install-app-deps` to rebuild native modules for the Electron target.
+- The Tauri build does not run Electron's native-module rebuild hook. The legacy Electron scripts remain available only for the compatibility build path.
 
 ## Code Style
 
@@ -113,7 +113,7 @@ Use these aliases in imports; both src and tests consume them.
 
 These are the facts an agent is most likely to get wrong:
 
-- **ESLint blocks `window.winsshApi`** in all `src/renderer/src/**` except `src/renderer/src/features/shared/api/**`. Always go through `features/*/api`.
+- **ESLint blocks `window.russhApi`** in all `src/renderer/src/**` except `src/renderer/src/features/shared/api/**`. Always go through `features/*/api`.
 - **Credential model** — server password/passphrase, credential vault secrets, and server private keys (inline in `servers.private_key` DB column) all live in the SQLite database.
 - **`SessionManager` does NOT read credential vault directly** for connection auth. Only `servers:getSecrets` (display) and `resolveStoredPrivateKey()` use the vault. Connection auth uses `request.secrets[server.id]` or database fallback.
 - **Jump server is single-hop only**. Nested jump chains are explicitly rejected.
@@ -137,15 +137,15 @@ Changing any domain typically requires touching these layers together:
 - **SFTP / remote editing**: add `src/main/session-manager.ts` editor file streaming methods (`openFileReadStream`, `openFileWriteStream`, `writeFileChunk`, `closeFileWriteStream`, `cancelFileStream`) + `src/renderer/src/features/sftp/api/*` + `src/renderer/src/components/workbench/workbench-sftp-file-*-editor.tsx`.
 - **Any change to `servers` table schema**: also update `src/main/database.ts`, `src/main/application/servers-application-service.ts`, and `src/shared/validation.ts` (`ServerUpsertInput`/`serverSchema`).
 
-## Test Mock for `window.winsshApi`
+## Test Mock for `window.russhApi`
 
 When writing renderer tests that call the preload bridge:
 
 ```ts
-import { createWinsshApi } from '@test/helpers/create-winssh-api'
-// The setup file (test/renderer/helpers/setup.ts) injects window.winsshApi automatically.
+import { createRuSSHApi } from '@test/helpers/create-russh-api'
+// The setup file (test/renderer/helpers/setup.ts) injects window.russhApi automatically.
 // To override behavior in a specific test, mock the method:
-const api = createWinsshApi({/* overrides */})
+const api = createRuSSHApi({/* overrides */})
 ```
 
 ## Key Entry Points to Read First
@@ -155,4 +155,4 @@ const api = createWinsshApi({/* overrides */})
 - `src/shared/types.ts` — canonical shared types, event shapes, connection phases
 - `src/renderer/src/App.tsx` — React root, theme bootstrapping, routing
 - `src/renderer/src/components/workbench/workbench-shell.tsx` — renderer layout root
-- `src/renderer/src/features/shared/api/winssh-client.ts` — reference for how feature API clients wrap the bridge
+- `src/renderer/src/features/shared/api/russh-client.ts` — reference for how feature API clients wrap the bridge

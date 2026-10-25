@@ -1,8 +1,8 @@
-# WinSSH 主题开发文档
+# RuSSH 主题开发文档
 
 ## 1. 文档范围
 
-本文档基于当前仓库中的主题实现整理，目标是说明 WinSSH 现在已经支持的主题开发方式，而不是未来规划。
+本文档基于当前仓库中的主题实现整理，目标是说明 RuSSH 现在已经支持的主题开发方式，而不是未来规划。
 
 当前主题系统的核心事实：
 
@@ -17,7 +17,7 @@
 - `src/main/theme-registry.ts`
 - `src/renderer/src/lib/theme.ts`
 - `src/renderer/src/App.tsx`
-- `themes/builtin/winssh-default-themes/package.json`
+- `themes/builtin/russh-default-themes/package.json`
 
 ## 2. 当前主题系统概览
 
@@ -31,7 +31,7 @@
 4. 每个主题条目的 `path` 指向一个主题 JSON 文件。
 5. 主进程使用 Zod 校验 manifest 和主题文档。
 6. 主进程根据 `uiTheme` 推导 `appearance`，并把主题 JSON 与基础 UI token、默认终端调色板合并，生成完整 `ThemeDefinition`。
-7. 渲染层通过 `window.winsshApi.themes.list()` 读取主题列表。
+7. 渲染层通过 `window.russhApi.themes.list()` 读取主题列表。
 8. `App.tsx` 和 `src/renderer/src/lib/theme.ts` 负责解析当前选择并调用 `applyThemeToRoot()`。
 9. `applyThemeToRoot()` 会把全部 UI token 写入 `document.documentElement` 上的 CSS 变量，并设置主题相关 class / data-attribute。
 
@@ -39,9 +39,9 @@
 
 - `system`
 - 任意有效主题 id，例如：
-  - `winssh.light-plus`
-  - `winssh.dark-plus`
-  - `winssh.pixel-crt`
+  - `russh.light-plus`
+  - `russh.dark-plus`
+  - `russh.pixel-crt`
   - `acme.nebula`
 
 ## 3. 主题选择与解析规则
@@ -52,15 +52,15 @@
 
 当前规则：
 
-- 系统偏好浅色时，`system` 解析到 `winssh.light-plus`
-- 系统偏好深色时，`system` 解析到 `winssh.dark-plus`
+- 系统偏好浅色时，`system` 解析到 `russh.light-plus`
+- 系统偏好深色时，`system` 解析到 `russh.dark-plus`
 
 对应常量：
 
 - `SYSTEM_THEME_ID = "system"`
-- `DEFAULT_LIGHT_THEME_ID = "winssh.light-plus"`
-- `DEFAULT_DARK_THEME_ID = "winssh.dark-plus"`
-- `DEFAULT_PIXEL_THEME_ID = "winssh.pixel-crt"`
+- `DEFAULT_LIGHT_THEME_ID = "russh.light-plus"`
+- `DEFAULT_DARK_THEME_ID = "russh.dark-plus"`
+- `DEFAULT_PIXEL_THEME_ID = "russh.pixel-crt"`
 
 ### 3.2 `uiTheme` 决定外观基线
 
@@ -130,14 +130,14 @@ my-theme-pack/
 Windows 下通常会落在类似下面的位置：
 
 ```text
-%APPDATA%/winssh/themes/
+%APPDATA%/russh/themes/
 ```
 
 需要注意：
 
 1. 目录名只影响扫描顺序，不决定插件 id。
 2. 插件 id 来自 manifest 的 `publisher` 和 `name`，不是来自文件夹名。
-3. 当前没有主题热重载入口。新增、删除或修改用户主题包后，建议重启 WinSSH。
+3. 当前没有主题热重载入口。新增、删除或修改用户主题包后，建议重启 RuSSH。
 
 ## 5. `package.json` 格式
 
@@ -154,7 +154,7 @@ Windows 下通常会落在类似下面的位置：
       {
         "id": "acme.nebula",
         "label": "Nebula",
-        "description": "A blue-black theme for WinSSH.",
+        "description": "A blue-black theme for RuSSH.",
         "uiTheme": "vs-dark",
         "path": "./themes/nebula.json"
       }
@@ -185,11 +185,11 @@ Windows 下通常会落在类似下面的位置：
 
 例如：
 
-- 目录 `themes/builtin/winssh-default-themes`
-- manifest 中 `publisher = "winssh"`、`name = "default-themes"`
-- 最终 `pluginId = "winssh.default-themes"`
+- 目录 `themes/builtin/russh-default-themes`
+- manifest 中 `publisher = "russh"`、`name = "default-themes"`
+- 最终 `pluginId = "russh.default-themes"`
 
-额外字段目前不会参与主题解析。例如内置主题包里的 `engines.winssh` 不影响加载逻辑。
+额外字段目前不会参与主题解析。例如内置主题包里的 `engines.russh` 不影响加载逻辑。
 
 ## 6. 主题 JSON 格式
 
@@ -466,7 +466,7 @@ Windows 下通常会落在类似下面的位置：
 回退与容错规则：
 
 1. 主题 id 不存在时，选择值会归一化为 `system`
-2. `system` 会解析到 `winssh.light-plus` 或 `winssh.dark-plus`
+2. `system` 会解析到 `russh.light-plus` 或 `russh.dark-plus`
 3. 如果完全没有可加载主题，运行时会创建一个合成 fallback theme
 4. manifest 非法、主题文件不存在或主题文档非法时，该主题会被忽略
 5. `colors` 或 `terminal` 中出现未知 token 时，该 token 会被忽略并打印 warning
@@ -497,17 +497,17 @@ Windows 下通常会落在类似下面的位置：
 
 内置路径：
 
-- `themes/builtin/winssh-default-themes`
+- `themes/builtin/russh-default-themes`
 
 manifest 派生出的插件 id：
 
-- `winssh.default-themes`
+- `russh.default-themes`
 
 当前包含：
 
-- `winssh.light-plus`
-- `winssh.dark-plus`
-- `winssh.pixel-crt`
+- `russh.light-plus`
+- `russh.dark-plus`
+- `russh.pixel-crt`
 
 特征：
 
@@ -521,7 +521,7 @@ manifest 派生出的插件 id：
 
 如果你要做：
 
-- 常规浅色 / 深色主题：建议复制 `themes/builtin/winssh-default-themes`
+- 常规浅色 / 深色主题：建议复制 `themes/builtin/russh-default-themes`
 
 ### 13.2 先决定 `vs` 还是 `vs-dark`
 
@@ -568,7 +568,7 @@ manifest 派生出的插件 id：
 - `dark`
 - `light`
 - `blue`
-- `winssh.dark-plus`
+- `russh.dark-plus`
 
 ## 14. 最小示例
 
@@ -585,7 +585,7 @@ manifest 派生出的插件 id：
       {
         "id": "acme.nebula",
         "label": "Nebula",
-        "description": "A blue-black theme for WinSSH.",
+        "description": "A blue-black theme for RuSSH.",
         "uiTheme": "vs-dark",
         "path": "./themes/nebula.json"
       }
@@ -644,7 +644,7 @@ manifest 派生出的插件 id：
 2. 插件包里是否存在 `package.json`
 3. `contributes.themes[].path` 是否是相对插件包目录的路径
 4. 主题 id 是否和已有主题重复
-5. 修改后是否已重启 WinSSH
+5. 修改后是否已重启 RuSSH
 
 ### 15.2 为什么某个 token 看起来没有生效？
 
@@ -672,7 +672,7 @@ manifest 派生出的插件 id：
 
 ## 16.
 
-如果你是第一次开发 WinSSH 主题，最稳妥的路径不是从零写，而是：
+如果你是第一次开发 RuSSH 主题，最稳妥的路径不是从零写，而是：
 
 1. 复制内置主题包
 2. 先只改一个主题文件

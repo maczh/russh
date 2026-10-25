@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import i18n from '@/i18n'
 import { CommandPanel } from '@/components/workbench/command-panel'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 
 function renderCommandPanel() {
   const queryClient = new QueryClient({
@@ -92,8 +92,8 @@ describe('CommandPanel', () => {
 
     const listCustom = vi.fn().mockResolvedValue([])
 
-    window.winsshApi = {
-      ...createWinsshApiMock(),
+    window.russhApi = {
+      ...createRuSSHApiMock(),
       commandHistory: {
         list: listHistory,
         search: vi.fn().mockResolvedValue([]),
@@ -142,8 +142,8 @@ describe('CommandPanel', () => {
     const listHistory = vi.fn().mockResolvedValue(entries)
     const listCustom = vi.fn().mockResolvedValue([])
 
-    window.winsshApi = {
-      ...createWinsshApiMock(),
+    window.russhApi = {
+      ...createRuSSHApiMock(),
       commandHistory: {
         list: listHistory,
         search: vi.fn().mockResolvedValue([]),

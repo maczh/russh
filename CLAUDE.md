@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WinSSH is a cross-platform SSH/SFTP desktop client built with Electron 39, React 19, TypeScript 5.9, and Tailwind CSS 4. It uses electron-vite for builds and ships for Windows, macOS, and Linux.
+RuSSH is a cross-platform SSH/SFTP desktop client built with Electron 39, React 19, TypeScript 5.9, and Tailwind CSS 4. It uses electron-vite for builds and ships for Windows, macOS, and Linux.
 
 ## Common Commands
 
@@ -37,7 +37,7 @@ Vitest runs with `globals: true` (no imports needed for `describe`/`it`/`expect`
 ### Three-Process Electron Model
 
 - **Main process** (`src/main/`): `index.ts` is a thin entry that calls `bootstrap()`, which assembles all services, registers IPC, and creates the main window. The application services layer (`src/main/application/`) orchestrates use cases, and `src/main/ipc/` handles IPC registration split into 3 domain registrars.
-- **Preload** (`src/preload/`): Typed IPC bridge using `contextBridge.exposeInMainWorld('winsshApi', api)`. Implements a hub-based subscription system with global and per-ID dispatch for O(1) session/terminal data routing.
+- **Preload** (`src/preload/`): Typed IPC bridge using `contextBridge.exposeInMainWorld('russhApi', api)`. Implements a hub-based subscription system with global and per-ID dispatch for O(1) session/terminal data routing.
 - **Renderer** (`src/renderer/src/`): React app with a VS Code-like workbench UI.
 
 ### IPC Contract
@@ -45,7 +45,7 @@ Vitest runs with `globals: true` (no imports needed for `describe`/`it`/`expect`
 The typed IPC contract flows through 4 files:
 
 1. `src/shared/types.ts` — domain types
-2. `src/shared/api.ts` — `WinsshApi` interface (the contract)
+2. `src/shared/api.ts` — `RuSSHApi` interface (the contract)
 3. `src/shared/ipc-channels.ts` — typed push event channels
 4. `src/preload/index.ts` — bridge implementation
 
@@ -53,7 +53,7 @@ Main process handlers are in `src/main/ipc/` (5 registrars: server, session, sys
 
 ### Renderer Feature API Gateway
 
-Components must NOT access `window.winsshApi` directly — an ESLint rule enforces this. Instead, use per-domain clients from `src/renderer/src/features/*/api/`. The proxy-based client is in `features/shared/api/winssh-client.ts`. React Query keys are centralized in `features/shared/query-keys.ts`.
+Components must NOT access `window.russhApi` directly — an ESLint rule enforces this. Instead, use per-domain clients from `src/renderer/src/features/*/api/`. The proxy-based client is in `features/shared/api/russh-client.ts`. React Query keys are centralized in `features/shared/query-keys.ts`.
 
 ### Key Runtime Services (Main Process)
 
@@ -109,12 +109,12 @@ Both sub-projects are independent npm workspaces (own `package.json`, Vite confi
 
 ## Environment Variables
 
-- `WINSSH_HARDWARE_ACCELERATION` — override the default policy (Windows disables hardware acceleration by default).
+- `RUSSH_HARDWARE_ACCELERATION` — override the default policy (Windows disables hardware acceleration by default).
 
 ## Environment Requirements
 
 - Node.js 22 LTS and npm 10+ recommended.
-- Native deps (`better-sqlite3`, `node-pty`) require a working native toolchain when no prebuilt binary matches the platform. `postinstall` runs `electron-builder install-app-deps`.
+- Native deps (`better-sqlite3`, `node-pty`) belong to the legacy Electron compatibility path; the Tauri runtime uses Rust dependencies and does not run Electron's native-module rebuild hook.
 - Verification order when validating changes: `npm run typecheck` → `npm run test`. `npm run lint` is not a gate (see Key Constraints).
 
 ## Existing Documentation

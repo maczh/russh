@@ -127,7 +127,7 @@ it('temporarily zooms only the active terminal surface with ctrl wheel', () => {
     expect.stringMatching(/^ready:session-1:/),
     15
   )
-  expect(window.winsshApi.settings.update).not.toHaveBeenCalled()
+  expect(window.russhApi.settings.update).not.toHaveBeenCalled()
 })
 ```
 
@@ -182,7 +182,7 @@ const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
 ```ts
 it('temporarily zooms only the current Monaco editor with ctrl wheel', async () => {
   const updateSettings = vi.fn()
-  window.winsshApi = createWinsshApiMock({
+  window.russhApi = createRuSSHApiMock({
     settings: {
       update: updateSettings
     },

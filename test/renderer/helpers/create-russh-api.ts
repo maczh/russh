@@ -1,4 +1,4 @@
-import type { WinsshApi } from '@shared/api'
+import type { RuSSHApi } from '@shared/api'
 import { DEFAULT_APP_SETTINGS } from '@shared/constants'
 import {
   createThemeDefinition,
@@ -16,8 +16,8 @@ const defaultThemes = [
     appearance: 'light',
     id: DEFAULT_LIGHT_THEME_ID,
     label: 'Light+',
-    pluginDisplayName: 'WinSSH Default Themes',
-    pluginId: 'winssh.default-themes',
+    pluginDisplayName: 'RuSSH Default Themes',
+    pluginId: 'russh.default-themes',
     source: 'builtin',
     terminal: {
       background: '#ffffff',
@@ -47,8 +47,8 @@ const defaultThemes = [
     appearance: 'dark',
     id: DEFAULT_DARK_THEME_ID,
     label: 'Dark+',
-    pluginDisplayName: 'WinSSH Default Themes',
-    pluginId: 'winssh.default-themes',
+    pluginDisplayName: 'RuSSH Default Themes',
+    pluginId: 'russh.default-themes',
     source: 'builtin',
     terminal: {
       background: '#181a1f',
@@ -78,8 +78,8 @@ const defaultThemes = [
     appearance: 'dark',
     id: DEFAULT_PIXEL_THEME_ID,
     label: 'Pixel CRT',
-    pluginDisplayName: 'WinSSH Default Themes',
-    pluginId: 'winssh.default-themes',
+    pluginDisplayName: 'RuSSH Default Themes',
+    pluginId: 'russh.default-themes',
     source: 'builtin',
     terminal: {
       background: '#0b1811',
@@ -120,7 +120,7 @@ type DeepPartial<T> = {
       : T[K]
 }
 
-export function createWinsshApiMock(overrides: DeepPartial<WinsshApi> = {}): WinsshApi {
+export function createRuSSHApiMock(overrides: DeepPartial<RuSSHApi> = {}): RuSSHApi {
   const defaultSettings = {
     ...DEFAULT_APP_SETTINGS,
     language: 'en-US',
@@ -132,39 +132,39 @@ export function createWinsshApiMock(overrides: DeepPartial<WinsshApi> = {}): Win
   const windowOverrides = systemOverrides?.window
   const appFocusOverrides = systemOverrides?.appFocus
   const appActivityOverrides = systemOverrides?.appActivity
-  const defaultMenuApi: WinsshApi['system']['menu'] = {
+  const defaultMenuApi: RuSSHApi['system']['menu'] = {
     onAction: () => noopUnsubscribe
   }
-  const resolvedMenuApi: WinsshApi['system']['menu'] = {
+  const resolvedMenuApi: RuSSHApi['system']['menu'] = {
     onAction: menuOverrides?.onAction ?? defaultMenuApi.onAction
   }
-  const defaultWindowApi: WinsshApi['system']['window'] = {
+  const defaultWindowApi: RuSSHApi['system']['window'] = {
     close: async () => undefined,
     isMaximized: async () => false,
     minimize: async () => undefined,
     onStateChange: () => noopUnsubscribe,
     toggleMaximize: async () => undefined
   }
-  const resolvedWindowApi: WinsshApi['system']['window'] = {
+  const resolvedWindowApi: RuSSHApi['system']['window'] = {
     close: windowOverrides?.close ?? defaultWindowApi.close,
     isMaximized: windowOverrides?.isMaximized ?? defaultWindowApi.isMaximized,
     minimize: windowOverrides?.minimize ?? defaultWindowApi.minimize,
     onStateChange: windowOverrides?.onStateChange ?? defaultWindowApi.onStateChange,
     toggleMaximize: windowOverrides?.toggleMaximize ?? defaultWindowApi.toggleMaximize
   }
-  const resolvedAppFocusApi: WinsshApi['system']['appFocus'] = {
+  const resolvedAppFocusApi: RuSSHApi['system']['appFocus'] = {
     onStateChange: appFocusOverrides?.onStateChange ?? (() => noopUnsubscribe)
   }
-  const resolvedAppActivityApi: WinsshApi['system']['appActivity'] = {
+  const resolvedAppActivityApi: RuSSHApi['system']['appActivity'] = {
     onStateChange: appActivityOverrides?.onStateChange ?? (() => noopUnsubscribe)
   }
-  const resolvedSystemApi: WinsshApi['system'] = {
+  const resolvedSystemApi: RuSSHApi['system'] = {
     getCapabilities:
       systemOverrides?.getCapabilities ?? (async () => ({ credentialStorage: true })),
     getAppInfo:
       systemOverrides?.getAppInfo ??
       (async () => ({
-        name: 'WinSSH',
+        name: 'RuSSH',
         platform: 'linux',
         releaseChannel: 'latest',
         version: APP_PACKAGE_VERSION
@@ -354,7 +354,7 @@ export function createWinsshApiMock(overrides: DeepPartial<WinsshApi> = {}): Win
     },
     logs: {
       clear: async () => undefined,
-      getState: async () => ({ logFilePath: '/tmp/winssh.log' }),
+      getState: async () => ({ logFilePath: '/tmp/russh.log' }),
       list: async () => [],
       updatePath: async (logFilePath) => ({ logFilePath }),
       write: async () => undefined,

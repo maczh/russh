@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
-import type { WinsshApi } from '@shared/api'
+import type { RuSSHApi } from '@shared/api'
 import type { IpcCallback, IpcChannel, IpcPayload } from '@shared/ipc-channels'
 import type { LocalTerminalDataEvent, SessionDataEvent } from '@shared/types'
 import { TerminalPortAllocator } from './terminal-port-allocator'
@@ -178,7 +178,7 @@ export function destroyAllSubscriptions() {
 // ============================================================
 // 6. API 组装 —— 与原来完全兼容，只是 subscribeFiltered → subscribeById
 // ============================================================
-const api: WinsshApi = {
+const api: RuSSHApi = {
   groups: {
     list: () => ipcRenderer.invoke('groups:list'),
     create: (input) => ipcRenderer.invoke('groups:create', input),
@@ -369,4 +369,4 @@ const api: WinsshApi = {
   }
 }
 
-contextBridge.exposeInMainWorld('winsshApi', api)
+contextBridge.exposeInMainWorld('russhApi', api)

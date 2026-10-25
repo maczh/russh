@@ -88,7 +88,7 @@ function createWindow(settings: AppSettings, themeRegistry: ThemeRegistry): Brow
     minHeight: 760,
     show: false,
     autoHideMenuBar: true,
-    title: 'WinSSH',
+    title: 'RuSSH',
     backgroundColor: themeRegistry.getWindowBackgroundColor(
       settings.theme,
       nativeTheme.shouldUseDarkColors
@@ -130,7 +130,7 @@ function createWindow(settings: AppSettings, themeRegistry: ThemeRegistry): Brow
 function normalizeAppSettingsForPlatform(settings: AppSettings): AppSettings {
   return {
     ...settings,
-    logFilePath: settings.logFilePath?.trim() || join(app.getPath('logs'), 'winssh.log'),
+    logFilePath: settings.logFilePath?.trim() || join(app.getPath('logs'), 'russh.log'),
     localTerminalShell: normalizeLocalTerminalShell(
       settings.localTerminalShell,
       process.platform,
@@ -144,7 +144,7 @@ export async function bootstrap(): Promise<void> {
   electronApp.setAppUserModelId(APP_ID)
   registerCrossOriginIsolationHeaders(electronSession.defaultSession)
 
-  const database = new DatabaseService(join(app.getPath('userData'), 'winssh.db'))
+  const database = new DatabaseService(join(app.getPath('userData'), 'russh.db'))
   const themeRegistry = new ThemeRegistry(
     join(app.getAppPath(), 'themes', 'builtin'),
     join(app.getPath('userData'), 'themes')
@@ -165,7 +165,7 @@ export async function bootstrap(): Promise<void> {
     arch: process.arch,
     currentVersion: appInfo.version,
     githubOwner: 'lantongxue',
-    githubRepo: 'winssh',
+    githubRepo: 'russh',
     isPackaged: app.isPackaged,
     platform: process.platform,
     productName: APP_NAME
@@ -189,7 +189,7 @@ export async function bootstrap(): Promise<void> {
     }
   })
   const useWorkerTerminal =
-    process.env['WINSSH_WORKER_TERMINAL'] === '1' && process.env['WINSSH_LEGACY_TERMINAL'] !== '1'
+    process.env['RUSSH_WORKER_TERMINAL'] === '1' && process.env['RUSSH_LEGACY_TERMINAL'] !== '1'
   const sessionRuntime = useWorkerTerminal
     ? new WorkerSessionRuntime({
         database,
@@ -211,7 +211,7 @@ export async function bootstrap(): Promise<void> {
   )
   const logFileService = new LogFileService(
     normalizeAppSettingsForPlatform(database.getSettings()).logFilePath ??
-      join(app.getPath('logs'), 'winssh.log')
+      join(app.getPath('logs'), 'russh.log')
   )
   setAppLogSink((event) => {
     logFileService.append(event)

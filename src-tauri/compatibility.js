@@ -157,8 +157,9 @@
     createDataChannel: async (sessionId) => {
       const channel = new MessageChannel()
       let sequence = 0
+      let closed = false
       const unsubscribe = listen('sessions:data', (event) => {
-        if (event.sessionId !== sessionId) return
+        if (closed || event.sessionId !== sessionId) return
         const payload = new TextEncoder().encode(event.data ?? '')
         const frame = new ArrayBuffer(16 + payload.byteLength)
         const view = new DataView(frame)
@@ -166,10 +167,19 @@
         view.setFloat64(4, Date.now(), false)
         view.setUint32(12, payload.byteLength, false)
         new Uint8Array(frame, 16).set(payload)
-        channel.port1.postMessage({ type: 'data', frame }, [frame])
+        try {
+          channel.port1.postMessage({ type: 'data', frame }, [frame])
+        } catch {
+          // The renderer may close the worker port while an event is in flight.
+          // Stop the subscription and discard late frames instead of creating an
+          // unhandled promise rejection from MessagePort.postMessage().
+          closed = true
+          unsubscribe()
+        }
       })
       channel.port1.addEventListener('message', (event) => {
         if (event.data?.type === 'close') {
+          closed = true
           unsubscribe()
           channel.port1.close()
           channel.port2.close()
@@ -244,5 +254,5 @@
     deleteByPath: (serverId, path) => invoke('delete_sftp_bookmark_by_path', { serverId, path })
   }
 
-  window.winsshApi = api
+  window.russhApi = api
 })()

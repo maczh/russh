@@ -8,7 +8,7 @@
 //   - zsh uses add-zsh-hook preexec/precmd.
 //   - Command text is sent as OSC 633;Eh;<hex(cmd)> so the remote shell does
 //     not need base64.
-//   - When command history is disabled, WinSSH installs a cwd-only variant for
+//   - When command history is disabled, RuSSH installs a cwd-only variant for
 //     SFTP follow mode. That variant emits cwd/prompt markers but no command
 //     text or completion markers.
 //   - Leading space on the command line suppresses logging in bash

@@ -14,11 +14,11 @@ interface NetworkBytesSample {
 }
 
 export const RESOURCE_MONITOR_MARKERS = {
-  df: '__WINSSH_DF__',
-  platform: '__WINSSH_PLATFORM__',
-  procMeminfo: '__WINSSH_PROC_MEMINFO__',
-  procNetDev: '__WINSSH_PROC_NET_DEV__',
-  procStat: '__WINSSH_PROC_STAT__'
+  df: '__RUSSH_DF__',
+  platform: '__RUSSH_PLATFORM__',
+  procMeminfo: '__RUSSH_PROC_MEMINFO__',
+  procNetDev: '__RUSSH_PROC_NET_DEV__',
+  procStat: '__RUSSH_PROC_STAT__'
 } as const
 
 const LINUX_RESOURCE_SNAPSHOT_COMMAND = `LC_ALL=C sh -lc '

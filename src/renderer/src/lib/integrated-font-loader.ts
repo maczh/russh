@@ -45,7 +45,7 @@ type FontFaceDescriptorInput = {
 const loadedFontFaces = new Map<string, Promise<void>>()
 
 const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
-  'winssh-default': [
+  'russh-default': [
     {
       family: 'RuSSH UI Default',
       source: sourceSans3LatinUrl,
@@ -71,7 +71,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '300 800' }
     },
     {
-      family: 'WinSSH UI Open Sans',
+      family: 'RuSSH UI Open Sans',
       source: openSansLatinExtUrl,
       descriptors: { style: 'normal', weight: '300 800' }
     }
@@ -83,17 +83,17 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '400' }
     },
     {
-      family: 'WinSSH UI Source Sans Pro',
+      family: 'RuSSH UI Source Sans Pro',
       source: sourceSansProLatinBoldUrl,
       descriptors: { style: 'normal', weight: '700' }
     },
     {
-      family: 'WinSSH UI Source Sans Pro',
+      family: 'RuSSH UI Source Sans Pro',
       source: sourceSansProLatinExtRegularUrl,
       descriptors: { style: 'normal', weight: '400' }
     },
     {
-      family: 'WinSSH UI Source Sans Pro',
+      family: 'RuSSH UI Source Sans Pro',
       source: sourceSansProLatinExtBoldUrl,
       descriptors: { style: 'normal', weight: '700' }
     }
@@ -112,7 +112,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '300 700' }
     },
     {
-      family: 'WinSSH Fira Code',
+      family: 'RuSSH Fira Code',
       source: firaCodeLatinExtUrl,
       descriptors: { style: 'normal', weight: '300 700' }
     }
@@ -124,7 +124,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '100 700' }
     },
     {
-      family: 'WinSSH Roboto Mono',
+      family: 'RuSSH Roboto Mono',
       source: robotoMonoLatinExtUrl,
       descriptors: { style: 'normal', weight: '100 700' }
     }
@@ -136,7 +136,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '200 900' }
     },
     {
-      family: 'WinSSH Source Code Pro',
+      family: 'RuSSH Source Code Pro',
       source: sourceCodeProLatinExtUrl,
       descriptors: { style: 'normal', weight: '200 900' }
     }
@@ -148,7 +148,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '400' }
     },
     {
-      family: 'WinSSH Cascadia Mono',
+      family: 'RuSSH Cascadia Mono',
       source: cascadiaMonoLatinBoldUrl,
       descriptors: { style: 'normal', weight: '700' }
     }
@@ -160,7 +160,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '200 700' }
     },
     {
-      family: 'WinSSH Cascadia Code',
+      family: 'RuSSH Cascadia Code',
       source: cascadiaCodeLatinExtUrl,
       descriptors: { style: 'normal', weight: '200 700' }
     }
@@ -172,7 +172,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '400' }
     },
     {
-      family: 'WinSSH IBM Plex Mono',
+      family: 'RuSSH IBM Plex Mono',
       source: ibmPlexMonoLatinBoldUrl,
       descriptors: { style: 'normal', weight: '700' }
     }
@@ -184,17 +184,17 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '400' }
     },
     {
-      family: 'WinSSH Ubuntu Mono',
+      family: 'RuSSH Ubuntu Mono',
       source: ubuntuMonoLatinBoldUrl,
       descriptors: { style: 'normal', weight: '700' }
     },
     {
-      family: 'WinSSH Ubuntu Mono',
+      family: 'RuSSH Ubuntu Mono',
       source: ubuntuMonoLatinExtRegularUrl,
       descriptors: { style: 'normal', weight: '400' }
     },
     {
-      family: 'WinSSH Ubuntu Mono',
+      family: 'RuSSH Ubuntu Mono',
       source: ubuntuMonoLatinExtBoldUrl,
       descriptors: { style: 'normal', weight: '700' }
     }
@@ -206,7 +206,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '400 700' }
     },
     {
-      family: 'WinSSH Ubuntu Sans Mono',
+      family: 'RuSSH Ubuntu Sans Mono',
       source: ubuntuSansMonoLatinExtUrl,
       descriptors: { style: 'normal', weight: '400 700' }
     }
@@ -218,7 +218,7 @@ const fontFaces: Record<IntegratedFontId, FontFaceDescriptorInput[]> = {
       descriptors: { style: 'normal', weight: '400' }
     },
     {
-      family: 'WinSSH PT Mono',
+      family: 'RuSSH PT Mono',
       source: ptMonoLatinExtUrl,
       descriptors: { style: 'normal', weight: '400' }
     }

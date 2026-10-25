@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AppFocusEvent, AppActivityEvent } from '@shared/types'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 
 describe('systemClient — appFocus/appActivity subscription methods', () => {
   beforeEach(() => {
-    window.winsshApi = createWinsshApiMock()
+    window.russhApi = createRuSSHApiMock()
   })
 
   it('systemClient.appFocus.onStateChange returns unsubscribe function', () => {
     const callback = vi.fn<(event: AppFocusEvent) => void>()
-    const unsubscribe = window.winsshApi.system.appFocus.onStateChange(callback)
+    const unsubscribe = window.russhApi.system.appFocus.onStateChange(callback)
 
     expect(typeof unsubscribe).toBe('function')
     unsubscribe()
@@ -17,7 +17,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
 
   it('systemClient.appActivity.onStateChange returns unsubscribe function', () => {
     const callback = vi.fn<(event: AppActivityEvent) => void>()
-    const unsubscribe = window.winsshApi.system.appActivity.onStateChange(callback)
+    const unsubscribe = window.russhApi.system.appActivity.onStateChange(callback)
 
     expect(typeof unsubscribe).toBe('function')
     unsubscribe()
@@ -26,7 +26,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
   it('appFocus.onStateChange callback receives AppFocusEvent with phase "blurred"', () => {
     let capturedEvent: AppFocusEvent | null = null
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       system: {
         appFocus: {
           onStateChange: vi.fn((cb: (event: AppFocusEvent) => void) => {
@@ -37,7 +37,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
       }
     })
 
-    window.winsshApi.system.appFocus.onStateChange((event) => {
+    window.russhApi.system.appFocus.onStateChange((event) => {
       capturedEvent = event
     })
 
@@ -47,7 +47,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
   it('appActivity.onStateChange callback receives AppActivityEvent with phase "sleep"', () => {
     let capturedEvent: AppActivityEvent | null = null
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       system: {
         appActivity: {
           onStateChange: vi.fn((cb: (event: AppActivityEvent) => void) => {
@@ -58,7 +58,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
       }
     })
 
-    window.winsshApi.system.appActivity.onStateChange((event) => {
+    window.russhApi.system.appActivity.onStateChange((event) => {
       capturedEvent = event
     })
 
@@ -69,7 +69,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
     const callback = vi.fn<(event: AppFocusEvent) => void>()
     let storedCallback: ((event: AppFocusEvent) => void) | null = null
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       system: {
         appFocus: {
           onStateChange: vi.fn((cb: (event: AppFocusEvent) => void) => {
@@ -82,7 +82,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
       }
     })
 
-    const unsubscribe = window.winsshApi.system.appFocus.onStateChange(callback)
+    const unsubscribe = window.russhApi.system.appFocus.onStateChange(callback)
 
     storedCallback?.({ phase: 'focused' })
     expect(callback).toHaveBeenCalledTimes(1)
@@ -97,7 +97,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
     for (const phase of phases) {
       let capturedEvent: AppActivityEvent | null = null
 
-      window.winsshApi = createWinsshApiMock({
+      window.russhApi = createRuSSHApiMock({
         system: {
           appActivity: {
             onStateChange: vi.fn((cb: (event: AppActivityEvent) => void) => {
@@ -108,7 +108,7 @@ describe('systemClient — appFocus/appActivity subscription methods', () => {
         }
       })
 
-      window.winsshApi.system.appActivity.onStateChange((event) => {
+      window.russhApi.system.appActivity.onStateChange((event) => {
         capturedEvent = event
       })
 

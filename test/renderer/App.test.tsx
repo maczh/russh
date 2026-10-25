@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
 import i18n from '@/i18n'
 import { useUpdateDialogStore } from '@/store/update-dialog-store'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 
 vi.mock('@/components/workbench/workbench-shell', () => ({
   WorkbenchShell: () => <div>Workbench</div>
@@ -55,7 +55,7 @@ describe('App update dialog', () => {
   it('opens a dialog when an update becomes available', async () => {
     const stateChangeCallbacks: Array<(state: UpdateState) => void> = []
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         getState: vi.fn().mockResolvedValue({
           autoCheckEnabled: true,
@@ -121,7 +121,7 @@ describe('App update dialog', () => {
       unsupportedReason: null
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         download,
         getState: vi.fn().mockResolvedValue({
@@ -154,7 +154,7 @@ describe('App update dialog', () => {
   it('does not reopen the same version after the user dismisses it', async () => {
     const stateChangeCallbacks: Array<(state: UpdateState) => void> = []
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         getState: vi.fn().mockResolvedValue({
           autoCheckEnabled: true,
@@ -217,7 +217,7 @@ describe('App update dialog', () => {
   it('shows manual check progress and the up-to-date result in the dialog', async () => {
     const stateChangeCallbacks: Array<(state: UpdateState) => void> = []
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         getState: vi.fn().mockResolvedValue({
           autoCheckEnabled: true,
@@ -264,7 +264,7 @@ describe('App update dialog', () => {
   it('renders HTML release notes as rich text inside the update dialog', async () => {
     const stateChangeCallbacks: Array<(state: UpdateState) => void> = []
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       updates: {
         getState: vi.fn().mockResolvedValue({
           autoCheckEnabled: true,

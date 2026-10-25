@@ -1,3 +1,3 @@
 fn main() {
-    winssh_tauri_lib::run()
+    russh_tauri_lib::run()
 }

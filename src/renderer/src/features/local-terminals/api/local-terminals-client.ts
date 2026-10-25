@@ -1,3 +1,3 @@
-import { getWinsshDomainClient } from '@/features/shared/api/winssh-client'
+import { getRuSSHDomainClient } from '@/features/shared/api/russh-client'
 
-export const localTerminalsClient = getWinsshDomainClient('localTerminals')
+export const localTerminalsClient = getRuSSHDomainClient('localTerminals')

@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import i18n from '@/i18n'
 import { WorkbenchLocalTerminalEditor } from '@/components/workbench/workbench-local-terminal-editor'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 
 vi.mock('@/hooks/use-prefers-dark', () => ({
@@ -40,7 +40,7 @@ describe('WorkbenchLocalTerminalEditor', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en-US')
     useLocalTerminalsStore.getState().clear()
-    window.winsshApi = createWinsshApiMock()
+    window.russhApi = createRuSSHApiMock()
   })
 
   it('renders the local terminal toolbar and terminal surface without SSH aux actions', () => {

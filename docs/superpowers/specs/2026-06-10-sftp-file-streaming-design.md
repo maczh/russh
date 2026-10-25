@@ -48,7 +48,7 @@ Add shared types for editor file streams:
   `{ streamId, sessionId, remotePath, direction, status, transferred, total, error? }`.
 - `SftpFileWriteStreamStart`: `{ streamId, sessionId, remotePath }`.
 
-Add `WinsshApi['sftp']` methods:
+Add `RuSSHApi['sftp']` methods:
 
 - `openFileReadStream(sessionId, remotePath): Promise<SftpFileReadStreamStart>`
 - `openFileWriteStream(sessionId, remotePath, encoding): Promise<SftpFileWriteStreamStart>`
@@ -155,7 +155,7 @@ Renderer tests:
 
 Shared/preload tests:
 
-- `WinsshApi['sftp']` and the mock helper no longer expose `readFile` or `writeFile`.
+- `RuSSHApi['sftp']` and the mock helper no longer expose `readFile` or `writeFile`.
 - New stream event subscriptions unsubscribe correctly.
 
 ## Out Of Scope

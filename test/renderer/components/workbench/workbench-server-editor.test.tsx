@@ -7,7 +7,7 @@ import { WorkbenchServerEditor } from '@/components/workbench/workbench-server-e
 import { createServerEditorDocument } from '@/lib/workbench'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 
 vi.mock('sonner', () => ({
   toast: {
@@ -114,13 +114,13 @@ beforeEach(async () => {
   await i18n.changeLanguage('en-US')
   useWorkbenchStore.getState().reset()
   useSessionsStore.getState().clear()
-  window.winsshApi = createWinsshApiMock()
+  window.russhApi = createRuSSHApiMock()
 })
 
 describe('WorkbenchServerEditor credentials field', () => {
   it('saves a custom proxy for an individual server', async () => {
     const createServer = vi.fn().mockResolvedValue(savedServer)
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         create: createServer
       }
@@ -213,7 +213,7 @@ describe('WorkbenchServerEditor credentials field', () => {
   })
 
   it('prefills the stored password when editing an existing server', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         getSecrets: vi.fn().mockResolvedValue({
           password: 'hunter2',
@@ -246,7 +246,7 @@ describe('WorkbenchServerEditor credentials field', () => {
   })
 
   it('imports private key content from the file picker into the textarea', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         getSecrets: vi.fn().mockResolvedValue({
           password: null,
@@ -295,7 +295,7 @@ describe('WorkbenchServerEditor credentials field', () => {
       customIconDataUrl: 'data:image/png;base64,AQID'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         getSecrets: vi.fn().mockResolvedValue({
           password: 'hunter2',
@@ -360,7 +360,7 @@ describe('WorkbenchServerEditor credentials field', () => {
       customIconDataUrl: null
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         getSecrets: vi.fn().mockResolvedValue({
           password: 'hunter2',
@@ -404,7 +404,7 @@ describe('WorkbenchServerEditor credentials field', () => {
   })
 
   it('allows selecting an existing jump server', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer, jumpServer])
       }
@@ -437,7 +437,7 @@ describe('WorkbenchServerEditor credentials field', () => {
       groupId: 'group-1'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([
           {
@@ -497,7 +497,7 @@ describe('WorkbenchServerEditor credentials field', () => {
       name: 'Fresh Jump'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         create: createServer,
         list: listServers
@@ -545,7 +545,7 @@ describe('WorkbenchServerEditor credentials field', () => {
       groupId: 'group-child'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([
           {
@@ -590,7 +590,7 @@ describe('WorkbenchServerEditor credentials field', () => {
   it('creates a new tag from the tags combobox and selects it', async () => {
     const createTag = vi.fn().mockResolvedValue(databaseTag)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       tags: {
         create: createTag,
         list: vi.fn().mockResolvedValue([])
@@ -615,7 +615,7 @@ describe('WorkbenchServerEditor credentials field', () => {
   it('creates a new tag from the tags combobox when pressing Enter', async () => {
     const createTag = vi.fn().mockResolvedValue(databaseTag)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       tags: {
         create: createTag,
         list: vi.fn().mockResolvedValue([])
@@ -644,7 +644,7 @@ describe('WorkbenchServerEditor credentials field', () => {
   it('selects an existing tag from the tags combobox without creating a duplicate', async () => {
     const createTag = vi.fn()
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       tags: {
         create: createTag,
         list: vi.fn().mockResolvedValue([databaseTag])
@@ -670,7 +670,7 @@ describe('WorkbenchServerEditor credentials field', () => {
     const deleteTag = vi.fn().mockResolvedValue(undefined)
     const listTags = vi.fn().mockResolvedValueOnce([databaseTag]).mockResolvedValue([])
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       tags: {
         delete: deleteTag,
         list: listTags
@@ -703,7 +703,7 @@ describe('WorkbenchServerEditor credentials field', () => {
     const getShellIntegrationScript = vi
       .fn()
       .mockResolvedValue('__wsh_emit() { printf "\\033]%s\\033\\134" "$1"; };')
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         getSecrets: vi.fn().mockResolvedValue({
           password: 'hunter2',

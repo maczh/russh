@@ -131,9 +131,9 @@ const messages: Record<ResolvedMainLanguage, MessageTree> = {
       reconnectUnavailable: 'This tab does not have reusable connection parameters.',
       sessionUnavailable: 'This session does not exist or has already closed.',
       portForwardNotFound: 'The selected port forwarding rule could not be found.',
-      themeImportFailed: 'The selected ZIP file is not a valid WinSSH theme pack.',
+      themeImportFailed: 'The selected ZIP file is not a valid RuSSH theme pack.',
       themeArchiveLayoutInvalid:
-        'The ZIP file must contain a WinSSH theme plugin folder with a package.json manifest.',
+        'The ZIP file must contain a RuSSH theme plugin folder with a package.json manifest.',
       themeBuiltinConflict:
         'The imported theme pack conflicts with the built-in theme "{{value}}" and cannot be installed.',
       themePluginDeleteBuiltin: 'Built-in themes cannot be deleted.',
@@ -245,8 +245,8 @@ const messages: Record<ResolvedMainLanguage, MessageTree> = {
       reconnectUnavailable: '当前标签缺少可复用的连接参数',
       sessionUnavailable: '当前会话不存在或已经关闭',
       portForwardNotFound: '目标端口转发规则不存在',
-      themeImportFailed: '所选 ZIP 文件不是有效的 WinSSH 主题包',
-      themeArchiveLayoutInvalid: 'ZIP 文件中必须包含带有 package.json 的 WinSSH 主题插件目录',
+      themeImportFailed: '所选 ZIP 文件不是有效的 RuSSH 主题包',
+      themeArchiveLayoutInvalid: 'ZIP 文件中必须包含带有 package.json 的 RuSSH 主题插件目录',
       themeBuiltinConflict: '导入的主题包与内置主题 "{{value}}" 冲突，无法安装',
       themePluginDeleteBuiltin: '内置主题不能删除',
       themePluginNotFound: '找不到所选主题包'

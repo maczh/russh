@@ -5,7 +5,7 @@ import type { AppSettings } from '@shared/types'
 import { DEFAULT_APP_SETTINGS } from '@shared/constants'
 import i18n from '@/i18n'
 import { WorkbenchSettingsEditor } from '@/components/workbench/workbench-settings-editor'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useWorkbenchStore } from '@/store/workbench-store'
 
 vi.mock('sonner', () => ({
@@ -51,7 +51,7 @@ beforeEach(async () => {
 
 describe('WorkbenchSettingsEditor away reminder settings', () => {
   it('renders the away reminder enable switch and timeout input in the security section', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(baseSettings)
       }
@@ -74,7 +74,7 @@ describe('WorkbenchSettingsEditor away reminder settings', () => {
           : baseSettings.awayReminderEnabled
     }))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(baseSettings),
         update: updateSettings
@@ -99,7 +99,7 @@ describe('WorkbenchSettingsEditor away reminder settings', () => {
       awayReminderTimeoutMs: input.awayReminderTimeoutMs ?? baseSettings.awayReminderTimeoutMs
     }))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(baseSettings),
         update: updateSettings
@@ -127,7 +127,7 @@ describe('WorkbenchSettingsEditor away reminder settings', () => {
       awayReminderTimeoutMs: 60000
     }
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(settingsWithTimeout)
       }
@@ -147,7 +147,7 @@ describe('WorkbenchSettingsEditor away reminder settings', () => {
       awayReminderEnabled: false
     }
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(disabledSettings)
       }
@@ -162,7 +162,7 @@ describe('WorkbenchSettingsEditor away reminder settings', () => {
   })
 
   it('shows the timeout description text when the timeout input is visible', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         get: vi.fn().mockResolvedValue(baseSettings)
       }

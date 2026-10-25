@@ -1,6 +1,6 @@
-export const TERMINAL_PATH_DRAG_MIME = 'application/x-winssh-terminal-path'
+export const TERMINAL_PATH_DRAG_MIME = 'application/x-russh-terminal-path'
 
-export const SFTP_MOVE_DRAG_MIME = 'application/x-winssh-sftp-move'
+export const SFTP_MOVE_DRAG_MIME = 'application/x-russh-sftp-move'
 
 interface SftpMoveDragData {
   path: string

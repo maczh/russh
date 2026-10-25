@@ -29,10 +29,10 @@
 - 修改：`src/preload/index.d.ts`  
   职责：同步 preload 类型。
 - 修改：`src/shared/api.ts`  
-  职责：扩展 `WinsshApi['sessions']`。
+  职责：扩展 `RuSSHApi['sessions']`。
 - 修改：`src/shared/ipc-channels.ts`  
   职责：新增 `terminal:backpressure` 和可选 data lag 指标事件。
-- 修改：`test/renderer/helpers/create-winssh-api.ts`  
+- 修改：`test/renderer/helpers/create-russh-api.ts`
   职责：为 renderer 测试 mock `createDataChannel`。
 - 创建：`test/main/services/ssh-data-aggregator.test.ts`
 - 创建：`test/preload/binary-channel.test.ts`
@@ -219,7 +219,7 @@ git commit -m "feat: add preload binary channel"
 - 修改：`src/preload/index.ts`
 - 修改：`src/preload/index.d.ts`
 - 修改：`src/shared/api.ts`
-- 修改：`test/renderer/helpers/create-winssh-api.ts`
+- 修改：`test/renderer/helpers/create-russh-api.ts`
 
 - [ ] **步骤 1：编写失败的端口分配测试**
 
@@ -254,7 +254,7 @@ describe('TerminalPortAllocator', () => {
 - 返回 `channel.port2` 给 renderer。
 - 同一个 `sessionId` 重新 create 时先关闭旧 port。
 
-- [ ] **步骤 4：扩展 `WinsshApi`**
+- [ ] **步骤 4：扩展 `RuSSHApi`**
 
 `src/shared/api.ts` 的 `sessions` 增加：
 
@@ -268,11 +268,11 @@ createDataChannel: (sessionId: string) => Promise<MessagePort>
 createDataChannel: (sessionId) => terminalPortAllocator.create(sessionId)
 ```
 
-注册 main port 的内部实现应通过 Electron 支持的 transferable port API 传递给 main；如果当前 Electron 类型要求使用 `postMessage`，把传输封装在 `terminal-port-allocator.ts` 内，避免污染 `WinsshApi`。
+注册 main port 的内部实现应通过 Electron 支持的 transferable port API 传递给 main；如果当前 Electron 类型要求使用 `postMessage`，把传输封装在 `terminal-port-allocator.ts` 内，避免污染 `RuSSHApi`。
 
 - [ ] **步骤 5：更新测试 mock**
 
-`test/renderer/helpers/create-winssh-api.ts` 的 `sessions` 默认值增加：
+`test/renderer/helpers/create-russh-api.ts` 的 `sessions` 默认值增加：
 
 ```ts
 createDataChannel: async () => {
@@ -295,7 +295,7 @@ npm run typecheck
 - [ ] **步骤 7：Commit**
 
 ```bash
-git add src/preload/terminal-port-allocator.ts src/preload/index.ts src/preload/index.d.ts src/shared/api.ts test/preload/terminal-port-allocator.test.ts test/renderer/helpers/create-winssh-api.ts
+git add src/preload/terminal-port-allocator.ts src/preload/index.ts src/preload/index.d.ts src/shared/api.ts test/preload/terminal-port-allocator.test.ts test/renderer/helpers/create-russh-api.ts
 git commit -m "feat: expose ssh terminal data channel"
 ```
 

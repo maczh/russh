@@ -5,7 +5,7 @@ import type { RemoteEntry } from '@shared/types'
 import i18n from '@/i18n'
 import { SftpPanel } from '@/components/sftp-panel'
 import type { SessionTab } from '@/store/sessions-store'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useSessionsStore } from '@/store/sessions-store'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { SFTP_MOVE_DRAG_MIME, TERMINAL_PATH_DRAG_MIME } from '@/lib/terminal-path-dnd'
@@ -151,7 +151,7 @@ describe('SftpPanel', () => {
   it('sends the selected entry path to the terminal from the context menu', async () => {
     const sessionsWrite = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sessions: {
         write: sessionsWrite
       },
@@ -176,7 +176,7 @@ describe('SftpPanel', () => {
   it('opens a remote file editor from the context menu', async () => {
     const onEditFile = vi.fn()
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list: vi.fn().mockResolvedValue({
           entries,
@@ -196,7 +196,7 @@ describe('SftpPanel', () => {
   it('downloads a selected directory from the context menu', async () => {
     const downloadFile = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         downloadFile,
         list: vi.fn().mockResolvedValue({
@@ -217,7 +217,7 @@ describe('SftpPanel', () => {
   })
 
   it('renders directory icons with a stronger highlighted treatment than files', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list: vi.fn().mockResolvedValue({
           entries: [directoryEntry, ...entries],
@@ -242,7 +242,7 @@ describe('SftpPanel', () => {
   it('opens a remote file editor when double-clicking a file', async () => {
     const onEditFile = vi.fn()
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list: vi.fn().mockResolvedValue({
           entries,
@@ -260,7 +260,7 @@ describe('SftpPanel', () => {
 
   it('continues opening directories when double-clicking a directory', async () => {
     useSessionsStore.getState().addSession(session)
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list: vi.fn().mockResolvedValue({
           entries: [directoryEntry, ...entries],
@@ -279,7 +279,7 @@ describe('SftpPanel', () => {
   })
 
   it('keeps rendering when a loaded session becomes disconnected', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list: vi.fn().mockResolvedValue({
           entries,
@@ -312,7 +312,7 @@ describe('SftpPanel', () => {
     useSessionsStore.getState().addSession(session)
     useSessionsStore.getState().setAuxView('session-1', 'sftp')
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list: vi.fn().mockResolvedValue({
           entries,
@@ -335,7 +335,7 @@ describe('SftpPanel', () => {
     }))
 
     useSessionsStore.getState().addSession(session)
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list
       }
@@ -364,7 +364,7 @@ describe('SftpPanel', () => {
     const uploadPaths = vi.fn().mockResolvedValue(undefined)
     const getPathForFile = vi.fn((file: File) => (file as { path?: string }).path ?? null)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list,
         uploadPaths
@@ -415,7 +415,7 @@ describe('SftpPanel', () => {
   it('confirms before deleting and then shows a removing transition state', async () => {
     const remove = vi.fn(() => new Promise<void>(() => undefined))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list: vi.fn().mockResolvedValue({
           entries,
@@ -455,7 +455,7 @@ describe('SftpPanel', () => {
   })
 
   it('writes the dragged entry path into terminal drag data', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list: vi.fn().mockResolvedValue({
           entries,
@@ -500,7 +500,7 @@ describe('SftpPanel', () => {
     })
     const move = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list,
         move
@@ -550,7 +550,7 @@ describe('SftpPanel', () => {
     })
     const move = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list,
         move
@@ -619,7 +619,7 @@ describe('SftpPanel', () => {
       }
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list
       }
@@ -682,7 +682,7 @@ describe('SftpPanel', () => {
       }
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list
       }
@@ -729,7 +729,7 @@ describe('SftpPanel', () => {
         path: '/var/www'
       })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list
       }
@@ -818,7 +818,7 @@ describe('SftpPanel', () => {
     }))
 
     useSessionsStore.getState().addSession(session)
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         list
       }

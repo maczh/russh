@@ -10,7 +10,7 @@ React 19 + Tailwind 4 + Zustand workbench app. Single-page shell (no pages/ dir)
 
 | Task                      | File(s)                                                                        | Notes                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| Add new IPC method client | features/<domain>/api/\* + features/shared/query-keys.ts                       | Must go through features/\*/api — ESLint bans window.winsshApi           |
+| Add new IPC method client | features/<domain>/api/\* + features/shared/query-keys.ts                       | Must go through features/\*/api — ESLint bans window.russhApi           |
 | Add new document/tab type | lib/workbench.ts (WorkbenchDocument union) + store/workbench-store.ts          | 7 document kinds; add factory + open/close logic                         |
 | Modify session UI         | store/sessions-store.ts + workbench-context.tsx + workbench-session-editor.tsx | Keep-mounted strategy — do NOT change to conditional render              |
 | Modify local terminal     | hooks/use-terminal.ts (600 lines) + store/local-terminals-store.ts             | Shared terminal surface for SSH + local                                  |
@@ -25,7 +25,7 @@ React 19 + Tailwind 4 + Zustand workbench app. Single-page shell (no pages/ dir)
 
 ## CONVENTIONS
 
-- **Feature API gateway**: ALL renderer-to-preload calls go through `features/*/api` clients wrapping `winsshClient`. `window.winsshApi` is ESLint-banned except in `features/shared/api/`.
+- **Feature API gateway**: ALL renderer-to-preload calls go through `features/*/api` clients wrapping `russhClient`. `window.russhApi` is ESLint-banned except in `features/shared/api/`.
 - **Keep-mounted**: `session-editor` and `local-terminal-editor` use visibility toggle (`invisible pointer-events-none`), NOT conditional render. Other documents use `hidden`.
 - **Zustand + React Query**: UI state → Zustand stores (4), server state → React Query. Never use Redux or Context for state.
 - **Auto-save**: Settings use `useSettingsAutoSave` hook with `saveField()` + rollback via `onRevert`.
@@ -37,7 +37,7 @@ React 19 + Tailwind 4 + Zustand workbench app. Single-page shell (no pages/ dir)
 
 ## ANTI-PATTERNS
 
-- **NEVER** use `window.winsshApi` directly in components — use `features/*/api` clients (ESLint error)
+- **NEVER** use `window.russhApi` directly in components — use `features/*/api` clients (ESLint error)
 - **NEVER** hardcode React Query keys — use `features/shared/query-keys.ts` (pre-existing violations are debt, not patterns)
 - **NEVER** change session-editor/local-terminal-editor to conditional render — keep-mounted is required for xterm stability
 - **NEVER** add `react-refresh` exports to `components/ui/` — ESLint intentionally disabled there

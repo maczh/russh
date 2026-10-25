@@ -11,9 +11,9 @@ const databaseModule = await import('@main/database').catch(() => null)
 const tempDirectories: string[] = []
 
 function createTempDatabasePath() {
-  const directory = mkdtempSync(join(tmpdir(), 'winssh-cmdhist-'))
+  const directory = mkdtempSync(join(tmpdir(), 'russh-cmdhist-'))
   tempDirectories.push(directory)
-  return join(directory, 'winssh.db')
+  return join(directory, 'russh.db')
 }
 
 function createServerInput(overrides: Partial<ServerUpsertInput> = {}): ServerUpsertInput {
@@ -38,7 +38,7 @@ function createServerInput(overrides: Partial<ServerUpsertInput> = {}): ServerUp
 
 const canUse = (() => {
   if (!betterSqliteModule?.default) return false
-  const dir = mkdtempSync(join(tmpdir(), 'winssh-cmdhist-probe-'))
+  const dir = mkdtempSync(join(tmpdir(), 'russh-cmdhist-probe-'))
   try {
     const db = new betterSqliteModule.default(join(dir, 'probe.db'))
     db.close()

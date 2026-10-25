@@ -300,7 +300,7 @@ describe('SshCoreSessionWorker', () => {
     )
     expect(channel.write).toHaveBeenCalledWith(expect.any(String))
     const written = channel.write.mock.calls[0]?.[0] as string
-    expect(written).not.toContain('.winssh_init_')
+    expect(written).not.toContain('.russh_init_')
     expect(written).not.toContain(' && rm -f ')
     expect(written).toMatch(/\r$/)
   })

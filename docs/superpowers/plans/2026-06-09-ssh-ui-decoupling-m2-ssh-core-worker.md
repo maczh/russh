@@ -4,7 +4,7 @@
 
 **目标：** 将 SSH 连接核心的 `ssh2.Client` 生命周期、shell channel、write、resize、disconnect 从 main 线程迁移到 `worker_threads`，同时保持现有 IPC API 表面不变。
 
-**架构：** M2 在 M1 的 `SessionRuntime` 边界上新增 `WorkerSessionRuntime`。默认可通过 `WINSSH_LEGACY_TERMINAL=1` 回到 `LegacySessionRuntime`；SFTP、端口转发、资源监控、OSC/命令历史、主机信任仍委托 legacy runtime，避免一次性迁移过大。
+**架构：** M2 在 M1 的 `SessionRuntime` 边界上新增 `WorkerSessionRuntime`。默认可通过 `RUSSH_LEGACY_TERMINAL=1` 回到 `LegacySessionRuntime`；SFTP、端口转发、资源监控、OSC/命令历史、主机信任仍委托 legacy runtime，避免一次性迁移过大。
 
 **技术栈：** Electron main process、Node `worker_threads`、ssh2、TypeScript、Vitest、Zod、M1 `SessionRuntime`。
 
@@ -29,7 +29,7 @@
 - 创建：`src/main/workers/ssh-core/index.ts`  
   职责：worker 入口，解析 `sshCoreInboundSchema` 并调用 `SshCoreSessionWorker`。
 - 修改：`src/main/bootstrap.ts`  
-  职责：根据 `WINSSH_LEGACY_TERMINAL` 装配 legacy 或 worker runtime。
+  职责：根据 `RUSSH_LEGACY_TERMINAL` 装配 legacy 或 worker runtime。
 - 修改：`src/main/localization.ts`  
   职责：新增 worker crash 双语消息。
 - 修改：`electron.vite.config.ts`  
@@ -372,7 +372,7 @@ describe('WorkerSessionRuntime', () => {
 
 ```ts
 const legacyRuntime = new LegacySessionRuntime(sessionManager)
-const useLegacyTerminal = process.env['WINSSH_LEGACY_TERMINAL'] === '1'
+const useLegacyTerminal = process.env['RUSSH_LEGACY_TERMINAL'] === '1'
 const sessionRuntime = useLegacyTerminal
   ? legacyRuntime
   : new WorkerSessionRuntime({
@@ -435,22 +435,22 @@ npm run test
 
 - [ ] **步骤 3：手工验证 legacy 模式**
 
-运行：`$env:WINSSH_LEGACY_TERMINAL='1'; npm run dev`
+运行：`$env:RUSSH_LEGACY_TERMINAL='1'; npm run dev`
 
 预期：能连接 SSH、输入 `pwd`、resize、disconnect、reconnect，SFTP 行为不变。
 
 - [ ] **步骤 4：手工验证 worker 模式**
 
-运行：`Remove-Item Env:WINSSH_LEGACY_TERMINAL -ErrorAction SilentlyContinue; npm run dev`
+运行：`Remove-Item Env:RUSSH_LEGACY_TERMINAL -ErrorAction SilentlyContinue; npm run dev`
 
 预期：单 session 密码认证和私钥认证连接成功；worker crash 时 UI 显示可重连错误。
 
 ## 回退策略
 
-设置 `WINSSH_LEGACY_TERMINAL=1` 即可回到 M1 runtime。若需要代码回退，只需让 `bootstrap.ts` 固定装配 `LegacySessionRuntime`，保留 worker 文件不影响运行。
+设置 `RUSSH_LEGACY_TERMINAL=1` 即可回到 M1 runtime。若需要代码回退，只需让 `bootstrap.ts` 固定装配 `LegacySessionRuntime`，保留 worker 文件不影响运行。
 
 ## 自检
 
 - 覆盖 M2 的 ssh2 worker 迁移和现有 IPC API 不变要求。
 - 未迁移 SFTP、port-forward、OSC、resource、host-trust。
-- 保留 `WINSSH_LEGACY_TERMINAL=1` 回退。
+- 保留 `RUSSH_LEGACY_TERMINAL=1` 回退。

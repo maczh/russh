@@ -1,8 +1,8 @@
-import type { WinsshApi } from '@shared/api'
+import type { RuSSHApi } from '@shared/api'
 
 declare global {
   interface Window {
-    winsshApi: WinsshApi
+    russhApi: RuSSHApi
   }
 }
 

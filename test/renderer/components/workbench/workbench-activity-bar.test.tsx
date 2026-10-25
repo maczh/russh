@@ -9,7 +9,7 @@ import i18n from '@/i18n'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
-import { createWinsshApiMock, APP_PACKAGE_VERSION } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock, APP_PACKAGE_VERSION } from '@test/renderer/helpers/create-russh-api'
 
 function renderActivityBar() {
   const queryClient = new QueryClient({
@@ -49,7 +49,7 @@ beforeEach(async () => {
   useSessionsStore.getState().clear()
   useLocalTerminalsStore.getState().clear()
 
-  window.winsshApi = createWinsshApiMock({
+  window.russhApi = createRuSSHApiMock({
     servers: {
       list: vi.fn().mockResolvedValue([])
     }
@@ -94,7 +94,7 @@ describe('WorkbenchActivityBar', () => {
     const check = vi.fn().mockResolvedValue(updateState)
     const { queryClient } = renderActivityBar()
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([])
       },

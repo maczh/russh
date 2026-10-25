@@ -6,7 +6,7 @@ import { WorkbenchProvider } from '@/components/workbench/workbench-context'
 import { WorkbenchPrimarySidebar } from '@/components/workbench/workbench-primary-sidebar'
 import { WorkbenchQuickInput } from '@/components/workbench/workbench-quick-input'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
 
@@ -133,7 +133,7 @@ beforeEach(async () => {
   useSessionsStore.getState().clear()
   useWorkbenchStore.getState().setSelectedExplorerNode('home')
 
-  window.winsshApi = createWinsshApiMock({
+  window.russhApi = createRuSSHApiMock({
     groups: {
       list: vi.fn().mockResolvedValue([])
     },
@@ -218,7 +218,7 @@ describe('WorkbenchPrimarySidebar', () => {
   })
 
   it('lets top-level server management and tags headers enter the selected state', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([
           {
@@ -293,7 +293,7 @@ describe('WorkbenchPrimarySidebar', () => {
       }
     ]
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([])
       },
@@ -317,7 +317,7 @@ describe('WorkbenchPrimarySidebar', () => {
   })
 
   it('toggles grouped children on double click', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([
           {
@@ -363,7 +363,7 @@ describe('WorkbenchPrimarySidebar', () => {
   })
 
   it('always shows server tags when a server has tags', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([])
       },
@@ -423,7 +423,7 @@ describe('WorkbenchPrimarySidebar', () => {
       tags: []
     }))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([
           {
@@ -494,7 +494,7 @@ describe('WorkbenchPrimarySidebar', () => {
       tags: []
     }))
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([
           {
@@ -550,7 +550,7 @@ describe('WorkbenchPrimarySidebar', () => {
   })
 
   it('opens a grouped new connection from the group context menu', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([
           {
@@ -593,7 +593,7 @@ describe('WorkbenchPrimarySidebar', () => {
   })
 
   it('renders nested groups and servers assigned to a subgroup', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([
           {
@@ -667,7 +667,7 @@ describe('WorkbenchPrimarySidebar', () => {
       updatedAt: ''
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         create: createGroup,
         list: vi.fn().mockResolvedValue([
@@ -710,7 +710,7 @@ describe('WorkbenchPrimarySidebar', () => {
   })
 
   it('filters servers by name and host from the quick search input', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       groups: {
         list: vi.fn().mockResolvedValue([])
       },

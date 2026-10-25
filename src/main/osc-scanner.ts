@@ -150,7 +150,7 @@ function handleOscPayload(payload: string, handlers: OscHandlers): boolean {
   }
 
   // OSC 633;Eh — command text payload (hex-encoded). This is preferred by
-  // WinSSH shell integration because it only needs POSIX tools on the remote.
+  // RuSSH shell integration because it only needs POSIX tools on the remote.
   if (payload.startsWith('633;Eh;')) {
     const encoded = payload.slice(7)
     const decoded = decodeHexSafe(encoded)

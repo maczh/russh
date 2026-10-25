@@ -24,7 +24,7 @@ function writeJson(filePath: string, value: unknown) {
 function writeDefaultThemes(root: string) {
   writeJson(join(root, 'builtin', 'defaults', 'package.json'), {
     name: 'default-themes',
-    publisher: 'winssh',
+    publisher: 'russh',
     version: '1.0.0',
     contributes: {
       themes: [
@@ -83,7 +83,7 @@ describe('ThemeRegistry', () => {
   })
 
   it('loads builtin and user themes from plugin manifests', () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
 
     writeDefaultThemes(root)
@@ -131,25 +131,25 @@ describe('ThemeRegistry', () => {
   })
 
   it('accepts high contrast Monaco base theme declarations', () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
 
     writeDefaultThemes(root)
 
     writeJson(join(root, 'builtin', 'high-contrast', 'package.json'), {
       name: 'high-contrast-themes',
-      publisher: 'winssh',
+      publisher: 'russh',
       version: '1.0.0',
       contributes: {
         themes: [
           {
-            id: 'winssh.high-contrast-light',
+            id: 'russh.high-contrast-light',
             label: 'High Contrast Light',
             uiTheme: 'hc-light',
             path: './themes/light.json'
           },
           {
-            id: 'winssh.high-contrast-dark',
+            id: 'russh.high-contrast-dark',
             label: 'High Contrast Dark',
             uiTheme: 'hc-black',
             path: './themes/dark.json'
@@ -173,22 +173,22 @@ describe('ThemeRegistry', () => {
 
     expect(resolveThemeAppearance('hc-light')).toBe('light')
     expect(resolveThemeAppearance('hc-black')).toBe('dark')
-    expect(themes.find((theme) => theme.id === 'winssh.high-contrast-light')?.appearance).toBe(
+    expect(themes.find((theme) => theme.id === 'russh.high-contrast-light')?.appearance).toBe(
       'light'
     )
-    expect(themes.find((theme) => theme.id === 'winssh.high-contrast-light')?.uiTheme).toBe(
+    expect(themes.find((theme) => theme.id === 'russh.high-contrast-light')?.uiTheme).toBe(
       'hc-light'
     )
-    expect(themes.find((theme) => theme.id === 'winssh.high-contrast-dark')?.appearance).toBe(
+    expect(themes.find((theme) => theme.id === 'russh.high-contrast-dark')?.appearance).toBe(
       'dark'
     )
-    expect(themes.find((theme) => theme.id === 'winssh.high-contrast-dark')?.uiTheme).toBe(
+    expect(themes.find((theme) => theme.id === 'russh.high-contrast-dark')?.uiTheme).toBe(
       'hc-black'
     )
   })
 
   it('normalizes invalid selections and resolves system defaults', () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
 
     writeDefaultThemes(root)
@@ -201,7 +201,7 @@ describe('ThemeRegistry', () => {
   })
 
   it('derives window theme colors from the resolved theme', () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
 
     writeDefaultThemes(root)
@@ -238,7 +238,7 @@ describe('ThemeRegistry', () => {
   })
 
   it('imports a ZIP theme pack into the user theme directory', async () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
     writeDefaultThemes(root)
 
@@ -281,7 +281,7 @@ describe('ThemeRegistry', () => {
   })
 
   it('imports a ZIP theme pack wrapped in a single top-level folder', async () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
     writeDefaultThemes(root)
 
@@ -316,7 +316,7 @@ describe('ThemeRegistry', () => {
   })
 
   it('deletes imported user theme packs', async () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
     writeDefaultThemes(root)
 
@@ -354,7 +354,7 @@ describe('ThemeRegistry', () => {
   })
 
   it('rejects ZIP theme packs that conflict with built-in theme ids', async () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
     writeDefaultThemes(root)
 
@@ -390,13 +390,13 @@ describe('ThemeRegistry', () => {
   })
 
   it('rejects deleting built-in theme packs', async () => {
-    const root = mkdtempSync(join(tmpdir(), 'winssh-theme-registry-'))
+    const root = mkdtempSync(join(tmpdir(), 'russh-theme-registry-'))
     tempDirs.push(root)
     writeDefaultThemes(root)
 
     const registry = new ThemeRegistry(join(root, 'builtin'), join(root, 'user'))
 
-    await expect(registry.deletePlugin('winssh.default-themes')).rejects.toMatchObject({
+    await expect(registry.deletePlugin('russh.default-themes')).rejects.toMatchObject({
       code: 'pluginDeleteBuiltin'
     })
   })

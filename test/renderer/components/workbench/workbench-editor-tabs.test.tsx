@@ -13,7 +13,7 @@ import {
   createSettingsEditorDocument,
   createUpdatesEditorDocument
 } from '@/lib/workbench'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
 
@@ -137,7 +137,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
       connectedAt: new Date().toISOString()
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer])
       },
@@ -173,7 +173,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
       }
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer])
       },
@@ -205,7 +205,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
   })
 
   it('renames a session tab without mutating the saved server name', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer])
       }
@@ -231,7 +231,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
   })
 
   it('copies the current session host through the context menu', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer])
       }
@@ -252,7 +252,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
   it('closes a session tab through the context menu', async () => {
     const sessionsDisconnect = vi.fn().mockResolvedValue(undefined)
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer])
       },
@@ -275,7 +275,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
   })
 
   it('shows a close context menu for non-session tabs', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer])
       }
@@ -298,7 +298,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
   })
 
   it('shows the server brand icon in both session and server editor tabs', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer])
       }
@@ -314,7 +314,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
   })
 
   it('moves the left tab to the right when dropped on the trailing half of the target tab', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([savedServer])
       }
@@ -347,7 +347,7 @@ describe('WorkbenchEditorTabs session context menu', () => {
   })
 
   it('shows the updates tab with the updates title', async () => {
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       servers: {
         list: vi.fn().mockResolvedValue([])
       }

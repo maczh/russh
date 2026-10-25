@@ -276,7 +276,7 @@ describe('useTerminal', () => {
     cursorStyle: 'block',
     experimentalTerminalWebgl: false,
     language: 'en-US',
-    logFilePath: '/tmp/winssh.log',
+    logFilePath: '/tmp/russh.log',
     localTerminalShell: 'zsh',
     uiFontId: 'inter',
     terminalFontId: 'cascadia-mono',
@@ -285,7 +285,7 @@ describe('useTerminal', () => {
     theme: 'system',
     webdavBackupEnabled: false,
     webdavBackupIntervalMinutes: 60,
-    webdavBackupPath: '/winssh-backup/',
+    webdavBackupPath: '/russh-backup/',
     resourceMonitorIntervalMs: 2000,
     webdavUrl: null,
     webdavUsername: null,
@@ -478,7 +478,7 @@ describe('useTerminal', () => {
     expect(terminalInstances[0]?.initialOptions.allowTransparency).toBe(false)
     expect(terminalInstances[0]?.initialOptions.allowProposedApi).toBe(true)
     expect(terminalInstances[0]?.initialOptions.fontFamily).toBe(
-      '"WinSSH Cascadia Mono", Consolas, "Courier New", monospace'
+      '"RuSSH Cascadia Mono", Consolas, "Courier New", monospace'
     )
     expect(terminalInstances[0]?.unicode.activeVersion).toBe('11')
     expect(terminalInstances[0]?.options.theme).toMatchObject({
@@ -552,7 +552,7 @@ describe('useTerminal', () => {
 
     expect(terminalInstances).toHaveLength(1)
     expect(terminalInstances[0]?.options.fontFamily).toBe(
-      '"WinSSH IBM Plex Mono", Consolas, "Courier New", monospace'
+      '"RuSSH IBM Plex Mono", Consolas, "Courier New", monospace'
     )
     expect(terminalInstances[0]?.options.fontSize).toBe(16)
     await waitFor(() => {

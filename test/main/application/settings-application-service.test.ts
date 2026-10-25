@@ -10,7 +10,7 @@ function createSettings(overrides: Partial<AppSettings> = {}): AppSettings {
     editorFontId: null,
     experimentalTerminalWebgl: false,
     language: 'en-US',
-    logFilePath: '/tmp/winssh.log',
+    logFilePath: '/tmp/russh.log',
     localTerminalShell: 'zsh',
     uiFontId: 'inter',
     terminalFontId: 'cascadia-mono',
@@ -19,7 +19,7 @@ function createSettings(overrides: Partial<AppSettings> = {}): AppSettings {
     resourceMonitorIntervalMs: 2000,
     webdavBackupEnabled: false,
     webdavBackupIntervalMinutes: 60,
-    webdavBackupPath: '/winssh-backup/',
+    webdavBackupPath: '/russh-backup/',
     webdavUrl: null,
     webdavUsername: null,
     windowTitleBarStyle: 'custom'

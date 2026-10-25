@@ -17,7 +17,7 @@ unchanged.
 - Added a separate Vite configuration that builds the existing React renderer
   without changing files under `src/renderer/` or `web/`.
 - Added a document-start Tauri compatibility adapter that creates
-  `window.winsshApi` before the unchanged React workbench loads. Implemented
+  `window.russhApi` before the unchanged React workbench loads. Implemented
   system/window calls are wired to Rust; unimplemented domains fail explicitly
   instead of returning fake data.
 - Added Rust-backed default settings loading from the Tauri application config
@@ -28,9 +28,9 @@ unchanged.
   initialized with a schema metadata table and exposed through a health command
   for the upcoming server/group/tag migrations.
 - Added the first SQLite-backed business domain: group listing, creation, and
-  deletion through the unchanged `window.winsshApi.groups` shape.
+  deletion through the unchanged `window.russhApi.groups` shape.
 - Added the SQLite-backed tag domain with list, create, and delete operations
-  through the unchanged `window.winsshApi.tags` shape.
+  through the unchanged `window.russhApi.tags` shape.
 - Completed group and tag update operations with SQLite persistence.
 - Added the initial server persistence domain with list, create, and delete
   operations, preserving the renderer-facing server object shape for fields
@@ -187,7 +187,7 @@ Rust implementations and a Tauri-injected compatibility adapter:
 - Cross-platform signing, updater artifacts, and platform-specific window
   behavior validation.
 
-The renderer currently expects the Electron preload global `window.winsshApi`.
+The renderer currently expects the Electron preload global `window.russhApi`.
 Keeping the renderer source unchanged requires an adapter with the same runtime
 shape, including subscription cleanup and streaming semantics; replacing it
 with a partial `invoke` wrapper would break startup and terminal behavior.
@@ -216,8 +216,8 @@ with a partial `invoke` wrapper would break startup and terminal behavior.
 - `npm run tauri:build`: Rust release build and Debian/RPM bundles passed;
   AppImage bundling is blocked in this environment by `Read-only file system`
   while writing the AppImage runtime. Generated artifacts:
-  `src-tauri/target/release/bundle/deb/WinSSH_1.2.4_amd64.deb` and
-  `src-tauri/target/release/bundle/rpm/WinSSH-1.2.4-1.x86_64.rpm`.
+  `src-tauri/target/release/bundle/deb/RuSSH_1.2.4_amd64.deb` and
+  `src-tauri/target/release/bundle/rpm/RuSSH-1.2.4-1.x86_64.rpm`.
 - `cargo test --manifest-path src-tauri/Cargo.toml`: passed (6 Rust tests).
 - Debug binary smoke test reached Tauri/GTK initialization; headless execution
   stops at GTK backend initialization because this environment has no display.

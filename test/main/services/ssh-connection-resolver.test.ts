@@ -53,7 +53,7 @@ describe('SshConnectionResolver', () => {
   })
 
   it('prefers stored private key content and falls back to legacy private key path', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'winssh-key-'))
+    const dir = await mkdtemp(join(tmpdir(), 'russh-key-'))
     const keyPath = join(dir, 'id_rsa')
     await fs.writeFile(keyPath, 'path-private-key', 'utf8')
 

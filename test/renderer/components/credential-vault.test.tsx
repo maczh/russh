@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import i18n from '@/i18n'
 import { CredentialVault } from '@/components/credential-vault'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 vi.mock('sonner', () => ({
@@ -59,14 +59,14 @@ beforeEach(async () => {
 
 describe('CredentialVault', () => {
   it('pre-fills correct values when opening the edit dialog', async () => {
-    const api = createWinsshApiMock({
+    const api = createRuSSHApiMock({
       credentials: {
         list: async () => mockCredentials,
         getSecret: async (id) =>
           mockSecrets[id] ?? { password: null, passphrase: null, privateKey: null }
       }
     })
-    window.winsshApi = api
+    window.russhApi = api
 
     const queryClient = createTestQueryClient()
     render(

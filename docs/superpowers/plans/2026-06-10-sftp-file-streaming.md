@@ -18,8 +18,8 @@
 - 修改：`src/shared/ipc-channels.ts`，新增 `sftp:fileChunk` 和 `sftp:fileStreamState` renderer 事件。
 - 修改：`src/shared/api.ts`，删除旧 `sftp.readFile`/`sftp.writeFile`，新增 stream API。
 - 修改：`src/preload/index.ts`，删除旧 IPC 映射，新增 stream invoke/send 和订阅。
-- 修改：`test/renderer/helpers/create-winssh-api.ts`，更新 mock API 默认实现。
-- 修改：`test/preload/away-reminder-subscriptions.test.ts`，增加轻量类型契约检查，证明 mock 和 `WinsshApi` 暴露新方法。
+- 修改：`test/renderer/helpers/create-russh-api.ts`，更新 mock API 默认实现。
+- 修改：`test/preload/away-reminder-subscriptions.test.ts`，增加轻量类型契约检查，证明 mock 和 `RuSSHApi` 暴露新方法。
 - 修改：`src/main/services/session-runtime.ts`，用 stream 方法替换整文件方法。
 - 修改：`src/main/services/legacy-session-runtime.ts`，委派新的 stream 方法到 `SessionManager`。
 - 修改：`src/main/services/worker-session-runtime.ts`，worker terminal 模式下继续把编辑器文件流委派给 legacy runtime，并删除旧整文件委派。
@@ -177,7 +177,7 @@ git commit -m "feat: add incremental text decoder"
 - 修改：`src/shared/ipc-channels.ts`
 - 修改：`src/shared/api.ts`
 - 修改：`src/preload/index.ts`
-- 修改：`test/renderer/helpers/create-winssh-api.ts`
+- 修改：`test/renderer/helpers/create-russh-api.ts`
 - 修改：`test/preload/away-reminder-subscriptions.test.ts`
 
 - [ ] **步骤 1：编写失败的类型契约测试**
@@ -198,7 +198,7 @@ import type {
 ```ts
 describe('SFTP file stream API contract', () => {
   it('exposes stream methods instead of whole-file editor methods', async () => {
-    type SftpApi = WinsshApi['sftp']
+    type SftpApi = RuSSHApi['sftp']
     const _readStart: Awaited<ReturnType<SftpApi['openFileReadStream']>> =
       {} as SftpFileReadStreamStart
     const _writeStart: Awaited<ReturnType<SftpApi['openFileWriteStream']>> =
@@ -208,7 +208,7 @@ describe('SFTP file stream API contract', () => {
       _event: SftpFileStreamStateEvent
     ) => {}
 
-    const api = createWinsshApiMock()
+    const api = createRuSSHApiMock()
 
     const sftpApiRecord = api.sftp as unknown as Record<string, unknown>
     expect(sftpApiRecord['readFile']).toBeUndefined()
@@ -292,7 +292,7 @@ In `src/shared/ipc-channels.ts`, import `SftpFileChunkEvent` and `SftpFileStream
   'sftp:fileStreamState': SftpFileStreamStateEvent
 ```
 
-- [ ] **步骤 4：更新 `WinsshApi['sftp']` 契约**
+- [ ] **步骤 4：更新 `RuSSHApi['sftp']` 契约**
 
 在 `src/shared/api.ts` import 新类型，并将旧方法：
 
@@ -345,7 +345,7 @@ In `src/shared/ipc-channels.ts`, import `SftpFileChunkEvent` and `SftpFileStream
 
 - [ ] **步骤 6：更新 mock helper**
 
-在 `test/renderer/helpers/create-winssh-api.ts` 的默认 `sftp` 中删除旧 `readFile`、`cancelReadFile`、`writeFile`，添加：
+在 `test/renderer/helpers/create-russh-api.ts` 的默认 `sftp` 中删除旧 `readFile`、`cancelReadFile`、`writeFile`，添加：
 
 ```ts
       openFileReadStream: async (sessionId, remotePath) => ({
@@ -377,7 +377,7 @@ In `src/shared/ipc-channels.ts`, import `SftpFileChunkEvent` and `SftpFileStream
 - [ ] **步骤 8：Commit**
 
 ```bash
-git add src/shared/types.ts src/shared/ipc-channels.ts src/shared/api.ts src/preload/index.ts test/renderer/helpers/create-winssh-api.ts test/preload/away-reminder-subscriptions.test.ts
+git add src/shared/types.ts src/shared/ipc-channels.ts src/shared/api.ts src/preload/index.ts test/renderer/helpers/create-russh-api.ts test/preload/away-reminder-subscriptions.test.ts
 git commit -m "feat: define sftp file stream api"
 ```
 
@@ -1017,7 +1017,7 @@ Add test:
 ```ts
 it('appends streamed chunks and marks the editor clean after completion', async () => {
   const stream = createSftpStreamMock()
-  window.winsshApi = createWinsshApiMock({ sftp: stream.api })
+  window.russhApi = createRuSSHApiMock({ sftp: stream.api })
 
   renderEditor()
 
@@ -1169,7 +1169,7 @@ Add tests:
 ```ts
 it('ignores chunks from stale read streams', async () => {
   const stream = createSftpStreamMock()
-  window.winsshApi = createWinsshApiMock({ sftp: stream.api })
+  window.russhApi = createRuSSHApiMock({ sftp: stream.api })
 
   renderEditor()
   await waitFor(() => expect(stream.api.openFileReadStream).toHaveBeenCalled())
@@ -1190,7 +1190,7 @@ it('ignores chunks from stale read streams', async () => {
 
 it('saves editor content in bounded chunks and marks clean after close succeeds', async () => {
   const stream = createSftpStreamMock()
-  window.winsshApi = createWinsshApiMock({ sftp: stream.api })
+  window.russhApi = createRuSSHApiMock({ sftp: stream.api })
   monacoEditor.getValue.mockReturnValue('alpha\nbeta')
 
   renderEditor()
@@ -1227,7 +1227,7 @@ it('saves editor content in bounded chunks and marks clean after close succeeds'
 it('keeps the editor dirty when streamed save fails', async () => {
   const stream = createSftpStreamMock()
   stream.api.writeFileChunk.mockRejectedValueOnce(new Error('remote write failed'))
-  window.winsshApi = createWinsshApiMock({ sftp: stream.api })
+  window.russhApi = createRuSSHApiMock({ sftp: stream.api })
   monacoEditor.getValue.mockReturnValue('alpha\nbeta')
 
   renderEditor()

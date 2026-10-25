@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import i18n from '@/i18n'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { WorkbenchSessionEditor } from '@/components/workbench/workbench-session-editor'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useSessionsStore } from '@/store/sessions-store'
 
 vi.mock('sonner', () => ({
@@ -70,7 +70,7 @@ describe('WorkbenchSessionEditor', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en-US')
     useSessionsStore.getState().clear()
-    window.winsshApi = createWinsshApiMock()
+    window.russhApi = createRuSSHApiMock()
     clipboard.writeText.mockReset()
     clipboard.writeText.mockResolvedValue(undefined)
     vi.mocked(toast.error).mockReset()

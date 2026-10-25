@@ -6,7 +6,7 @@ import type { AppFocusEvent, AppActivityEvent } from '@shared/types'
 import type { AppSettings } from '@shared/types'
 import { DEFAULT_APP_SETTINGS } from '@shared/constants'
 import { queryKeys } from '@/features/shared/query-keys'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useAwayReminderStore } from '@/store/away-reminder-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
 import { createSessionEditorDocument } from '@/lib/workbench'
@@ -46,7 +46,7 @@ describe('useAwayDetector', () => {
     activityCallbacks = []
     mockSettings = defaultSettings({ awayReminderEnabled: true, awayReminderTimeoutMs: 30000 })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       system: {
         appFocus: {
           onStateChange: vi.fn((cb: (event: AppFocusEvent) => void) => {

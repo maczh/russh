@@ -30,7 +30,7 @@
 
 ## 任务 2：本地终端安装路径
 
-- [x] 在可覆盖范围内新增/调整测试，确认本地终端不再写 `.winssh_init_*` 临时文件。
+- [x] 在可覆盖范围内新增/调整测试，确认本地终端不再写 `.russh_init_*` 临时文件。
 - [x] 修改 `src/main/local-terminal-manager.ts` 使用共享 inline installer。
 - [x] 运行相关本地终端测试确认通过。
 

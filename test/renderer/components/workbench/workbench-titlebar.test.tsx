@@ -5,7 +5,7 @@ import i18n from '@/i18n'
 import { WorkbenchProvider } from '@/components/workbench/workbench-context'
 import { WorkbenchTitlebar } from '@/components/workbench/workbench-titlebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
 
@@ -66,7 +66,7 @@ beforeEach(async () => {
   await i18n.changeLanguage('en-US')
   useWorkbenchStore.getState().reset()
   useLocalTerminalsStore.getState().clear()
-  window.winsshApi = createWinsshApiMock()
+  window.russhApi = createRuSSHApiMock()
   Reflect.deleteProperty(window.navigator, 'windowControlsOverlay')
 })
 
@@ -74,7 +74,7 @@ describe('WorkbenchTitlebar', () => {
   it('renders the app logo on the left side of the title bar with theme-driven color', () => {
     renderTitlebar()
 
-    expect(screen.getByRole('img', { name: 'WinSSH' })).toHaveStyle('color: var(--workbench-logo)')
+    expect(screen.getByRole('img', { name: 'RuSSH' })).toHaveStyle('color: var(--workbench-logo)')
     expect(screen.getByRole('button', { name: 'Add' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Quick Connect' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Open Local Terminal' })).toBeInTheDocument()
@@ -100,7 +100,7 @@ describe('WorkbenchTitlebar', () => {
       title: 'zsh'
     })
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       localTerminals: {
         create: createLocalTerminal
       }
@@ -139,7 +139,7 @@ describe('WorkbenchTitlebar', () => {
   it('uses the native Windows caption button lane when window controls overlay is available', async () => {
     installWindowControlsOverlayMock()
     const isMaximized = vi.fn().mockResolvedValue(false)
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       system: {
         window: {
           isMaximized

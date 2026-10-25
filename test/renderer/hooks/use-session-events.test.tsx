@@ -8,7 +8,7 @@ import { useSessionEvents } from '@/hooks/use-session-events'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 
 vi.mock('sonner', () => ({
   toast: {
@@ -44,7 +44,7 @@ describe('useSessionEvents', () => {
   it('opens the transfers panel at a usable height when an upload starts', () => {
     let transferListener: ((event: TransferProgressEvent) => void) | null = null
 
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sftp: {
         onTransferProgress: (listener) => {
           transferListener = listener

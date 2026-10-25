@@ -1,4 +1,4 @@
-WinSSH 开源协议 (Open Source License)
+RuSSH 开源协议 (Open Source License)
 ====================================
 
 版本 1.0 | 生效日期：2026年6月
@@ -14,9 +14,9 @@ WinSSH 开源协议 (Open Source License)
 
 2.1 署名要求
 必须在您的项目中清晰显示原作者信息，包括但不限于：
-  • 原项目名称：WinSSH
+  • 原项目名称：RuSSH
   • 原作者：lantongxue（或项目声明的当前维护者）
-  • 原项目地址：https://github.com/lantongxue/winssh
+  • 原项目地址：https://github.com/lantongxue/russh
   • 可通过以下方式署名：README、LICENSE、关于对话框、源代码注释等显著位置
 
 2.2 禁止收费
@@ -47,8 +47,8 @@ WinSSH 开源协议 (Open Source License)
 
 6. 联系方式
 如对本协议有疑问或需要特殊授权，请通过以下方式联系原作者：
-  • GitHub Issues: https://github.com/lantongxue/winssh/issues
-  • GitHub Discussions: https://github.com/lantongxue/winssh/discussions
+  • GitHub Issues: https://github.com/lantongxue/russh/issues
+  • GitHub Discussions: https://github.com/lantongxue/russh/discussions
 
 ---
 © 2026 lantongxue. All rights reserved (除开源部分外).

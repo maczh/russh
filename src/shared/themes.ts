@@ -7,10 +7,10 @@ import {
 } from './integrated-fonts'
 
 export const SYSTEM_THEME_ID = 'system'
-export const DEFAULT_LIGHT_THEME_ID = 'winssh.light-plus'
-export const DEFAULT_DARK_THEME_ID = 'winssh.dark-plus'
-export const DEFAULT_PIXEL_THEME_ID = 'winssh.pixel-crt'
-export const HIGH_CONTRAST_THEME_ID_PREFIX = 'winssh.high-contrast'
+export const DEFAULT_LIGHT_THEME_ID = 'russh.light-plus'
+export const DEFAULT_DARK_THEME_ID = 'russh.dark-plus'
+export const DEFAULT_PIXEL_THEME_ID = 'russh.pixel-crt'
+export const HIGH_CONTRAST_THEME_ID_PREFIX = 'russh.high-contrast'
 
 export const THEME_UI_OPTIONS = ['vs', 'vs-dark', 'hc-light', 'hc-black'] as const
 export const THEME_APPEARANCE_OPTIONS = ['light', 'dark'] as const

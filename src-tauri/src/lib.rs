@@ -57,6 +57,7 @@ struct SessionConnectionInfo {
     password: String,
     private_key: Option<String>,
     passphrase: Option<String>,
+    jump: Option<Box<SessionConnectionInfo>>,
 }
 
 enum SftpStream {
@@ -80,15 +81,21 @@ impl RuntimeState {
     fn open(app: &AppHandle) -> Result<Self, String> {
         let data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
         std::fs::create_dir_all(&data_dir).map_err(|error| error.to_string())?;
-        let database = Connection::open(data_dir.join("winssh.db")).map_err(|error| error.to_string())?;
+        let database = Connection::open(data_dir.join("russh.db")).map_err(|error| error.to_string())?;
         database
             .execute_batch(
                 "CREATE TABLE IF NOT EXISTS schema_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);\n                 INSERT OR IGNORE INTO schema_meta (key, value) VALUES ('schema_version', '1');\n                 CREATE TABLE IF NOT EXISTS groups (id TEXT PRIMARY KEY, name TEXT NOT NULL, parent_id TEXT, color TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);\n                 CREATE TABLE IF NOT EXISTS tags (id TEXT PRIMARY KEY, name TEXT NOT NULL, color TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);\n                 CREATE TABLE IF NOT EXISTS servers (id TEXT PRIMARY KEY, name TEXT NOT NULL, host TEXT NOT NULL, port INTEGER NOT NULL, username TEXT NOT NULL, auth_type TEXT NOT NULL, favorite INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);\n                 CREATE TABLE IF NOT EXISTS credentials (id TEXT PRIMARY KEY, name TEXT NOT NULL, kind TEXT NOT NULL, username TEXT, password TEXT, private_key TEXT, passphrase TEXT, note TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);\n                 CREATE TABLE IF NOT EXISTS known_hosts (host TEXT NOT NULL, port INTEGER NOT NULL, algorithm TEXT NOT NULL, fingerprint TEXT NOT NULL, verified_at TEXT NOT NULL, PRIMARY KEY (host, port));\n                 CREATE TABLE IF NOT EXISTS command_history (id TEXT PRIMARY KEY, scope_kind TEXT NOT NULL, server_id TEXT, command TEXT NOT NULL, executed_at TEXT NOT NULL, cwd TEXT, exit_code INTEGER, duration_ms INTEGER);\n                 CREATE TABLE IF NOT EXISTS custom_commands (id TEXT PRIMARY KEY, name TEXT NOT NULL, command TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);\n                 CREATE TABLE IF NOT EXISTS sftp_bookmarks (id TEXT PRIMARY KEY, server_id TEXT NOT NULL, path TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(server_id, path));",
             )
             .map_err(|error| error.to_string())?;
+        database.execute("ALTER TABLE servers ADD COLUMN jump_server_id TEXT", []).or_else(|error| {
+            if error.to_string().contains("duplicate column name") { Ok(0) } else { Err(error) }
+        }).map_err(|error: rusqlite::Error| error.to_string())?;
+        database.execute("ALTER TABLE servers ADD COLUMN group_id TEXT", []).or_else(|error| {
+            if error.to_string().contains("duplicate column name") { Ok(0) } else { Err(error) }
+        }).map_err(|error: rusqlite::Error| error.to_string())?;
         database.execute("CREATE TABLE IF NOT EXISTS server_preferences (server_id TEXT PRIMARY KEY, enabled INTEGER NOT NULL DEFAULT 1)", []).map_err(|error| error.to_string())?;
         database.execute("CREATE TABLE IF NOT EXISTS recent_sessions (id TEXT PRIMARY KEY, server_id TEXT NOT NULL, connected_at TEXT NOT NULL)", []).map_err(|error| error.to_string())?;
-        Ok(Self { database: Mutex::new(database), local_terminals: Mutex::new(HashMap::new()), sessions: Mutex::new(HashMap::new()), connection_info: Mutex::new(HashMap::new()), sftp_streams: Mutex::new(HashMap::new()), port_forward_rules: Mutex::new(HashMap::new()), port_forward_stops: Mutex::new(HashMap::new()), pending_trust: Arc::new(Mutex::new(HashMap::new())), log_path: Mutex::new(data_dir.join("winssh.log").to_string_lossy().into_owned()), logs: Mutex::new(Vec::new()), transfer_cancellations: Mutex::new(HashMap::new()), command_buffers: Mutex::new(HashMap::new()), session_output_buffers: Arc::new(Mutex::new(HashMap::new())) })
+        Ok(Self { database: Mutex::new(database), local_terminals: Mutex::new(HashMap::new()), sessions: Mutex::new(HashMap::new()), connection_info: Mutex::new(HashMap::new()), sftp_streams: Mutex::new(HashMap::new()), port_forward_rules: Mutex::new(HashMap::new()), port_forward_stops: Mutex::new(HashMap::new()), pending_trust: Arc::new(Mutex::new(HashMap::new())), log_path: Mutex::new(data_dir.join("russh.log").to_string_lossy().into_owned()), logs: Mutex::new(Vec::new()), transfer_cancellations: Mutex::new(HashMap::new()), command_buffers: Mutex::new(HashMap::new()), session_output_buffers: Arc::new(Mutex::new(HashMap::new())) })
     }
 }
 
@@ -96,7 +103,7 @@ struct CompatibilityPlugin;
 
 impl<R: Runtime> tauri::plugin::Plugin<R> for CompatibilityPlugin {
     fn name(&self) -> &'static str {
-        "winssh-compatibility"
+        "russh-compatibility"
     }
 
     fn initialization_script(&self) -> Option<String> {
@@ -326,7 +333,7 @@ impl Default for AppSettings {
             webdav_url: None,
             webdav_username: None,
             webdav_backup_interval_minutes: 60,
-            webdav_backup_path: Some("/winssh-backup/".into()),
+            webdav_backup_path: Some("/russh-backup/".into()),
             resource_monitor_interval_ms: 2000,
             sftp_upload_concurrency: 3,
             sftp_download_concurrency: 3,
@@ -369,11 +376,11 @@ fn get_system_capabilities() -> SystemCapabilities {
 #[specta::specta]
 fn list_themes(app: AppHandle) -> Result<String, String> {
     let candidates = [
-        ("winssh-default-themes", "RuSSH Default Themes", "light-plus", "Light+", "light", "vs"),
-        ("winssh-default-themes", "RuSSH Default Themes", "dark-plus", "Dark+", "dark", "vs-dark"),
-        ("winssh-default-themes", "RuSSH Default Themes", "pixel-crt", "Pixel CRT", "dark", "vs-dark"),
-        ("winssh-high-contrast", "RuSSH High Contrast", "high-contrast-light", "High Contrast Light", "light", "hc-light"),
-        ("winssh-high-contrast", "RuSSH High Contrast", "high-contrast-dark", "High Contrast Dark", "dark", "hc-black"),
+        ("russh-default-themes", "RuSSH Default Themes", "light-plus", "Light+", "light", "vs"),
+        ("russh-default-themes", "RuSSH Default Themes", "dark-plus", "Dark+", "dark", "vs-dark"),
+        ("russh-default-themes", "RuSSH Default Themes", "pixel-crt", "Pixel CRT", "dark", "vs-dark"),
+        ("russh-high-contrast", "RuSSH High Contrast", "high-contrast-light", "High Contrast Light", "light", "hc-light"),
+        ("russh-high-contrast", "RuSSH High Contrast", "high-contrast-dark", "High Contrast Dark", "dark", "hc-black"),
     ];
     let roots = [std::env::current_dir().ok().map(|path| path.join("themes/builtin")), app.path().resource_dir().ok().map(|path| path.join("themes/builtin"))];
     let mut themes = Vec::new();
@@ -381,7 +388,7 @@ fn list_themes(app: AppHandle) -> Result<String, String> {
         let Some(root) = roots.iter().flatten().find(|root| root.join(plugin_id).join("themes").join(format!("{file}.json")).exists()) else { continue };
         let path = root.join(plugin_id).join("themes").join(format!("{file}.json"));
         let theme: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(path).map_err(|error| error.to_string())?).map_err(|error| error.to_string())?;
-        themes.push(serde_json::json!({"id": format!("winssh.{}", file), "label": label, "description": label, "pluginId": plugin_id, "pluginDisplayName": plugin_name, "version": "1.0.0", "appearance": appearance, "uiTheme": ui_theme, "source": "builtin", "colors": theme.get("colors").cloned().unwrap_or_default(), "terminal": theme.get("terminal").cloned().unwrap_or_default(), "terminalDefaults": theme.get("terminalDefaults").cloned()}));
+        themes.push(serde_json::json!({"id": format!("russh.{}", file), "label": label, "description": label, "pluginId": plugin_id, "pluginDisplayName": plugin_name, "version": "1.0.0", "appearance": appearance, "uiTheme": ui_theme, "source": "builtin", "colors": theme.get("colors").cloned().unwrap_or_default(), "terminal": theme.get("terminal").cloned().unwrap_or_default(), "terminalDefaults": theme.get("terminalDefaults").cloned()}));
     }
     if let Ok(user_root) = theme_user_root(&app) {
         if let Ok(entries) = std::fs::read_dir(user_root) {
@@ -471,7 +478,7 @@ fn get_update_state(app: AppHandle) -> UpdateStateRecord {
 #[specta::specta]
 fn check_for_updates(app: AppHandle) -> Result<UpdateStateRecord, String> {
     let current = app.package_info().version.to_string();
-    let response = reqwest::blocking::Client::new().get("https://api.github.com/repos/lantongxue/winssh/releases/latest").header("User-Agent", "WinSSH-Tauri").send().map_err(|error| error.to_string())?;
+    let response = reqwest::blocking::Client::new().get("https://api.github.com/repos/lantongxue/russh/releases/latest").header("User-Agent", "RuSSH-Tauri").send().map_err(|error| error.to_string())?;
     if !response.status().is_success() { return Err(format!("update check failed with HTTP {}", response.status())); }
     let release: serde_json::Value = response.json().map_err(|error| error.to_string())?;
     let version = release.get("tag_name").and_then(|value| value.as_str()).unwrap_or_default().trim_start_matches('v').to_owned();
@@ -641,7 +648,7 @@ fn update_settings(app: AppHandle, input: String) -> Result<AppSettings, String>
     if let Some(password) = patch.get("webdavPassword") {
         let data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
         std::fs::create_dir_all(&data_dir).map_err(|error| error.to_string())?;
-        let database = rusqlite::Connection::open(data_dir.join("winssh.db")).map_err(|error| error.to_string())?;
+        let database = rusqlite::Connection::open(data_dir.join("russh.db")).map_err(|error| error.to_string())?;
         database.execute("CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)", []).map_err(|error| error.to_string())?;
         if password.is_null() || password.as_str().unwrap_or_default().is_empty() {
             database.execute("DELETE FROM app_settings WHERE key = 'webdav_backup_password'", []).map_err(|error| error.to_string())?;
@@ -672,7 +679,7 @@ fn webdav_settings(app: &AppHandle) -> Result<AppSettings, String> {
 fn webdav_url(settings: &AppSettings) -> Result<String, String> {
     let base = settings.webdav_url.clone().ok_or("WebDAV URL is not configured")?;
     if !base.starts_with("http://") && !base.starts_with("https://") { return Err("WebDAV URL must use HTTP or HTTPS".into()); }
-    Ok(format!("{}/{}", base.trim_end_matches('/'), settings.webdav_backup_path.clone().unwrap_or_else(|| "winssh-backup".into()).trim_matches('/')))
+    Ok(format!("{}/{}", base.trim_end_matches('/'), settings.webdav_backup_path.clone().unwrap_or_else(|| "russh-backup".into()).trim_matches('/')))
 }
 
 fn webdav_file_url(settings: &AppSettings, file_name: &str) -> Result<String, String> {
@@ -685,7 +692,7 @@ fn webdav_client(_settings: &AppSettings) -> Result<reqwest::blocking::Client, S
 }
 
 fn webdav_request(app: &AppHandle, settings: &AppSettings, request: reqwest::blocking::RequestBuilder) -> reqwest::blocking::RequestBuilder {
-    let password = app.path().app_data_dir().ok().and_then(|path| rusqlite::Connection::open(path.join("winssh.db")).ok()).and_then(|database| database.query_row("SELECT value FROM app_settings WHERE key = 'webdav_backup_password'", [], |row| row.get::<_, String>(0)).optional().ok().flatten());
+    let password = app.path().app_data_dir().ok().and_then(|path| rusqlite::Connection::open(path.join("russh.db")).ok()).and_then(|database| database.query_row("SELECT value FROM app_settings WHERE key = 'webdav_backup_password'", [], |row| row.get::<_, String>(0)).optional().ok().flatten());
     match (settings.webdav_username.as_deref(), password.as_deref()) { (Some(username), Some(password)) if !username.is_empty() => request.basic_auth(username, Some(password)), _ => request }
 }
 
@@ -712,7 +719,7 @@ fn list_webdav_backups(app: AppHandle) -> Result<Vec<WebDavBackupRecord>, String
     let mut results = Vec::new();
     for href in body.split("<d:href>").skip(1).filter_map(|part| part.split("</d:href>").next()) {
         let file_name = href.rsplit('/').next().unwrap_or_default();
-        if file_name.starts_with("winssh-") && file_name.ends_with(".db") { results.push(WebDavBackupRecord { file_name: file_name.into(), modified_at: String::new() }); }
+        if file_name.starts_with("russh-") && file_name.ends_with(".db") { results.push(WebDavBackupRecord { file_name: file_name.into(), modified_at: String::new() }); }
     }
     Ok(results)
 }
@@ -721,9 +728,9 @@ fn list_webdav_backups(app: AppHandle) -> Result<Vec<WebDavBackupRecord>, String
 #[specta::specta]
 fn backup_webdav_now(app: AppHandle) -> Result<(), String> {
     let settings = webdav_settings(&app)?;
-    let database_path = app.path().app_data_dir().map_err(|error| error.to_string())?.join("winssh.db");
+    let database_path = app.path().app_data_dir().map_err(|error| error.to_string())?.join("russh.db");
     let body = std::fs::read(&database_path).map_err(|error| error.to_string())?;
-    let file_name = format!("winssh-{}-{}.db", std::env::consts::OS, utc_timestamp());
+    let file_name = format!("russh-{}-{}.db", std::env::consts::OS, utc_timestamp());
     let response = webdav_request(&app, &settings, webdav_client(&settings)?.put(webdav_file_url(&settings, &file_name)?).body(body)).send().map_err(|error| error.to_string())?;
     if !response.status().is_success() && response.status().as_u16() != 201 { return Err(format!("WebDAV upload failed with HTTP {}", response.status())); }
     Ok(())
@@ -748,10 +755,10 @@ fn restore_webdav_backup(app: AppHandle, file_name: String) -> Result<(), String
     if bytes.len() < 16 || &bytes[..16] != b"SQLite format 3\0" { return Err("the selected WebDAV backup is not a valid SQLite database".into()); }
     let data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
     std::fs::create_dir_all(&data_dir).map_err(|error| error.to_string())?;
-    let target = data_dir.join("winssh.db");
-    let temporary = data_dir.join(format!(".winssh-restore-{}.db", utc_timestamp()));
+    let target = data_dir.join("russh.db");
+    let temporary = data_dir.join(format!(".russh-restore-{}.db", utc_timestamp()));
     std::fs::write(&temporary, &bytes).map_err(|error| error.to_string())?;
-    let backup = data_dir.join(format!("winssh.db.before-restore-{}", utc_timestamp()));
+    let backup = data_dir.join(format!("russh.db.before-restore-{}", utc_timestamp()));
     if target.exists() { std::fs::rename(&target, &backup).map_err(|error| error.to_string())?; }
     if let Err(error) = std::fs::rename(&temporary, &target) {
         if backup.exists() { let _ = std::fs::rename(&backup, &target); }
@@ -789,7 +796,7 @@ fn host_fingerprint(session: &ssh2::Session) -> Result<String, String> {
 
 fn authenticate_session(session: &mut ssh2::Session, info: &SessionConnectionInfo, tag: &str) -> Result<(), String> {
     if let Some(private_key) = info.private_key.as_deref() {
-        let key_path = std::env::temp_dir().join(format!("winssh-key-{tag}"));
+        let key_path = std::env::temp_dir().join(format!("russh-key-{tag}"));
         std::fs::write(&key_path, private_key).map_err(|error| error.to_string())?;
         let result = session.userauth_pubkey_file(&info.username, None, &key_path, info.passphrase.as_deref()).map_err(|error| error.to_string());
         let _ = std::fs::remove_file(key_path);
@@ -797,6 +804,141 @@ fn authenticate_session(session: &mut ssh2::Session, info: &SessionConnectionInf
     } else {
         session.userauth_password(&info.username, &info.password).map_err(|error| error.to_string())
     }
+}
+
+fn load_connection_info(
+    database: &Connection,
+    server_id: &str,
+    request: &serde_json::Value,
+) -> Result<(String, String, u16, String, Option<String>, SessionConnectionInfo), String> {
+    let (name, host, port, username, jump_server_id): (String, String, u16, String, Option<String>) = database
+        .query_row(
+            "SELECT name, host, port, username, jump_server_id FROM servers WHERE id = ?1",
+            [server_id],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?, row.get(4)?)),
+        )
+        .map_err(|error| error.to_string())?;
+    let secrets: (Option<String>, Option<String>, Option<String>) = database
+        .query_row(
+            "SELECT password, private_key, passphrase FROM server_secrets WHERE server_id = ?1",
+            [server_id],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )
+        .optional()
+        .map_err(|error| error.to_string())?
+        .unwrap_or((None, None, None));
+    let request_secrets = request.get("secrets").and_then(|value| value.get(server_id));
+    let password = request_secrets
+        .and_then(|value| value.get("password"))
+        .and_then(|value| value.as_str())
+        .map(str::to_owned)
+        .or(secrets.0);
+    let private_key = request_secrets
+        .and_then(|value| value.get("privateKey"))
+        .and_then(|value| value.as_str())
+        .map(str::to_owned)
+        .or(secrets.1);
+    let passphrase = request_secrets
+        .and_then(|value| value.get("passphrase"))
+        .and_then(|value| value.as_str())
+        .map(str::to_owned)
+        .or(secrets.2);
+    let info = SessionConnectionInfo {
+        server_id: server_id.to_owned(),
+        host: host.clone(),
+        port,
+        username: username.clone(),
+        password: password.unwrap_or_default(),
+        private_key,
+        passphrase,
+        jump: None,
+    };
+    Ok((name, host, port, username, jump_server_id, info))
+}
+
+fn connect_through_jump(
+    jump: &SessionConnectionInfo,
+    target_host: &str,
+    target_port: u16,
+    tag: &str,
+) -> Result<TcpStream, String> {
+    let jump_tcp = TcpStream::connect((jump.host.as_str(), jump.port)).map_err(|error| error.to_string())?;
+    let mut jump_session = ssh2::Session::new().map_err(|error| error.to_string())?;
+    jump_session.set_tcp_stream(jump_tcp);
+    jump_session.handshake().map_err(|error| error.to_string())?;
+    authenticate_session(&mut jump_session, jump, &format!("{tag}-jump"))?;
+    let mut channel = jump_session
+        .channel_direct_tcpip(target_host, target_port, None)
+        .map_err(|error| error.to_string())?;
+
+    let listener = TcpListener::bind(("127.0.0.1", 0)).map_err(|error| error.to_string())?;
+    let address = listener.local_addr().map_err(|error| error.to_string())?;
+    let relay = std::thread::spawn(move || {
+        let Ok((mut local, _)) = listener.accept() else { return };
+        let _ = local.set_nonblocking(true);
+        jump_session.set_blocking(false);
+        let mut local_to_jump = Vec::new();
+        let mut jump_to_local = Vec::new();
+        let mut local_buffer = [0_u8; 8192];
+        let mut jump_buffer = [0_u8; 8192];
+        loop {
+            let mut did_work = false;
+            match local.read(&mut local_buffer) {
+                Ok(0) => break,
+                Ok(size) => {
+                    local_to_jump.extend_from_slice(&local_buffer[..size]);
+                    did_work = true;
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+                Err(_) => break,
+            }
+            if !local_to_jump.is_empty() {
+                match channel.write(&local_to_jump) {
+                    Ok(size) => {
+                        local_to_jump.drain(..size);
+                        did_work = true;
+                        if size > 0 {
+                            let _ = channel.flush();
+                        }
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+                    Err(_) => break,
+                }
+            }
+            match channel.read(&mut jump_buffer) {
+                Ok(0) => break,
+                Ok(size) => {
+                    jump_to_local.extend_from_slice(&jump_buffer[..size]);
+                    did_work = true;
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+                Err(_) => break,
+            }
+            if !jump_to_local.is_empty() {
+                match local.write(&jump_to_local) {
+                    Ok(size) => {
+                        jump_to_local.drain(..size);
+                        did_work = true;
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+                    Err(_) => break,
+                }
+            }
+            if channel.eof() { break; }
+            // Both endpoints are non-blocking. Avoid spinning when a jump
+            // connection is idle or the target stops consuming data.
+            std::thread::sleep(if did_work {
+                std::time::Duration::from_millis(2)
+            } else {
+                std::time::Duration::from_millis(20)
+            });
+        }
+        let _ = channel.close();
+    });
+    let target = TcpStream::connect(address).map_err(|error| error.to_string())?;
+    target.set_nodelay(true).map_err(|error| error.to_string())?;
+    drop(relay);
+    Ok(target)
 }
 
 fn extract_cwd(data: &str) -> Option<String> {
@@ -912,13 +1054,13 @@ fn list_servers(state: tauri::State<'_, RuntimeState>) -> Result<String, String>
     let database = state.database.lock().map_err(|error| error.to_string())?;
     database.execute("CREATE TABLE IF NOT EXISTS server_secrets (server_id TEXT PRIMARY KEY, password TEXT, private_key TEXT, passphrase TEXT)", []).map_err(|error| error.to_string())?;
     database.execute("CREATE TABLE IF NOT EXISTS server_preferences (server_id TEXT PRIMARY KEY, enabled INTEGER NOT NULL DEFAULT 1)", []).map_err(|error| error.to_string())?;
-    let mut statement = database.prepare("SELECT id, name, host, port, username, auth_type, favorite, created_at, updated_at FROM servers ORDER BY favorite DESC, name").map_err(|error| error.to_string())?;
+    let mut statement = database.prepare("SELECT id, name, host, port, username, auth_type, favorite, created_at, updated_at, jump_server_id, group_id FROM servers ORDER BY favorite DESC, name").map_err(|error| error.to_string())?;
     let rows = statement.query_map([], |row| Ok(serde_json::json!({
         "id": row.get::<_, String>(0)?, "name": row.get::<_, String>(1)?, "host": row.get::<_, String>(2)?,
         "port": row.get::<_, i64>(3)?, "username": row.get::<_, String>(4)?, "authType": row.get::<_, String>(5)?,
         "favorite": row.get::<_, i64>(6)? != 0, "createdAt": row.get::<_, String>(7)?, "updatedAt": row.get::<_, String>(8)?,
-        "brandId": null, "customIconDataUrl": null, "privateKeyPath": null, "note": null, "groupId": null,
-        "credentialId": null, "jumpServerId": null, "proxyMode": "none", "proxyType": "socks5", "proxyHost": null,
+        "brandId": null, "customIconDataUrl": null, "privateKeyPath": null, "note": null,
+        "credentialId": null, "jumpServerId": row.get::<_, Option<String>>(9)?, "groupId": row.get::<_, Option<String>>(10)?, "proxyMode": "none", "proxyType": "socks5", "proxyHost": null,
         "proxyPort": 1080, "captureCommandHistory": true, "lastConnectedAt": null, "group": null, "tags": [],
         "hasPassword": false, "hasPassphrase": false
     }))).map_err(|error| error.to_string())?;
@@ -965,7 +1107,7 @@ fn create_server(state: tauri::State<'_, RuntimeState>, input: String) -> Result
     let favorite = value.get("favorite").and_then(|value| value.as_bool()).unwrap_or(false);
     let database = state.database.lock().map_err(|error| error.to_string())?;
     database.execute("CREATE TABLE IF NOT EXISTS server_secrets (server_id TEXT PRIMARY KEY, password TEXT, private_key TEXT, passphrase TEXT)", []).map_err(|error| error.to_string())?;
-    database.execute("INSERT INTO servers (id, name, host, port, username, auth_type, favorite, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)", rusqlite::params![id, name, host, port, username, auth_type, favorite as i64, now, now]).map_err(|error| error.to_string())?;
+    database.execute("INSERT INTO servers (id, name, host, port, username, auth_type, favorite, jump_server_id, group_id, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)", rusqlite::params![id, name, host, port, username, auth_type, favorite as i64, value.get("jumpServerId").and_then(|v| v.as_str()), value.get("groupId").and_then(|v| v.as_str()), now, now]).map_err(|error| error.to_string())?;
     database.execute("INSERT OR REPLACE INTO server_secrets (server_id, password, private_key, passphrase) VALUES (?1, ?2, ?3, ?4)", rusqlite::params![id, value.get("password").and_then(|v| v.as_str()), value.get("privateKey").and_then(|v| v.as_str()), value.get("passphrase").and_then(|v| v.as_str())]).map_err(|error| error.to_string())?;
     Ok(serde_json::json!({"id": id, "name": name, "host": host, "port": port, "username": username, "authType": auth_type, "favorite": favorite}).to_string())
 }
@@ -991,13 +1133,17 @@ fn update_server(state: tauri::State<'_, RuntimeState>, id: String, input: Strin
     let port = value.get("port").and_then(|value| value.as_i64());
     let auth_type = value.get("authType").and_then(|value| value.as_str());
     let favorite = value.get("favorite").and_then(|value| value.as_bool()).map(|value| value as i64);
-    database.execute("UPDATE servers SET name = COALESCE(?1, name), host = COALESCE(?2, host), port = COALESCE(?3, port), username = COALESCE(?4, username), auth_type = COALESCE(?5, auth_type), favorite = COALESCE(?6, favorite), updated_at = ?7 WHERE id = ?8", rusqlite::params![name, host, port, username, auth_type, favorite, utc_timestamp(), id]).map_err(|error| error.to_string())?;
+    let jump_server_id = value.get("jumpServerId").and_then(|value| value.as_str());
+    let group_id = value.get("groupId").and_then(|value| value.as_str());
+    let has_jump_server_id = value.get("jumpServerId").is_some();
+    let has_group_id = value.get("groupId").is_some();
+    database.execute("UPDATE servers SET name = COALESCE(?1, name), host = COALESCE(?2, host), port = COALESCE(?3, port), username = COALESCE(?4, username), auth_type = COALESCE(?5, auth_type), favorite = COALESCE(?6, favorite), jump_server_id = CASE WHEN ?7 THEN ?8 ELSE jump_server_id END, group_id = CASE WHEN ?9 THEN ?10 ELSE group_id END, updated_at = ?11 WHERE id = ?12", rusqlite::params![name, host, port, username, auth_type, favorite, has_jump_server_id, jump_server_id, has_group_id, group_id, utc_timestamp(), id]).map_err(|error| error.to_string())?;
     database.execute("INSERT INTO server_secrets (server_id, password, private_key, passphrase) VALUES (?1, ?2, ?3, ?4) ON CONFLICT(server_id) DO UPDATE SET password=COALESCE(excluded.password, server_secrets.password), private_key=COALESCE(excluded.private_key, server_secrets.private_key), passphrase=COALESCE(excluded.passphrase, server_secrets.passphrase)", rusqlite::params![id, value.get("password").and_then(|v| v.as_str()), value.get("privateKey").and_then(|v| v.as_str()), value.get("passphrase").and_then(|v| v.as_str())]).map_err(|error| error.to_string())?;
-    let mut statement = database.prepare("SELECT id, name, host, port, username, auth_type, favorite, created_at, updated_at FROM servers WHERE id = ?1").map_err(|error| error.to_string())?;
+    let mut statement = database.prepare("SELECT id, name, host, port, username, auth_type, favorite, created_at, updated_at, jump_server_id, group_id FROM servers WHERE id = ?1").map_err(|error| error.to_string())?;
     let record = statement.query_row([id], |row| Ok(serde_json::json!({
         "id": row.get::<_, String>(0)?, "name": row.get::<_, String>(1)?, "host": row.get::<_, String>(2)?,
         "port": row.get::<_, i64>(3)?, "username": row.get::<_, String>(4)?, "authType": row.get::<_, String>(5)?,
-        "favorite": row.get::<_, i64>(6)? != 0, "createdAt": row.get::<_, String>(7)?, "updatedAt": row.get::<_, String>(8)?
+        "favorite": row.get::<_, i64>(6)? != 0, "createdAt": row.get::<_, String>(7)?, "updatedAt": row.get::<_, String>(8)?, "jumpServerId": row.get::<_, Option<String>>(9)?, "groupId": row.get::<_, Option<String>>(10)?
     }))).map_err(|error| error.to_string())?;
     serde_json::to_string(&record).map_err(|error| error.to_string())
 }
@@ -1174,18 +1320,14 @@ fn connect_session(app: AppHandle, state: tauri::State<'_, RuntimeState>, input:
     let request: serde_json::Value = serde_json::from_str(&input).map_err(|error| error.to_string())?;
     let server_id = request.get("serverId").and_then(|value| value.as_str()).ok_or("serverId is required")?.to_owned();
     let database = state.database.lock().map_err(|error| error.to_string())?;
-    let (name, host, port, username) = database.query_row("SELECT name, host, port, username FROM servers WHERE id = ?1", [&server_id], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, u16>(2)?, row.get::<_, String>(3)?))).map_err(|error| error.to_string())?;
-    let known_fingerprint: Option<String> = database.query_row("SELECT fingerprint FROM known_hosts WHERE host = ?1 AND port = ?2", rusqlite::params![host, port], |row| row.get(0)).optional().map_err(|error| error.to_string())?;
     database.execute("CREATE TABLE IF NOT EXISTS server_secrets (server_id TEXT PRIMARY KEY, password TEXT, private_key TEXT, passphrase TEXT)", []).map_err(|error| error.to_string())?;
-    let stored_secrets: (Option<String>, Option<String>, Option<String>) = database.query_row("SELECT password, private_key, passphrase FROM server_secrets WHERE server_id = ?1", [&server_id], |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?))).optional().map_err(|error| error.to_string())?.unwrap_or((None, None, None));
+    let (name, host, port, _username, jump_server_id, target_info) = load_connection_info(&database, &server_id, &request)?;
+    let known_fingerprint: Option<String> = database.query_row("SELECT fingerprint FROM known_hosts WHERE host = ?1 AND port = ?2", rusqlite::params![host, port], |row| row.get(0)).optional().map_err(|error| error.to_string())?;
     drop(database);
-    let password = request.get("secrets").and_then(|value| value.get(&server_id)).and_then(|value| value.get("password")).and_then(|value| value.as_str()).map(str::to_owned).or(stored_secrets.0);
-    let private_key = request.get("secrets").and_then(|value| value.get(&server_id)).and_then(|value| value.get("privateKey")).and_then(|value| value.as_str()).map(str::to_owned).or(stored_secrets.1);
-    let passphrase = request.get("secrets").and_then(|value| value.get(&server_id)).and_then(|value| value.get("passphrase")).and_then(|value| value.as_str()).map(str::to_owned).or(stored_secrets.2);
-    let connection_username = username.clone();
-    let connection_password = password.clone();
-    let connection_private_key = private_key.clone();
-    let connection_passphrase = passphrase.clone();
+    let connection_username = target_info.username.clone();
+    let connection_password = (!target_info.password.is_empty()).then(|| target_info.password.clone());
+    let connection_private_key = target_info.private_key.clone();
+    let connection_passphrase = target_info.passphrase.clone();
     let expected_fingerprint = known_fingerprint.clone();
     let trust_server_name = name.clone();
     let pending_trust = state.pending_trust.clone();
@@ -1201,6 +1343,14 @@ fn connect_session(app: AppHandle, state: tauri::State<'_, RuntimeState>, input:
     let event_app = app.clone();
     let event_session = session_id.clone();
     let connection_host = host.clone();
+    let jump_info = if let Some(jump_id) = jump_server_id.as_deref() {
+        let database = state.database.lock().map_err(|error| error.to_string())?;
+        Some(load_connection_info(&database, jump_id, &request)?.5)
+    } else {
+        None
+    };
+    let mut session_info = target_info.clone();
+    session_info.jump = jump_info.clone().map(Box::new);
     let output_buffers = state.session_output_buffers.clone();
     std::thread::spawn(move || {
         let emit_state = |status: &str, message: Option<&str>| {
@@ -1210,7 +1360,14 @@ fn connect_session(app: AppHandle, state: tauri::State<'_, RuntimeState>, input:
                 let _ = event_app.emit("sessions:error", serde_json::json!({"sessionId": event_session, "message": message.unwrap_or("session error"), "recoverable": true}));
             }
         };
-        let tcp = match TcpStream::connect((connection_host.as_str(), port)) { Ok(tcp) => tcp, Err(error) => { emit_state("error", Some(&error.to_string())); return; } };
+        let tcp = if let Some(jump) = jump_info.as_ref() {
+            match connect_through_jump(jump, connection_host.as_str(), port, &event_session) {
+                Ok(tcp) => tcp,
+                Err(error) => { emit_state("error", Some(&error)); return; }
+            }
+        } else {
+            match TcpStream::connect((connection_host.as_str(), port)) { Ok(tcp) => tcp, Err(error) => { emit_state("error", Some(&error.to_string())); return; } }
+        };
         let mut session = match ssh2::Session::new() { Ok(session) => session, Err(error) => { emit_state("error", Some(&error.to_string())); return; } };
         session.set_tcp_stream(tcp);
         let authenticated = session.handshake().and_then(|_| {
@@ -1224,11 +1381,11 @@ fn connect_session(app: AppHandle, state: tauri::State<'_, RuntimeState>, input:
                 if let Ok(mut pending) = pending_trust.lock() { pending.remove(&request_id); }
                 if !trusted { return Err(ssh2::Error::new(ssh2::ErrorCode::Session(-1), "SSH host key is not trusted")); }
                 let data_dir = event_app.path().app_data_dir().map_err(|_| ssh2::Error::new(ssh2::ErrorCode::Session(-1), "application data directory unavailable"))?;
-                let database = Connection::open(data_dir.join("winssh.db")).map_err(|_| ssh2::Error::new(ssh2::ErrorCode::Session(-1), "known host database unavailable"))?;
+                let database = Connection::open(data_dir.join("russh.db")).map_err(|_| ssh2::Error::new(ssh2::ErrorCode::Session(-1), "known host database unavailable"))?;
                 database.execute("INSERT OR REPLACE INTO known_hosts (host, port, algorithm, fingerprint, verified_at) VALUES (?1, ?2, ?3, ?4, ?5)", rusqlite::params![connection_host, port, "sha256", actual_fingerprint, utc_timestamp()]).map_err(|_| ssh2::Error::new(ssh2::ErrorCode::Session(-1), "known host write failed"))?;
             }
             if let Some(private_key) = connection_private_key.as_deref() {
-                let key_path = std::env::temp_dir().join(format!("winssh-key-{}", event_session));
+                let key_path = std::env::temp_dir().join(format!("russh-key-{}", event_session));
                 std::fs::write(&key_path, private_key).map_err(|_| ssh2::Error::new(ssh2::ErrorCode::Session(-1), "failed to write private key"))?;
                 let result = session.userauth_pubkey_file(&connection_username, None, &key_path, connection_passphrase.as_deref());
                 let _ = std::fs::remove_file(key_path);
@@ -1245,14 +1402,38 @@ fn connect_session(app: AppHandle, state: tauri::State<'_, RuntimeState>, input:
         session.set_blocking(false);
         emit_state("ready", None);
         let mut buffer = [0_u8; 8192];
+        let mut pending_input = Vec::new();
         loop {
             while let Ok(command) = receiver.try_recv() {
                 match command {
-                    SessionCommand::Write(data) => { let _ = channel.write_all(&data).and_then(|_| channel.flush()); }
+                    SessionCommand::Write(data) => pending_input.extend(data),
                     SessionCommand::Resize(columns, rows) => { let _ = channel.request_pty_size(columns as u32, rows as u32, None, None); }
                     SessionCommand::Close => { let _ = channel.close(); return; }
                 }
             }
+
+            if !pending_input.is_empty() {
+                match channel.write(&pending_input) {
+                    Ok(size) if size > 0 => {
+                        pending_input.drain(..size);
+                        if let Err(error) = channel.flush() {
+                            if error.kind() != std::io::ErrorKind::WouldBlock {
+                                emit_state("error", Some(&error.to_string()));
+                                return;
+                            }
+                        }
+                    }
+                    Ok(_) => std::thread::sleep(std::time::Duration::from_millis(2)),
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        std::thread::sleep(std::time::Duration::from_millis(2));
+                    }
+                    Err(error) => {
+                        emit_state("error", Some(&error.to_string()));
+                        return;
+                    }
+                }
+            }
+
             match channel.read(&mut buffer) {
                 Ok(size) if size > 0 => { let data = String::from_utf8_lossy(&buffer[..size]).into_owned(); if let Ok(mut pending) = output_buffers.lock() { pending.entry(event_session.clone()).or_default().push_str(&data); } let _ = event_app.emit("sessions:data", serde_json::json!({"sessionId": event_session, "data": data})); if let Some(cwd) = extract_cwd(&data) { let _ = event_app.emit("sessions:cwdChanged", serde_json::json!({"sessionId": event_session, "cwd": cwd})); } }
                 Ok(_) => { let _ = event_app.emit("sessions:exit", serde_json::json!({"sessionId": event_session, "exitCode": 0})); return; }
@@ -1262,7 +1443,7 @@ fn connect_session(app: AppHandle, state: tauri::State<'_, RuntimeState>, input:
         }
     });
     state.sessions.lock().map_err(|error| error.to_string())?.insert(session_id.clone(), sender);
-    state.connection_info.lock().map_err(|error| error.to_string())?.insert(session_id.clone(), SessionConnectionInfo { server_id: server_id.clone(), host: host.clone(), port, username: username.clone(), password: password.unwrap_or_default(), private_key, passphrase });
+    state.connection_info.lock().map_err(|error| error.to_string())?.insert(session_id.clone(), session_info);
     Ok(serde_json::to_string(&SessionSummaryRecord { session_id, server_id, server_name: name, host, port, status: "connecting".into(), connected_at, current_path: "~".into() }).map_err(|error| error.to_string())?)
 }
 
@@ -1342,12 +1523,7 @@ fn get_session_resource_snapshot(session_id: String) -> Result<String, String> {
 #[specta::specta]
 fn list_sftp(app: AppHandle, state: tauri::State<'_, RuntimeState>, session_id: String, remote_path: String) -> Result<String, String> {
     let info = state.connection_info.lock().map_err(|error| error.to_string())?.get(&session_id).cloned().ok_or("session not found")?;
-    let tcp = TcpStream::connect((info.host.as_str(), info.port)).map_err(|error| error.to_string())?;
-    let mut session = ssh2::Session::new().map_err(|error| error.to_string())?;
-    session.set_tcp_stream(tcp);
-    session.handshake().map_err(|error| error.to_string())?;
-    authenticate_session(&mut session, &info, "list-sftp")?;
-    let sftp = session.sftp().map_err(|error| error.to_string())?;
+    let sftp = open_sftp(&info)?;
     let resolved_path = resolve_sftp_path(&sftp, &remote_path)?;
     let entries = sftp.readdir(std::path::Path::new(&resolved_path)).map_err(|error| error.to_string())?;
     let mapped: Vec<serde_json::Value> = entries.into_iter().map(|(path, stat)| {
@@ -1371,7 +1547,11 @@ fn resolve_sftp_path(sftp: &ssh2::Sftp, path: &str) -> Result<String, String> {
 }
 
 fn open_sftp(info: &SessionConnectionInfo) -> Result<ssh2::Sftp, String> {
-    let tcp = TcpStream::connect((info.host.as_str(), info.port)).map_err(|error| error.to_string())?;
+    let tcp = if let Some(jump) = info.jump.as_deref() {
+        connect_through_jump(jump, info.host.as_str(), info.port, &format!("{}-sftp", info.server_id))?
+    } else {
+        TcpStream::connect((info.host.as_str(), info.port)).map_err(|error| error.to_string())?
+    };
     let mut session = ssh2::Session::new().map_err(|error| error.to_string())?;
     session.set_tcp_stream(tcp);
     session.handshake().map_err(|error| error.to_string())?;

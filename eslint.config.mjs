@@ -48,9 +48,9 @@ export default defineConfig(
         'error',
         {
           object: 'window',
-          property: 'winsshApi',
+          property: 'russhApi',
           message:
-            'Use feature API clients from src/renderer/src/features/*/api instead of window.winsshApi directly.'
+            'Use feature API clients from src/renderer/src/features/*/api instead of window.russhApi directly.'
         }
       ]
     }

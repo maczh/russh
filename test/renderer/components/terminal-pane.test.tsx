@@ -6,7 +6,7 @@ import i18n from '@/i18n'
 import type { SessionTab } from '@/store/sessions-store'
 import { TerminalPane } from '@/components/terminal-pane'
 import { TERMINAL_PATH_DRAG_MIME } from '@/lib/terminal-path-dnd'
-import { createWinsshApiMock } from '@test/renderer/helpers/create-winssh-api'
+import { createRuSSHApiMock } from '@test/renderer/helpers/create-russh-api'
 
 const { searchControllerMock, useTerminalMock } = vi.hoisted(() => ({
   searchControllerMock: {
@@ -30,7 +30,7 @@ describe('TerminalPane', () => {
     cursorStyle: 'block',
     experimentalTerminalWebgl: false,
     language: 'en-US',
-    logFilePath: '/tmp/winssh.log',
+    logFilePath: '/tmp/russh.log',
     localTerminalShell: 'zsh',
     uiFontId: 'inter',
     terminalFontId: 'cascadia-mono',
@@ -39,7 +39,7 @@ describe('TerminalPane', () => {
     theme: 'system',
     webdavBackupEnabled: false,
     webdavBackupIntervalMinutes: 60,
-    webdavBackupPath: '/winssh-backup/',
+    webdavBackupPath: '/russh-backup/',
     resourceMonitorIntervalMs: 2000,
     webdavUrl: null,
     webdavUsername: null,
@@ -83,7 +83,7 @@ describe('TerminalPane', () => {
       focus: vi.fn(),
       search: searchControllerMock
     })
-    window.winsshApi = createWinsshApiMock()
+    window.russhApi = createRuSSHApiMock()
   })
 
   afterEach(() => {
@@ -331,7 +331,7 @@ describe('TerminalPane', () => {
 
   it('temporarily zooms only the active terminal surface with ctrl wheel', () => {
     const updateSettings = vi.fn()
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         update: updateSettings
       }
@@ -371,7 +371,7 @@ describe('TerminalPane', () => {
 
   it('temporarily zooms and resets the active terminal surface with keyboard shortcuts', () => {
     const updateSettings = vi.fn()
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       settings: {
         update: updateSettings
       }
@@ -443,7 +443,7 @@ describe('TerminalPane', () => {
 
   it('writes a dragged SFTP path into the terminal transport', async () => {
     const sessionsWrite = vi.fn().mockResolvedValue(undefined)
-    window.winsshApi = createWinsshApiMock({
+    window.russhApi = createRuSSHApiMock({
       sessions: {
         write: sessionsWrite
       }

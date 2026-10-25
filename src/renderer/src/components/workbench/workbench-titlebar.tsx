@@ -8,7 +8,7 @@ import { systemClient } from '@/features/system/api/system-client'
 import { actionIcons } from '@/lib/action-icons'
 import { getPlatform, isWindowsPlatform } from '@/lib/platform'
 import { cn } from '@/lib/utils'
-import WinsshLogo from '@/assets/logo-slim.svg?react'
+import RuSSHLogo from '@/assets/logo-slim.svg?react'
 import { useWorkbenchContext } from '@/components/workbench/workbench-context'
 import { useWorkbenchStore } from '@/store/workbench-store'
 import { Button } from '@/components/ui/button'
@@ -221,13 +221,13 @@ export function WorkbenchTitlebar() {
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <div
-          className="winssh-logo-orbit flex size-7 shrink-0 items-center justify-center rounded-sm"
+          className="russh-logo-orbit flex size-7 shrink-0 items-center justify-center rounded-sm"
           style={noDragStyle}
         >
-          <WinsshLogo
+          <RuSSHLogo
             role="img"
             aria-label="RuSSH"
-            className="winssh-logo-sprite size-6"
+            className="russh-logo-sprite size-6"
             style={{ color: 'var(--workbench-logo)' }}
           />
         </div>
