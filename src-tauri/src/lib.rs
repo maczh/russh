@@ -160,8 +160,6 @@ pub struct AppSettings {
     pub sftp_upload_concurrency: u32,
     pub sftp_download_concurrency: u32,
     pub command_history_enabled: bool,
-    pub away_reminder_enabled: bool,
-    pub away_reminder_timeout_ms: u32,
     pub proxy_mode: String,
     pub proxy_type: String,
     pub proxy_host: String,
@@ -338,8 +336,6 @@ impl Default for AppSettings {
             sftp_upload_concurrency: 3,
             sftp_download_concurrency: 3,
             command_history_enabled: true,
-            away_reminder_enabled: true,
-            away_reminder_timeout_ms: 30_000,
             proxy_mode: "none".into(),
             proxy_type: "socks5".into(),
             proxy_host: "127.0.0.1".into(),
@@ -2233,10 +2229,6 @@ pub fn run() {
                         if let Some(is_maximized) = event_app.get_webview_window("main").and_then(|window| window.is_maximized().ok()) {
                             let _ = event_app.emit("system:windowState", WindowState { is_maximized });
                         }
-                    }
-                    tauri::WindowEvent::Focused(focused) => {
-                        let phase = if *focused { "focused" } else { "blurred" };
-                        let _ = event_app.emit("system:appFocus", serde_json::json!({ "phase": phase }));
                     }
                     _ => {}
                 }

@@ -223,8 +223,6 @@ export const settingsSchema = z.object({
   sftpUploadConcurrency: z.coerce.number().int().min(1).max(16),
   sftpDownloadConcurrency: z.coerce.number().int().min(1).max(16),
   commandHistoryEnabled: z.boolean(),
-  awayReminderEnabled: z.boolean(),
-  awayReminderTimeoutMs: z.coerce.number().int().min(5000).max(3600000),
   proxyMode: z.enum(['none', 'manual']),
   proxyType: z.enum(['socks5', 'http']),
   proxyHost: proxyHostSchema.min(1, 'validation.proxy.host.required'),

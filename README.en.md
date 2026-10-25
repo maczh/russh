@@ -22,7 +22,7 @@
 
 ## 📖 Introduction
 
-**RuSSH** is a cross-platform SSH and SFTP client designed for developers and system administrators. Moving away from the cluttered and cumbersome UI of traditional terminal tools, we aim to integrate **SSH sessions, local terminals, SFTP file transfers, port forwarding, command palettes, credential vaults, away reminder**, and a **personalized theme system** all within a single window. No more frequent context-switching between tools — RuSSH delivers a fast, smooth, and immersive operations experience.
+**RuSSH** is a cross-platform SSH and SFTP client designed for developers and system administrators. Moving away from the cluttered and cumbersome UI of traditional terminal tools, we aim to integrate **SSH sessions, local terminals, SFTP file transfers, port forwarding, command palettes, and credential vaults**, along with a **personalized theme system** all within a single window. No more frequent context-switching between tools — RuSSH delivers a fast, smooth, and immersive operations experience.
 
 <div align="center">
   <img src="official-website/public/russh-shell-en.png" width="100%" alt="RuSSH Dark Preview" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
@@ -42,7 +42,6 @@ RuSSH is more than just a terminal emulator; it is a complete, closed-loop opera
 - 🌐 **Flexible Port Forwarding** — Supports Local Port Forwarding and Remote Port Forwarding, with automatic rule restoration after reconnection when network fluctuations occur.
 - 🎨 **VSCode-style Themes** — Built-in collection of beautiful, high-contrast themes, supporting standard VSCode JSON theme imports and automatic syncing with system Dark/Light modes.
 - ☁️ **WebDAV Cloud Sync** — Back up and restore host configurations, credentials, and preferences via WebDAV. Automatically performs a hot-relaunch upon successful configuration restoration.
-- ⏰ **Away Reminder** — Detects user inactivity, displaying a protective overlay and locking the terminal windows to safeguard data privacy.
 
 ---
 

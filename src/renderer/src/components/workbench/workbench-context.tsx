@@ -29,7 +29,6 @@ import {
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
-import { useAwayReminderStore } from '@/store/away-reminder-store'
 
 type EntityQuickInputState = {
   entityId?: string
@@ -488,7 +487,6 @@ export function WorkbenchProvider({ children }: { children: ReactNode }) {
       })
       replaceSession(pendingSessionId, result.summary)
       setSessionState(pendingSessionId, 'ready', undefined, 'attach')
-      useAwayReminderStore.getState().reset()
       replaceDocument(
         `session-editor:${pendingSessionId}`,
         createSessionEditorDocument(result.summary.sessionId)

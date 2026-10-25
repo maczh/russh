@@ -1,6 +1,4 @@
 import type {
-  AppActivityEvent,
-  AppFocusEvent,
   CommandRecordedEvent,
   HostTrustRequest,
   LocalTerminalDataEvent,
@@ -47,8 +45,6 @@ export interface IpcChannelMap {
   'sftp:transfer': TransferProgressEvent
   'system:hostTrustRequest': HostTrustRequest
   'system:menuAction': SystemMenuAction
-  'system:appFocus': AppFocusEvent
-  'system:appActivity': AppActivityEvent
   'system:windowState': WindowState
   'terminal:backpressure': TerminalBackpressureEvent
   'terminal:degraded': TerminalDegradedEvent

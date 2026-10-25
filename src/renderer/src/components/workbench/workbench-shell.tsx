@@ -39,8 +39,6 @@ import { WorkbenchSettingsEditor } from '@/components/workbench/workbench-settin
 import { WorkbenchStatusBar } from '@/components/workbench/workbench-status-bar'
 import { WorkbenchTitlebar } from '@/components/workbench/workbench-titlebar'
 import { WorkbenchUpdatesEditor } from '@/components/workbench/workbench-updates-editor'
-import { WorkbenchAwayReminderOverlay } from '@/components/workbench/workbench-away-reminder-overlay'
-import { useAwayDetector } from '@/hooks/use-away-detector'
 
 function submitServerEditorForm(documentId: `server-editor:${string}`) {
   const form = document.getElementById(getServerEditorFormId(documentId))
@@ -110,7 +108,6 @@ function WorkbenchTerminalWelcome() {
 }
 
 function WorkbenchShellContent() {
-  useAwayDetector()
   const {
     closeLocalTerminal,
     disconnectSession,
@@ -479,7 +476,6 @@ function WorkbenchShellContent() {
       <WorkbenchStatusBar />
       <WorkbenchCommandCenter activeDocument={activeDocument} />
       <WorkbenchQuickInput />
-      <WorkbenchAwayReminderOverlay />
     </div>
   )
 }
