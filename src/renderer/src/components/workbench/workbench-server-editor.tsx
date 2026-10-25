@@ -379,7 +379,10 @@ export function WorkbenchServerEditor({ document }: { document: ServerEditorDocu
     queryKey: queryKeys.credentials,
     queryFn: () => credentialsClient.list()
   })
-  const server = (serversQuery.data ?? []).find((item) => item.id === document.serverId) ?? null
+  const server =
+    document.cloneServer ??
+    (serversQuery.data ?? []).find((item) => item.id === document.serverId) ??
+    null
   const serverSecretsQuery = useQuery({
     queryKey: queryKeys.serverSecrets(document.serverId as string),
     queryFn: () => serversClient.getSecrets(document.serverId as string),

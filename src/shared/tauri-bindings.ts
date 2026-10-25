@@ -38,6 +38,8 @@ export const commands = {
 	deleteServer: (id: string) => typedError<null, string>(__TAURI_INVOKE("delete_server", { id })),
 	updateServer: (id: string, input: string) => typedError<string, string>(__TAURI_INVOKE("update_server", { id, input })),
 	getServerSecrets: (id: string) => typedError<string, string>(__TAURI_INVOKE("get_server_secrets", { id })),
+	exportServerConfig: (serverId: string | null) => typedError<null, string>(__TAURI_INVOKE("export_server_config", { serverId })),
+	importServerConfig: () => typedError<number, string>(__TAURI_INVOKE("import_server_config")),
 	toggleServerFavorite: (id: string) => typedError<string, string>(__TAURI_INVOKE("toggle_server_favorite", { id })),
 	listCredentials: () => typedError<CredentialRecord_Serialize[], string>(__TAURI_INVOKE("list_credentials")),
 	getCredentialSecret: (id: string) => typedError<CredentialSecretRecord_Serialize, string>(__TAURI_INVOKE("get_credential_secret", { id })),
@@ -405,4 +407,3 @@ async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; dat
         return { status: "error", error: e as any };
     }
 }
-

@@ -1,4 +1,4 @@
-import type { TransferProgressEvent } from '@shared/types'
+import type { Server, TransferProgressEvent } from '@shared/types'
 import { normalizeRemotePath } from '@shared/sftp'
 import type { LucideIcon } from 'lucide-react'
 import { Files, Settings2, Terminal } from 'lucide-react'
@@ -52,6 +52,7 @@ export interface ServerEditorDocument {
   kind: 'server-editor'
   initialGroupId?: string | null
   serverId: string | null
+  cloneServer?: Server
 }
 
 export interface SessionEditorDocument {
@@ -153,7 +154,7 @@ function createNewServerEditorDocumentId(initialGroupId?: string | null) {
 
 export function createServerEditorDocument(
   serverId?: string | null,
-  options: { initialGroupId?: string | null } = {}
+  options: { initialGroupId?: string | null; cloneServer?: Server } = {}
 ): ServerEditorDocument {
   const initialGroupId = serverId ? undefined : options.initialGroupId
 
@@ -161,7 +162,8 @@ export function createServerEditorDocument(
     id: serverId ? `server-editor:${serverId}` : createNewServerEditorDocumentId(initialGroupId),
     initialGroupId,
     kind: 'server-editor',
-    serverId: serverId ?? null
+    serverId: serverId ?? null,
+    cloneServer: options.cloneServer
   }
 }
 

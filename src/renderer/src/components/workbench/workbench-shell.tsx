@@ -11,7 +11,6 @@ import {
   createSessionEditorDocument,
   createSettingsEditorDocument,
   createTerminalWelcomeDocument,
-  DEFAULT_WORKBENCH_BOTTOM_PANEL_SIZE_PX,
   getServerEditorFormId,
   getSftpFileEditorFormId,
   getLegacyPathForActivity,
@@ -401,7 +400,7 @@ function WorkbenchShellContent() {
     <div className="flex h-full min-h-0 flex-1 flex-col">
       {hasActiveDocument ? <WorkbenchEditorTabs /> : null}
       <ResizablePanelGroup id="workbench-editor-layout" orientation="vertical">
-        <ResizablePanel id="workbench-editor-main" defaultSize="74%" minSize="10%">
+        <ResizablePanel id="workbench-editor-main" defaultSize="80%" minSize="10%">
           <div className="relative h-full min-h-0 overflow-hidden bg-[var(--workbench-editor)]">
             {!hasActiveDocument ? <WorkbenchExplorerHome /> : null}
             {documentLayers}
@@ -414,8 +413,7 @@ function WorkbenchShellContent() {
         <ResizablePanel
           collapsedSize={0}
           collapsible
-          defaultSize={`${DEFAULT_WORKBENCH_BOTTOM_PANEL_SIZE_PX}px`}
-          groupResizeBehavior="preserve-pixel-size"
+          defaultSize="20%"
           id="workbench-bottom-panel"
           minSize="10%"
           onResize={(size) => {

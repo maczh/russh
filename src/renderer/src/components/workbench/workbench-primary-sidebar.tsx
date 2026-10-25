@@ -9,6 +9,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowRight,
+  Download,
   Folder,
   FolderOpen,
   FolderTree,
@@ -16,12 +17,14 @@ import {
   LoaderCircle,
   Plus,
   Search,
+  Upload,
   Server as ServerIcon,
   Tag as TagIcon
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { Server, ServerGroup, Tag } from '@shared/types'
+import { commands as tauriCommands } from '@shared/tauri-bindings'
 import { groupsClient } from '@/features/groups/api/groups-client'
 import { queryKeys } from '@/features/shared/query-keys'
 import { serversClient } from '@/features/servers/api/servers-client'
@@ -293,10 +296,12 @@ function ServerRow({
   dragging = false,
   groups,
   onConnect,
+  onClone,
   onDelete,
   onDragEnd,
   onDragStart,
   onEdit,
+  onExport,
   onMoveToGroup,
   onSelect,
   onToggleFavorite,
@@ -309,10 +314,12 @@ function ServerRow({
   dragging?: boolean
   groups: ServerGroup[]
   onConnect: () => void
+  onClone?: () => void
   onDelete: () => void
   onDragEnd?: (event: DragEvent<HTMLDivElement>) => void
   onDragStart?: (event: DragEvent<HTMLDivElement>) => void
   onEdit: () => void
+  onExport?: () => void
   onMoveToGroup: (server: Server, group: ServerGroup | null) => void | Promise<void>
   onSelect?: () => void
   onToggleFavorite: () => void
@@ -322,6 +329,7 @@ function ServerRow({
   const { t } = useTranslation()
   const ConnectIcon = actionIcons.connect
   const EditIcon = actionIcons.edit
+  const CloneIcon = actionIcons.clone
   const FavoriteIcon = actionIcons.star
   const DeleteIcon = actionIcons.delete
   const hasTags = server.tags.length > 0
@@ -431,6 +439,18 @@ function ServerRow({
           <EditIcon className="size-4" />
           {t('workbench.primarySidebar.actions.edit')}
         </ContextMenuItem>
+        {onClone ? (
+          <ContextMenuItem onClick={onClone}>
+            <CloneIcon className="size-4" />
+            {t('workbench.primarySidebar.actions.clone')}
+          </ContextMenuItem>
+        ) : null}
+        {onExport ? (
+          <ContextMenuItem onClick={onExport}>
+            <Download className="size-4" />
+            {t('workbench.primarySidebar.actions.exportServer')}
+          </ContextMenuItem>
+        ) : null}
         <ContextMenuItem onClick={onToggleFavorite}>
           <FavoriteIcon className="size-4" />
           {server.favorite
@@ -810,6 +830,25 @@ export function WorkbenchPrimarySidebar() {
     setServerSearchQuery('')
   }
 
+  const exportServers = async (selected?: Server) => {
+    try {
+      await tauriCommands.exportServerConfig(selected?.id ?? null)
+      toast.success(t('workbench.primarySidebar.toasts.exported'))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('workbench.primarySidebar.toasts.exportFailed'))
+    }
+  }
+
+  const importServers = async () => {
+    try {
+      const count = await tauriCommands.importServerConfig()
+      await refreshWorkspaceData()
+      toast.success(`${t('workbench.primarySidebar.toasts.imported')} (${count})`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('workbench.primarySidebar.toasts.importFailed'))
+    }
+  }
+
   const renderGroupNode = (node: GroupTreeNode, depth: number): ReactNode => {
     const { group } = node
     const style = getColorStyle(group.color)
@@ -884,10 +923,21 @@ export function WorkbenchPrimarySidebar() {
                   server={server}
                   onSelect={() => setSelectedExplorerNode(`server:${server.id}`)}
                   onConnect={() => void connectServer(server)}
+                  onClone={() =>
+                    openServerEditor(null, {
+                      cloneServer: {
+                        ...server,
+                        id: `${server.id}-clone-${Date.now()}`,
+                        name: `${server.name} - Copy`,
+                        favorite: false
+                      }
+                    })
+                  }
                   onDelete={() => setPendingDeleteServer(server)}
                   onDragEnd={handleServerDragEnd}
                   onDragStart={handleServerDragStart(server.id)}
                   onEdit={() => openServerEditor(server.id)}
+                  onExport={() => exportServers(server)}
                   onMoveToGroup={(currentServer, targetGroup) =>
                     void handleMoveServerGroup(currentServer, targetGroup)
                   }
@@ -979,6 +1029,7 @@ export function WorkbenchPrimarySidebar() {
                       onDragEnd={handleServerDragEnd}
                       onDragStart={handleServerDragStart(server.id)}
                       onEdit={() => openServerEditor(server.id)}
+                      onExport={() => exportServers(server)}
                       onMoveToGroup={(currentServer, targetGroup) =>
                         void handleMoveServerGroup(currentServer, targetGroup)
                       }
@@ -1035,6 +1086,14 @@ export function WorkbenchPrimarySidebar() {
                           <NewConnectionIcon className="size-4" />
                           {t('workbench.primarySidebar.actions.createServer')}
                         </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => exportServers()}>
+                          <Download className="size-4" />
+                          {t('workbench.primarySidebar.actions.exportServers')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => void importServers()}>
+                          <Upload className="size-4" />
+                          {t('workbench.primarySidebar.actions.importServers')}
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   }
@@ -1056,6 +1115,7 @@ export function WorkbenchPrimarySidebar() {
                         onDragEnd={handleServerDragEnd}
                         onDragStart={handleServerDragStart(server.id)}
                         onEdit={() => openServerEditor(server.id)}
+                        onExport={() => exportServers(server)}
                         onMoveToGroup={(currentServer, targetGroup) =>
                           void handleMoveServerGroup(currentServer, targetGroup)
                         }
@@ -1200,6 +1260,7 @@ export function WorkbenchPrimarySidebar() {
                                   onDragEnd={handleServerDragEnd}
                                   onDragStart={handleServerDragStart(server.id)}
                                   onEdit={() => openServerEditor(server.id)}
+                                  onExport={() => exportServers(server)}
                                   onMoveToGroup={(currentServer, targetGroup) =>
                                     void handleMoveServerGroup(currentServer, targetGroup)
                                   }
@@ -1262,6 +1323,7 @@ export function WorkbenchPrimarySidebar() {
                           onDragEnd={handleServerDragEnd}
                           onDragStart={handleServerDragStart(server.id)}
                           onEdit={() => openServerEditor(server.id)}
+                          onExport={() => exportServers(server)}
                           onMoveToGroup={(currentServer, targetGroup) =>
                             void handleMoveServerGroup(currentServer, targetGroup)
                           }

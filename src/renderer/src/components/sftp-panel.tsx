@@ -232,6 +232,32 @@ export function SftpPanel({
   }, [currentPath])
 
   useEffect(() => {
+    if (!session || session.status !== 'ready' || typeof window === 'undefined' || !('__TAURI_INTERNALS__' in window)) {
+      return
+    }
+    let disposed = false
+    let unlisten: (() => void) | undefined
+    void import('@tauri-apps/api/event').then(({ listen }) =>
+      listen<{ paths?: string[] }>('tauri://drag-drop', (event) => {
+        const paths = event.payload?.paths ?? []
+        if (!disposed && paths.length > 0) {
+          void sftpClient
+            .uploadPaths(session.sessionId, currentPath, paths)
+            .then(() => queryClient.invalidateQueries({ queryKey: ['sftp', session.sessionId] }))
+            .catch((error: unknown) => toast.error(error instanceof Error ? error.message : t('workbench.sftp.toasts.uploadFailed')))
+        }
+      })
+    ).then((cleanup) => {
+      if (disposed) cleanup()
+      else unlisten = cleanup
+    }).catch(() => undefined)
+    return () => {
+      disposed = true
+      unlisten?.()
+    }
+  }, [currentPath, queryClient, session, t])
+
+  useEffect(() => {
     if (!listingQuery.data?.entries) {
       return
     }

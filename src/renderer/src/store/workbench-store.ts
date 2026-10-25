@@ -129,7 +129,9 @@ function createInitialState(): WorkbenchStateData {
     openDocuments: [],
     outputEntries: [],
     panelOpen: false,
-    panelSizePx: DEFAULT_WORKBENCH_BOTTOM_PANEL_SIZE_PX,
+    // Let the panel group apply the 80/20 percentage defaults until the user
+    // explicitly resizes the output panel.
+    panelSizePx: 0,
     problems: [],
     quickOpenOpen: false,
     selectedExplorerNode: 'home',

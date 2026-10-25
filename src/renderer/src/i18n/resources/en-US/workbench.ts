@@ -156,6 +156,10 @@ const workbench = {
       actions: {
         addToFavorites: 'Add to Favorites',
         clearRecent: 'Clear Recent Connections',
+        exportServer: 'Export Configuration',
+        exportServers: 'Export Server Configurations',
+        importServers: 'Import Server Configurations',
+        clone: 'Clone',
         connect: 'Connect',
         createGroup: 'New Group',
         createServer: 'New Server',
@@ -195,7 +199,11 @@ const workbench = {
       },
       title: 'Explorer',
       toasts: {
+        exportFailed: 'Failed to export configuration.',
+        exported: 'Configuration saved.',
         groupDeleted: 'Group deleted.',
+        importFailed: 'Failed to import configuration.',
+        imported: 'Configuration imported',
         recentCleared: 'Recent connections cleared.',
         serverDeleteFailed: 'Failed to delete the server.',
         serverMoveFailed: 'Failed to move the server.',
@@ -240,6 +248,8 @@ const workbench = {
         }
       },
       toasts: {
+        exportFailed: 'Failed to export configuration.',
+        exported: 'Configuration saved.',
         groupCreated: 'Group created.',
         groupUpdated: 'Group updated.',
         saveFailed: 'Save failed.',

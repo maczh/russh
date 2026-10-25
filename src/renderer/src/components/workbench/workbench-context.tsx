@@ -84,6 +84,7 @@ interface ConnectServerOptions {
 
 interface OpenServerEditorOptions {
   initialGroupId?: string | null
+  cloneServer?: Server
 }
 
 interface ConnectionSecretsRequestOptions {

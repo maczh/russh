@@ -153,6 +153,10 @@ const workbench = {
       actions: {
         addToFavorites: '加入收藏',
         clearRecent: '清除最近连接',
+        exportServer: '导出配置',
+        exportServers: '导出服务器配置',
+        importServers: '导入服务器配置',
+        clone: '克隆',
         connect: '连接',
         createGroup: '新建分组',
         createServer: '新建服务器',
@@ -192,7 +196,11 @@ const workbench = {
       },
       title: '资源管理器',
       toasts: {
+        exportFailed: '导出配置失败。',
+        exported: '配置已保存。',
         groupDeleted: '分组已删除。',
+        importFailed: '导入配置失败。',
+        imported: '配置已导入',
         recentCleared: '最近连接已清除。',
         serverDeleteFailed: '删除服务器失败。',
         serverMoveFailed: '移动服务器失败。',

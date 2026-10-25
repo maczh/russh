@@ -1,6 +1,6 @@
 [package]
 name = "russh-tauri"
-version = "1.2.4"
+version = "1.2.5"
 description = "RuSSH native runtime powered by Tauri"
 authors = ["RuSSH"]
 edition = "2021"
@@ -25,6 +25,7 @@ specta-typescript = "0.0.13"
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-specta = { version = "2.0.0-rc.26", features = ["typescript"] }
 tauri-plugin-dialog = "2"
+tokio = { version = "1", features = ["sync"] }
 zip = "2"
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 urlencoding = "2"

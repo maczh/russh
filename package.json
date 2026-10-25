@@ -1,6 +1,6 @@
 {
   "name": "russh",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "RuSSH is a cross-platform SSH and SFTP client.",
   "main": "./out/main/index.js",
   "author": "russh",

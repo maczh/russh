@@ -17,7 +17,7 @@ use tauri::{AppHandle, Emitter, Manager, Runtime, WebviewWindow};
 use tauri::menu::MenuBuilder;
 use tauri::tray::{TrayIconBuilder, TrayIconEvent};
 use tauri_specta::{collect_commands, Builder};
-use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 use zip::ZipArchive;
 
 pub struct RuntimeState {
@@ -874,7 +874,7 @@ fn connect_through_jump(
     authenticate_session(&mut jump_session, jump, &format!("{tag}-jump")).map_err(|error| {
         format!("jump host {}:{} authentication failed: {error}", jump.host, jump.port)
     })?;
-    let channel = jump_session
+    let mut channel = jump_session
         .channel_direct_tcpip(target_host, target_port, None)
         .map_err(|error| {
             format!(
@@ -897,90 +897,69 @@ fn connect_through_jump(
     // `target` is the client side consumed by libssh2. Both relay directions
     // must use clones of the accepted server side; cloning `target` here
     // sends remote output back into the relay instead of into libssh2.
-    let local_for_write = local_for_read.try_clone().map_err(|error| error.to_string())?;
     // This is the accepted relay-side socket. It is distinct from `target`,
     // which is owned by libssh2, so non-blocking mode here cannot alter the
     // target SSH session's socket.
     local_for_read.set_nonblocking(true).map_err(|error| error.to_string())?;
-    local_for_write.set_nonblocking(true).map_err(|error| error.to_string())?;
-    let stop = Arc::new(AtomicBool::new(false));
-
-    let mut channel_to_jump = channel.clone();
-    let stop_to_jump = stop.clone();
     std::thread::spawn(move || {
         let mut local = local_for_read;
-        let mut pending = Vec::new();
-        let mut buffer = [0_u8; 64 * 1024];
-        let mut flush_pending = false;
-        while !stop_to_jump.load(Ordering::Relaxed) {
-            if pending.len() < 256 * 1024 {
-                match local.read(&mut buffer) {
+        let mut to_jump = Vec::new();
+        let mut from_jump = Vec::new();
+        let mut local_buffer = [0_u8; 64 * 1024];
+        let mut jump_buffer = [0_u8; 64 * 1024];
+        loop {
+            if to_jump.len() < 256 * 1024 {
+                match local.read(&mut local_buffer) {
                     Ok(0) => break,
-                    Ok(size) => pending.extend_from_slice(&buffer[..size]),
-                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => continue,
+                    Ok(size) => to_jump.extend_from_slice(&local_buffer[..size]),
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
                     Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
-                    Err(_) => break,
-                }
-            }
-            if flush_pending {
-                match channel_to_jump.flush() {
-                    Ok(()) => flush_pending = false,
-                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
-                        std::thread::sleep(std::time::Duration::from_millis(1));
-                        continue;
+                    Err(_error) => {
+                        break;
                     }
-                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
-                    Err(_) => break,
                 }
             }
-            if !pending.is_empty() {
-                match channel_to_jump.write(&pending) {
+            if from_jump.len() < 256 * 1024 {
+                match channel.read(&mut jump_buffer) {
+                    Ok(0) => break,
+                    Ok(size) => {
+                        from_jump.extend_from_slice(&jump_buffer[..size]);
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    Err(_error) => {
+                        break;
+                    }
+                }
+            }
+            if !to_jump.is_empty() {
+                match channel.write(&to_jump) {
                     Ok(size) if size > 0 => {
-                        pending.drain(..size);
-                        flush_pending = true;
+                        to_jump.drain(..size);
                     }
                     Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
                     Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
-                    Err(_) => break,
+                    Err(_error) => {
+                        break;
+                    }
                     Ok(_) => {}
                 }
             }
-            std::thread::sleep(std::time::Duration::from_millis(if pending.is_empty() { 2 } else { 1 }));
-        }
-        stop_to_jump.store(true, Ordering::Relaxed);
-    });
-
-    let mut channel_from_jump = channel;
-    let stop_from_jump = stop.clone();
-    std::thread::spawn(move || {
-        let mut local = local_for_write;
-        let mut pending = Vec::new();
-        let mut buffer = [0_u8; 64 * 1024];
-        while !stop_from_jump.load(Ordering::Relaxed) {
-            if pending.len() < 256 * 1024 {
-                match channel_from_jump.read(&mut buffer) {
-                    Ok(0) => break,
-                    Ok(size) => pending.extend_from_slice(&buffer[..size]),
+            if !from_jump.is_empty() {
+                match local.write(&from_jump) {
+                    Ok(size) if size > 0 => {
+                        from_jump.drain(..size);
+                    }
                     Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
                     Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
-                    Err(_) => break,
-                }
-            }
-            if !pending.is_empty() {
-                match local.write(&pending) {
-                    Ok(size) if size > 0 => { pending.drain(..size); }
-                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
-                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
-                        std::thread::sleep(std::time::Duration::from_millis(1));
-                        continue;
+                    Err(_error) => {
+                        break;
                     }
-                    Err(_) => break,
                     Ok(_) => {}
                 }
             }
-            std::thread::sleep(std::time::Duration::from_millis(if pending.is_empty() { 2 } else { 1 }));
+            std::thread::sleep(std::time::Duration::from_millis(2));
         }
-        stop_from_jump.store(true, Ordering::Relaxed);
     });
 
     Ok(target)
@@ -1200,6 +1179,64 @@ fn get_server_secrets(state: tauri::State<'_, RuntimeState>, id: String) -> Resu
     database.execute("CREATE TABLE IF NOT EXISTS server_secrets (server_id TEXT PRIMARY KEY, password TEXT, private_key TEXT, passphrase TEXT)", []).map_err(|error| error.to_string())?;
     let record = database.query_row("SELECT password, private_key, passphrase FROM server_secrets WHERE server_id = ?1", [id], |row| Ok(serde_json::json!({"password": row.get::<_, Option<String>>(0)?, "privateKey": row.get::<_, Option<String>>(1)?, "passphrase": row.get::<_, Option<String>>(2)?}))).optional().map_err(|error| error.to_string())?.unwrap_or_else(|| serde_json::json!({"password": null, "privateKey": null, "passphrase": null}));
     serde_json::to_string(&record).map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+async fn export_server_config(app: AppHandle, state: tauri::State<'_, RuntimeState>, server_id: Option<String>) -> Result<(), String> {
+    let servers: Vec<serde_json::Value> = {
+        let database = state.database.lock().map_err(|error| error.to_string())?;
+        database.execute("CREATE TABLE IF NOT EXISTS server_secrets (server_id TEXT PRIMARY KEY, password TEXT, private_key TEXT, passphrase TEXT)", []).map_err(|error| error.to_string())?;
+        let mut statement = database.prepare("SELECT id, name, host, port, username, auth_type, favorite, jump_server_id, group_id FROM servers WHERE (?1 IS NULL OR id = ?1) ORDER BY name").map_err(|error| error.to_string())?;
+        let rows = statement.query_map([server_id.as_deref()], |row| {
+            let id: String = row.get(0)?;
+            let secret = database.query_row("SELECT password, private_key, passphrase FROM server_secrets WHERE server_id = ?1", [&id], |secret_row| Ok(serde_json::json!({
+                "password": secret_row.get::<_, Option<String>>(0)?, "privateKey": secret_row.get::<_, Option<String>>(1)?, "passphrase": secret_row.get::<_, Option<String>>(2)?
+            }))).optional()?.unwrap_or_else(|| serde_json::json!({"password": null, "privateKey": null, "passphrase": null}));
+            Ok(serde_json::json!({
+                "name": row.get::<_, String>(1)?, "host": row.get::<_, String>(2)?, "port": row.get::<_, i64>(3)?, "username": row.get::<_, String>(4)?,
+                "authType": row.get::<_, String>(5)?, "favorite": row.get::<_, i64>(6)? != 0, "jumpServerId": row.get::<_, Option<String>>(7)?, "secrets": secret
+            }))
+        }).map_err(|error| error.to_string())?;
+        rows.map(|row| row.map_err(|error| error.to_string())).collect::<Result<_, _>>()?
+    };
+    let content = servers.iter().map(|server| {
+        let json = serde_json::to_string(server).map_err(|error| error.to_string())?;
+        Ok::<String, String>(STANDARD.encode(json.as_bytes()))
+    }).collect::<Result<Vec<_>, _>>()?.join("\n");
+    let (sender, receiver) = tokio::sync::oneshot::channel();
+    app.dialog().file().add_filter("RuSSH Config", &["russh"]).set_file_name("russh-servers.russh").save_file(move |path| { let _ = sender.send(path); });
+    if let Some(path) = receiver.await.map_err(|error| error.to_string())? { std::fs::write(path.into_path().map_err(|error| error.to_string())?, content).map_err(|error| error.to_string())?; }
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+async fn import_server_config(app: AppHandle, state: tauri::State<'_, RuntimeState>) -> Result<u32, String> {
+    let (sender, receiver) = tokio::sync::oneshot::channel();
+    app.dialog().file().add_filter("RuSSH Config", &["russh"]).pick_file(move |path| { let _ = sender.send(path); });
+    let Some(path) = receiver.await.map_err(|error| error.to_string())? else { return Ok(0); };
+    let content = std::fs::read_to_string(path.into_path().map_err(|error| error.to_string())?).map_err(|error| error.to_string())?;
+    let items: Vec<serde_json::Value> = content.lines().enumerate().filter(|(_, line)| !line.trim().is_empty()).map(|(line_number, line)| {
+        let decoded = STANDARD.decode(line.trim()).map_err(|error| format!("invalid base64 at line {}: {}", line_number + 1, error))?;
+        serde_json::from_slice(&decoded).map_err(|error| format!("invalid server JSON at line {}: {}", line_number + 1, error))
+    }).collect::<Result<_, _>>()?;
+    let database = state.database.lock().map_err(|error| error.to_string())?;
+    database.execute("CREATE TABLE IF NOT EXISTS server_secrets (server_id TEXT PRIMARY KEY, password TEXT, private_key TEXT, passphrase TEXT)", []).map_err(|error| error.to_string())?;
+    let mut imported = 0u32;
+    for (index, item) in items.iter().enumerate() {
+        let name = item.get("name").and_then(|v| v.as_str()).ok_or("server name is required")?;
+        let host = item.get("host").and_then(|v| v.as_str()).ok_or("server host is required")?;
+        let id = format!("server-import-{}-{}", utc_timestamp(), index);
+        let now = utc_timestamp();
+        let group_id = item.get("groupId").and_then(|v| v.as_str());
+        let group_id = group_id.filter(|id| database.query_row("SELECT 1 FROM groups WHERE id = ?1", [id], |_| Ok(())).optional().ok().flatten().is_some());
+        database.execute("INSERT INTO servers (id, name, host, port, username, auth_type, favorite, jump_server_id, group_id, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)", rusqlite::params![id, name, host, item.get("port").and_then(|v| v.as_i64()).unwrap_or(22), item.get("username").and_then(|v| v.as_str()).unwrap_or(""), item.get("authType").and_then(|v| v.as_str()).unwrap_or("password"), item.get("favorite").and_then(|v| v.as_bool()).unwrap_or(false) as i64, Option::<&str>::None, group_id, now, now]).map_err(|error| error.to_string())?;
+        let secrets = item.get("secrets");
+        database.execute("INSERT INTO server_secrets (server_id, password, private_key, passphrase) VALUES (?1, ?2, ?3, ?4)", rusqlite::params![id, secrets.and_then(|v| v.get("password")).and_then(|v| v.as_str()), secrets.and_then(|v| v.get("privateKey")).and_then(|v| v.as_str()), secrets.and_then(|v| v.get("passphrase")).and_then(|v| v.as_str())]).map_err(|error| error.to_string())?;
+        imported += 1;
+    }
+    Ok(imported)
 }
 
 #[tauri::command]
@@ -1604,7 +1641,9 @@ fn open_sftp(info: &SessionConnectionInfo) -> Result<ssh2::Sftp, String> {
         })?
     };
     let mut session = ssh2::Session::new().map_err(|error| error.to_string())?;
-    session.set_timeout(30_000);
+    // Keep a stalled SFTP packet from blocking a transfer forever. The relay
+    // is non-blocking, so libssh2 must also have a finite I/O deadline.
+    session.set_timeout(10_000);
     session.set_tcp_stream(tcp);
     session.handshake().map_err(|error| {
         format!("SFTP target {}:{} SSH handshake failed: {error}", info.host, info.port)
@@ -1814,6 +1853,17 @@ fn cancel_all_sftp_transfers(state: tauri::State<'_, RuntimeState>) -> Result<()
 
 fn metadata_len(path: &std::path::Path) -> u64 { std::fs::metadata(path).map(|value| value.len()).unwrap_or(0) }
 
+fn format_transfer_size(bytes: u64) -> String {
+    const UNITS: [&str; 4] = ["B", "KB", "MB", "GB"];
+    let mut value = bytes as f64;
+    let mut unit = 0;
+    while value >= 1024.0 && unit < UNITS.len() - 1 {
+        value /= 1024.0;
+        unit += 1;
+    }
+    if unit == 0 { format!("{} {}", bytes, UNITS[unit]) } else { format!("{value:.2} {}", UNITS[unit]) }
+}
+
 #[tauri::command]
 #[specta::specta]
 fn download_sftp_file(app: AppHandle, state: tauri::State<'_, RuntimeState>, session_id: String, remote_path: String) -> Result<(), String> {
@@ -1835,20 +1885,65 @@ fn download_sftp_file(app: AppHandle, state: tauri::State<'_, RuntimeState>, ses
                     format!("SFTP stat {}:{} failed for {}: {error}", info.host, info.port, download_remote_path)
                 })?.size.unwrap_or(0);
                 let local_size = std::fs::metadata(&path).map(|metadata| metadata.len()).unwrap_or(0);
-                let resume_offset = if local_size > 0 && local_size < total { local_size } else { 0 };
+                let mut resume_download = local_size > 0 && local_size < total;
+                if local_size > 0 {
+                    let (question, title) = if local_size < total {
+                        (
+                            format!(
+                                "本地文件已有 {}，远端文件大小为 {}。是否从本地位置继续断点续传？",
+                                format_transfer_size(local_size),
+                                format_transfer_size(total)
+                            ),
+                            "继续断点续传",
+                        )
+                    } else {
+                        (
+                            format!(
+                                "本地文件大小为 {}，远端文件大小为 {}。是否覆盖本地文件并重新下载？",
+                                format_transfer_size(local_size),
+                                format_transfer_size(total)
+                            ),
+                            "覆盖本地文件",
+                        )
+                    };
+                    let (answer_tx, answer_rx) = mpsc::channel();
+                    download_app
+                        .dialog()
+                        .message(question)
+                        .title(title)
+                        .buttons(MessageDialogButtons::YesNo)
+                        .show(move |answer| {
+                            let _ = answer_tx.send(answer);
+                        });
+                    let accepted = answer_rx.recv().unwrap_or(false);
+                    if local_size < total {
+                        // For a partial local file, No means overwrite and restart
+                        // from byte zero; it is not a cancellation.
+                        resume_download = accepted;
+                    } else if !accepted {
+                        return Err("用户取消下载".into());
+                    }
+                }
+                // The local file length is the only safe resume point: every byte before it
+                // has already been persisted. If the local file is longer than the remote
+                // file, it cannot be a valid prefix and must be restarted from byte zero.
+                let resume_offset = if resume_download { local_size } else { 0 };
                 if resume_offset > 0 {
                     remote.seek(SeekFrom::Start(resume_offset)).map_err(|error| {
                         format!("SFTP resume seek {}:{} failed at {} bytes: {error}", info.host, info.port, resume_offset)
                     })?;
                 }
-                let mut local = if resume_offset > 0 {
-                    std::fs::OpenOptions::new().write(true).open(&path).map_err(|error| error.to_string())?
-                } else {
-                    std::fs::File::create(&path).map_err(|error| error.to_string())?
-                };
-                if resume_offset > 0 {
-                    local.seek(SeekFrom::Start(resume_offset)).map_err(|error| error.to_string())?;
-                }
+                let mut local = std::fs::OpenOptions::new()
+                    .create(true)
+                    .read(true)
+                    .write(true)
+                    .truncate(false)
+                    .open(&path)
+                    .map_err(|error| error.to_string())?;
+                // Remove any stale tail before appending the resumed blocks. This also
+                // guarantees that a same-size/empty file is not accidentally extended.
+                local.set_len(resume_offset).map_err(|error| error.to_string())?;
+                local.seek(SeekFrom::Start(resume_offset)).map_err(|error| error.to_string())?;
                 let _ = download_app.emit("sftp:transferProgress", serde_json::json!({"sessionId": download_session_id, "direction": "download", "fileName": file_name, "localPath": path, "remotePath": download_remote_path, "transferred": resume_offset, "total": total, "status": "running"}));
                 let mut transferred = resume_offset;
                 let mut last_reported = std::time::Instant::now();
@@ -2098,6 +2193,8 @@ pub fn run() {
         delete_server,
         update_server,
         get_server_secrets,
+        export_server_config,
+        import_server_config,
         toggle_server_favorite,
         list_credentials,
         get_credential_secret,

@@ -3049,7 +3049,7 @@ dependencies = [
 
 [[package]]
 name = "russh-tauri"
-version = "1.2.4"
+version = "1.2.5"
 dependencies = [
  "base64 0.22.1",
  "png",
@@ -3065,6 +3065,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-dialog",
  "tauri-specta",
+ "tokio",
  "urlencoding",
  "zip",
 ]
