@@ -25,12 +25,12 @@ React 19 + Tailwind 4 + Zustand workbench app. Single-page shell (no pages/ dir)
 
 ## CONVENTIONS
 
-- **Feature API gateway**: ALL renderer-to-preload calls go through `features/*/api` clients wrapping `russhClient`. `window.russhApi` is ESLint-banned except in `features/shared/api/`.
+- **Feature API gateway**: ALL renderer-to-native calls go through `features/*/api` clients wrapping `russhClient`. `window.russhApi` is ESLint-banned except in `features/shared/api/`.
 - **Keep-mounted**: `session-editor` and `local-terminal-editor` use visibility toggle (`invisible pointer-events-none`), NOT conditional render. Other documents use `hidden`.
 - **Zustand + React Query**: UI state → Zustand stores (4), server state → React Query. Never use Redux or Context for state.
 - **Auto-save**: Settings use `useSettingsAutoSave` hook with `saveField()` + rollback via `onRevert`.
 - **shadcn/ui**: Components in `components/ui/` use new-york style. ESLint disables `react-refresh/only-export-components` there — do NOT add those exports.
-- **HashRouter**: Electron `file://` compat — not BrowserRouter.
+- **HashRouter**: required for WebView `file://`/asset-protocol compat — not BrowserRouter.
 - **WorkbenchDocument is tagged union**: 7 kinds with template literal ID types. No separate `pages/` directory.
 - **Global hooks**: `hooks/` is renderer-level shared (not per-feature). `use-session-events.ts` is mounted at App root.
 - **i18n namespace-per-file**: `.ts` files (not JSON) with typed exports. 3 namespaces per locale: common, validation, workbench.
@@ -43,4 +43,4 @@ React 19 + Tailwind 4 + Zustand workbench app. Single-page shell (no pages/ dir)
 - **NEVER** add `react-refresh` exports to `components/ui/` — ESLint intentionally disabled there
 - **NEVER** add binary/large-file SFTP support — SFTP file streaming is text-only
 - **NEVER** assume app continues after backup restore — triggers `system:relaunch`
-- **NEVER** use BrowserRouter — HashRouter required for Electron `file://` compat
+- **NEVER** use BrowserRouter — HashRouter required for WebView `file://` compat

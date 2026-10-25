@@ -1,58 +1,62 @@
 # AGENTS.md
 
-**Updated:** 2026-05-26 · **Commit:** 50c93b3 · **Branch:** main
+Cross-platform SSH/SFTP desktop client. Tauri 2 (Rust) + React 19 + TypeScript 5 + Vite 7 + Tailwind 4. The Rust runtime owns SSH/SFTP, PTYs, SQLite, themes, port forwarding, and update checks.
 
-Cross-platform SSH/SFTP desktop client. Electron 39 + React 19 + TypeScript 5 + Vite 7 + Tailwind 4. Core runtime: ssh2, node-pty, better-sqlite3, xterm.js, Monaco, electron-updater.
-
-> **Child AGENTS.md**: `src/main/`, `src/renderer/src/`, `test/`, `web/` — read domain-specific docs there.
+> **Child AGENTS.md**: `src/renderer/src/`, `test/` — read domain-specific docs there.
 
 ## STRUCTURE
 
 ```
-src/main/           # Electron main process (Node.js) — see child AGENTS.md
-src/preload/        # contextBridge typed IPC — 2 files only (index.ts + index.d.ts)
-src/renderer/src/   # React workbench app — see child AGENTS.md
-src/shared/         # Domain models (NOT just types): 12 files incl. Zod schemas, API surface
-themes/builtin/     # VSCode-style JSON theme packs (loaded by main, not CSS in renderer)
+src-tauri/          # Tauri 2 / Rust backend — see src-tauri/README.md
+  src/lib.rs        # Entire backend: RuntimeState, commands, events, tray, builder
+  src/main.rs       # Thin entry: russh_tauri_lib::run()
+  compatibility.js  # Document-start adapter that defines window.russhApi
+  capabilities/     # Tauri permission scopes (main window only)
+  gen/schemas/      # Generated capability schemas
+  tauri.conf.json   # Window, CSP, dev URL, bundling, icons
+src/renderer/       # React workbench (index.html + src/)
+src/shared/         # Shared models + API contract (Zod, RuSSHApi, Tauri Specta bindings)
+themes/builtin/     # VSCode-style JSON theme packs (loaded by Rust)
 test/               # Mirror-tree test infra — see child AGENTS.md
-web/                # Fully independent brand-site subproject — see child AGENTS.md
-scripts/            # ESM (.mjs) build/utility scripts (mock update feed)
-build/              # NSIS installer.nsh + platform icons + macOS entitlements
+scripts/            # tauri-dev.mjs — starts Vite then cargo run
+build/              # Bundle icons referenced by tauri.conf.json
+docs/               # Theme development guide + historical design notes
 ```
 
-**Non-obvious**: `src/renderer/src/` double nesting is electron-vite convention. No `pages/` dir — entire app is a single workbench shell. `src/native/` referenced in README but removed — do not use.
+**Non-obvious**: `src/renderer/src/` double nesting is the Vite root convention. No `pages/` dir — the entire app is a single workbench shell. There is no Node-based host process or preload directory; the renderer talks to Rust through `window.russhApi`, which is created by `src-tauri/compatibility.js`.
 
 ## WHERE TO LOOK
 
-| Task                     | Location                                                                                                                                                                                                       | Notes                                            |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Add new IPC method       | shared/types → shared/validation → main/ipc/register-_ → preload → features/_/api → query-keys                                                                                                                 | 6-layer cross-cutting (see below)                |
-| Modify session lifecycle | main/session-manager + renderer/store/sessions-store + workbench-context                                                                                                                                       | SessionManager is 2897 lines — most complex file |
-| Change theme             | shared/themes → main/theme-registry → themes/builtin/_/themes/_.json → renderer/lib/theme                                                                                                                      | Theme packs are JSON, not CSS                    |
-| Add server table column  | main/database + main/application/servers-app-service + shared/validation                                                                                                                                       | Also update ServerUpsertInput/serverSchema       |
-| Add SFTP feature         | main/session-manager editor file streaming API (`openFileReadStream`/`openFileWriteStream`/`writeFileChunk`/`closeFileWriteStream`/`cancelFileStream`) + renderer/features/sftp/api + workbench-sftp-\*-editor | SFTP editor streaming is text-only               |
-| Work on UI layout        | renderer/components/workbench/                                                                                                                                                                                 | Keep-mounted for session/local-terminal editors  |
-| Write renderer tests     | test/renderer/ + test/renderer/helpers/create-russh-api                                                                                                                                                       | Never co-locate tests in src/                    |
-| Work on web/ site        | web/src/                                                                                                                                                                                                       | Separate package.json, tsconfig, vite config     |
+| Task                     | Location                                                                                                                                        | Notes                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Add new Rust command     | `src-tauri/src/lib.rs` command + `collect_commands!` → regenerate `src/shared/tauri-bindings.ts` → expose in `compatibility.js` if renderer needs it | Cross-cutting (see below)                        |
+| Modify session lifecycle | `src-tauri/src/lib.rs` (session commands/workers) + `renderer/store/sessions-store.ts` + `renderer/components/workbench/workbench-context.tsx`    | Emits `sessions:state` / `sessions:error` / `sessions:data` |
+| Change theme             | `src/shared/themes.ts` → theme commands in `lib.rs` → `themes/builtin/<pack>/themes/*.json` → `renderer/lib/theme.ts`                            | Theme packs are JSON, not CSS                    |
+| Add server field         | `src-tauri/src/lib.rs` SQLite schema/mapping + `src/shared/validation.ts` (`ServerUpsertInput`/`serverSchema`) + `src/shared/types.ts`            | Also update the servers command payloads         |
+| Add SFTP feature         | `src-tauri/src/lib.rs` SFTP commands + `renderer/features/sftp/api` + `workbench-sftp-*` components                                             | SFTP editor streaming is text-only               |
+| Work on UI layout        | `renderer/components/workbench/`                                                                                                                | Keep-mounted for session/local-terminal editors  |
+| Write renderer tests     | `test/renderer/` + `test/renderer/helpers/create-russh-api`                                                                                     | Never co-locate tests in src/                    |
 
 ## Commands
 
 ```bash
-npm run dev              # Electron dev mode (hot reload)
-npm run build            # typecheck + electron-vite build (NOT just vite build)
-npm run test             # All Vitest tests for desktop app
+npm run dev              # Vite (127.0.0.1:5173) + cargo run — full app
+npm run build            # typecheck + frontend build (no Rust)
+npm run tauri:build      # Full Tauri build with bundles
+npm run test             # All Vitest tests
 npm run typecheck        # Both Node + Web tsc projects
-npm run lint             # KNOWN to have historical failures - do not treat as blocking
+npm run lint             # KNOWN to have historical failures — not a gate
 npm run format           # Prettier
+npm run dist:win         # Platform bundles via Tauri CLI
+npm run dist:mac
+npm run dist:linux
 
 npx vitest run test/path/to/file.test.ts      # Single test file
 npx vitest run -t "pattern name"              # Filter by test name
 
-npm run web:dev          # web/ subproject dev server (separate Vite build)
-npm run web:test         # web/ subproject tests (separate vitest)
-npm run updates:mock     # Generate mock update feed for local testing
-npm run updates:serve    # Serve mock update feed on localhost
-npm run dist:win         # Build Windows NSIS installer
+make check               # typecheck + cargo fmt --check + cargo check
+make build               # Release Rust binary
+make bundle-<platform>   # Tauri bundles for one platform
 ```
 
 **Verification order**: `npm run typecheck` → `npm run test` (lint is not a gate)
@@ -61,25 +65,24 @@ npm run dist:win         # Build Windows NSIS installer
 
 ```
 @/          → src/renderer/src/
-@main/      → src/main/
 @renderer/  → src/renderer/src/
 @shared/    → src/shared/
-@test/      → test/
+@test/      → test/  (Vitest only)
 ```
 
 Use these aliases in imports; both src and tests consume them.
 
 ## Architecture
 
-**Process boundary**: `src/main/` (Node.js/Electron main) ↔ `src/preload/` (bridge) ↔ `src/renderer/src/` (React). Shared types live in `src/shared/`.
+**Process boundary**: Rust (`src-tauri/`) ↔ WebView renderer (`src/renderer/src/`). Shared types/contract live in `src/shared/`.
 
-- **`src/main/index.ts`** is a thin entry (`app.whenReady().then(bootstrap)`). All assembly is in **`src/main/bootstrap.ts`**.
-- **`src/main/application/`** is a use-case orchestration layer (servers/sessions/settings services).
-- **`src/main/ipc/`** has 4 registrars: `register-server-ipc.ts`, `register-session-ipc.ts`, `register-system-ipc.ts`, `register-command-history-ipc.ts`.
-- **`src/renderer/src/features/*/api`** is the ONLY approved entry point for renderer code to call preload bridge. ESLint enforces this: `window.russhApi` is banned in `src/renderer/src/**` except in `features/shared/api/`.
-- **`src/renderer/src/features/shared/query-keys.ts`** centralizes all React Query keys. Never hardcode new keys.
-- Theme definitions live in `themes/builtin/`, loaded by `src/main/theme-registry.ts`.
-- `web/` is a **fully independent** Vite subproject with its own `package.json`, `tsconfig.json`, and tests.
+- `src-tauri/src/main.rs` is a thin entry; all assembly is in `russh_tauri_lib::run()` in `lib.rs`.
+- `RuntimeState` (managed by Tauri) holds the SQLite connection, SSH sessions, SFTP streams, local PTYs, port-forward rules, pending trust prompts, and log buffers.
+- `src-tauri/compatibility.js` is injected as an initialization script and exposes the `RuSSHApi` surface on `window.russhApi`, translating calls into Tauri `invoke` calls and event subscriptions.
+- `src/shared/tauri-bindings.ts` is generated by Tauri Specta — **do not edit manually**.
+- `src/renderer/src/features/*/api` is the ONLY approved entry point for renderer code to call `window.russhApi`. ESLint enforces this: `window.russhApi` is banned in `src/renderer/src/**` except in `features/shared/api/`.
+- `src/renderer/src/features/shared/query-keys.ts` centralizes all React Query keys. Never hardcode new keys.
+- Theme definitions live in `themes/builtin/`, bundled by `tauri.conf.json` and loaded by Rust.
 
 ## Testing
 
@@ -87,20 +90,19 @@ Use these aliases in imports; both src and tests consume them.
 - File pattern: `test/**/*.test.{ts,tsx}`. Setup file: `test/renderer/helpers/setup.ts`.
 - Environment: `jsdom` with `globals: true` (no explicit imports of describe/it/expect needed).
 - Renderer tests mock `window.russhApi` via `test/renderer/helpers/create-russh-api.ts`.
-- Main process test mocks live near tests in `test/main/`.
+- Rust unit tests live next to the code in `src-tauri/src/lib.rs` and run via `cargo test --manifest-path src-tauri/Cargo.toml`.
 
 ## i18n
 
 - Renderer strings: `src/renderer/src/i18n/resources/{en-US,zh-CN}/` (namespace-per-file).
-- Main process strings: `src/main/localization.ts` — adding user-facing error messages or dialog text here requires both languages.
 - Adding a new i18n key requires updating **both** locale directories and the type definitions they export.
 
-## Native Dependencies
+## Tauri Runtime Notes
 
-- `better-sqlite3`, `node-pty`, and `ssh2` are native modules.
-- `electron.vite.config.ts` externalizes them via `externalizeDepsPlugin()`.
-- `electron-builder.yml` has `asarUnpack` entries for `better-sqlite3`. If adding a new native module that must load from disk at runtime, add it to `asarUnpack` too.
-- The Tauri build does not run Electron's native-module rebuild hook. The legacy Electron scripts remain available only for the compatibility build path.
+- Rendering uses the platform WebView: WebView2 on Windows, WKWebView on macOS, WebKitGTK on Linux (dev packages required).
+- The CSP in both `src/renderer/index.html` and `tauri.conf.json` allows `ipc://localhost`, `http://ipc.localhost`, inline styles, `data:`/`blob:` images, and `wasm-unsafe-eval`.
+- Permissions are intentionally minimal (`core:default`, window dragging, dialog). Extend `src-tauri/capabilities/default.json` only alongside reviewed commands.
+- Frontend dev requires the Vite server to be reachable on `127.0.0.1:5173`; `scripts/tauri-dev.mjs` blocks until it is listening before starting Cargo.
 
 ## Code Style
 
@@ -114,32 +116,29 @@ Use these aliases in imports; both src and tests consume them.
 These are the facts an agent is most likely to get wrong:
 
 - **ESLint blocks `window.russhApi`** in all `src/renderer/src/**` except `src/renderer/src/features/shared/api/**`. Always go through `features/*/api`.
-- **Credential model** — server password/passphrase, credential vault secrets, and server private keys (inline in `servers.private_key` DB column) all live in the SQLite database.
-- **`SessionManager` does NOT read credential vault directly** for connection auth. Only `servers:getSecrets` (display) and `resolveStoredPrivateKey()` use the vault. Connection auth uses `request.secrets[server.id]` or database fallback.
+- **Credential model** — server password/passphrase, vault secrets, and private keys all live in the SQLite database managed by Rust.
 - **Jump server is single-hop only**. Nested jump chains are explicitly rejected.
-- **Auto-update**: Windows uses `NsisUpdater` for full silent updates. macOS downloads and mounts DMG for manual drag-install (no code signing required). Linux and dev builds return `unsupported`.
+- **Auto-update**: release metadata is fetched from GitHub Releases; installing an update requires a signed Tauri updater endpoint that is not yet configured.
 - **Resource monitoring is Linux-only** (`/proc/stat`, `/proc/meminfo`, etc.).
 - **Port forwarding is session-scoped memory only** — no DB persistence.
 - **`session-editor` and `local-terminal-editor` use keep-mounted strategy** (visible via visibility toggle, not conditional render) to avoid xterm re-initialization on tab switch. Do not change this.
-- **SFTP remote file editing is text-only** — editor file streaming uses `openFileReadStream`, `openFileWriteStream`, `writeFileChunk`, `closeFileWriteStream`, and `cancelFileStream`. No binary/large-file editor support.
-- **`private_key_path` column is legacy compat** — new writes store key content in `private_key`. Do not delete the compat path-reading logic.
-- **Restore (backup) triggers `system:relaunch`** — do not assume the app continues running after restore.
-- **`web/` is a separate subproject** — changes to root `package.json` version or `src/shared/themes.ts` (light/dark-plus themes) affect it. Coordinate.
-- **`npm run lint` has known repository-level failures** (React hooks, IPC constraints). Do not fail a workflow because of lint; only fail on new lint errors introduced by your change.
+- **SFTP remote file editing is text-only** — editor streaming is chunked over Rust events; no binary/large-file editor support.
+- **Restore (backup) triggers `system.relaunch`** — do not assume the app continues running after restore.
+- **`npm run lint` has known repository-level failures** (React hooks, fast refresh). Do not fail a workflow because of lint; only fail on new lint errors introduced by your change.
 
 ## Cross-Cutting Changes
 
 Changing any domain typically requires touching these layers together:
 
-- **IPC change**: `src/shared/types.ts` → `src/shared/validation.ts` → `src/main/ipc/register-*` → `src/preload/index.ts` → `src/renderer/src/features/<domain>/api/*` → update `query-keys.ts`.
-- **Session identity / phase**: add `src/main/session-manager.ts` + `src/renderer/src/store/sessions-store.ts` + `src/renderer/src/components/workbench/workbench-context.tsx`.
-- **Theme change**: `src/shared/themes.ts` → `src/main/theme-registry.ts` → `themes/builtin/<pack>/themes/*.json` → `src/renderer/src/lib/theme.ts`.
-- **SFTP / remote editing**: add `src/main/session-manager.ts` editor file streaming methods (`openFileReadStream`, `openFileWriteStream`, `writeFileChunk`, `closeFileWriteStream`, `cancelFileStream`) + `src/renderer/src/features/sftp/api/*` + `src/renderer/src/components/workbench/workbench-sftp-file-*-editor.tsx`.
-- **Any change to `servers` table schema**: also update `src/main/database.ts`, `src/main/application/servers-application-service.ts`, and `src/shared/validation.ts` (`ServerUpsertInput`/`serverSchema`).
+- **Rust command change**: `src-tauri/src/lib.rs` (`#[tauri::command]` + `collect_commands!`) → regenerate `src/shared/tauri-bindings.ts` → `src-tauri/compatibility.js` (`window.russhApi` shape) → keep `src/shared/api.ts` unchanged for renderer parity.
+- **Session identity / phase**: `src-tauri/src/lib.rs` + `src/renderer/src/store/sessions-store.ts` + `src/renderer/src/components/workbench/workbench-context.tsx`.
+- **Theme change**: `src/shared/themes.ts` → theme commands in `src-tauri/src/lib.rs` → `themes/builtin/<pack>/themes/*.json` → `src/renderer/src/lib/theme.ts`.
+- **SFTP / remote editing**: Rust SFTP stream commands in `lib.rs` + `src/renderer/src/features/sftp/api/*` + `src/renderer/src/components/workbench/workbench-sftp-file-*-editor.tsx`.
+- **Any change to the servers table schema**: update the Rust schema/mapping in `src-tauri/src/lib.rs` and `src/shared/validation.ts` (`ServerUpsertInput`/`serverSchema`).
 
 ## Test Mock for `window.russhApi`
 
-When writing renderer tests that call the preload bridge:
+When writing renderer tests that call the bridge:
 
 ```ts
 import { createRuSSHApi } from '@test/helpers/create-russh-api'
@@ -150,8 +149,9 @@ const api = createRuSSHApi({/* overrides */})
 
 ## Key Entry Points to Read First
 
-- `src/main/bootstrap.ts` — how the main process is wired
-- `src/preload/index.ts` — full typed bridge surface
+- `src-tauri/src/lib.rs` — Rust runtime, command surface, events, tray, builder
+- `src-tauri/compatibility.js` — how `window.russhApi` is implemented on Tauri
+- `src/shared/api.ts` — canonical renderer-facing contract
 - `src/shared/types.ts` — canonical shared types, event shapes, connection phases
 - `src/renderer/src/App.tsx` — React root, theme bootstrapping, routing
 - `src/renderer/src/components/workbench/workbench-shell.tsx` — renderer layout root

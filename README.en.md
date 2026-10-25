@@ -6,7 +6,7 @@
   <img src="resources/icon.png" width="120" alt="RuSSH Logo" />
   <h1>RuSSH</h1>
   <p>🚀 <strong>A modern, powerful, and beautiful cross-platform desktop SSH / SFTP client</strong> 🚀</p>
-  <p>Built with Electron 39 · React 19 · TypeScript 5 · Tailwind CSS 4</p>
+  <p>Built with Tauri 2 (Rust) · React 19 · TypeScript 5 · Tailwind CSS 4</p>
 
   <p>
     <a href="https://github.com/lantongxue/russh/releases">
@@ -50,17 +50,17 @@ RuSSH is more than just a terminal emulator; it is a complete, closed-loop opera
 
 RuSSH is built on top of a mature and modern frontend ecosystem for high performance:
 
-- **Shell Environment**: Electron 39
+- **Shell Environment**: Tauri 2 (Rust)
 - **Frontend Framework**: React 19 (Hooks) + TypeScript 5
-- **Build System**: Vite 7 + electron-vite
+- **Build System**: Vite 7 + Tauri CLI
 - **CSS Styling**: Tailwind CSS 4
 - **Core Dependencies**:
   - [xterm.js](https://github.com/xtermjs/xterm.js) - Terminal rendering engine supporting WebGL acceleration and Web fonts
   - [Monaco Editor](https://github.com/microsoft/monaco-editor) - Inline text editing for remote files
-  - [ssh2](https://github.com/mscdex/ssh2) - Efficient, pure Node.js SSH2 protocol library
-  - [node-pty](https://github.com/microsoft/node-pty) - Local pseudo-terminal bridge
-  - [better-sqlite3](https://github.com/WiseFlatfish/better-sqlite3) - High-speed embedded SQLite driver
-  - [electron-updater](https://github.com/electron-userland/electron-builder) - Auto-update check and notification module
+  - [ssh2](https://github.com/alexcrichton/ssh2-rs) - Rust SSH2 protocol implementation
+  - [portable-pty](https://github.com/wez/wezterm/tree/main/pty) - Local pseudo-terminal bridge
+  - [rusqlite](https://github.com/rusqlite/rusqlite) - Embedded SQLite driver (bundled)
+  - [tauri-plugin-dialog](https://github.com/tauri-apps/plugins-workspace) - Native file open/save dialogs
 
 ---
 
@@ -70,6 +70,9 @@ RuSSH is built on top of a mature and modern frontend ecosystem for high perform
 
 - **Node.js**: `22.x` or higher
 - **npm**: `10.x` or higher
+- **Rust**: stable toolchain (with `cargo`)
+- **System libraries**: GTK / WebKitGTK development packages on Linux (see the Tauri 2 prerequisites)
+- **Linux bundling**: `libayatana-appindicator3-dev` is required when bundling with the tray icon feature, otherwise `tauri build` aborts because pkg-config cannot locate appindicator
 
 ### Development Steps
 
@@ -80,29 +83,29 @@ RuSSH is built on top of a mature and modern frontend ecosystem for high perform
    cd russh
    ```
 
-2. **Install dependencies** (this automatically triggers compilation of C++ native modules):
+2. **Install dependencies**:
 
    ```bash
    npm install
    ```
 
-3. **Start Electron in development mode** (supports hot-reloading for both main and renderer processes):
+3. **Start Tauri in development mode** (Vite frontend HMR + Rust backend):
    ```bash
    npm run dev
    ```
 
 ### Packaging & Distribution
 
-This project uses `electron-builder` to package applications for various platforms:
+This project uses the Tauri CLI to package applications for various platforms:
 
 ```bash
-# Build Windows installers (NSIS installer & portable ZIP)
+# Build Windows installer (NSIS)
 npm run dist:win
 
-# Build macOS installers (DMG image & ZIP)
+# Build macOS bundles (APP & DMG)
 npm run dist:mac
 
-# Build Linux installers (AppImage & DEB package)
+# Build Linux packages (AppImage, DEB & RPM)
 npm run dist:linux
 ```
 
@@ -113,38 +116,32 @@ npm run dist:linux
 ```text
 russh/
 ├── src/
-│   ├── main/              # Electron main process (Node.js) - handles DB operations, SSH/SFTP connections, away activity, and auto-updates
-│   ├── preload/           # contextBridge secure IPC channel definitions (only index.ts and index.d.ts)
-│   ├── renderer/          # React renderer process - workbench interaction layer, state management, and feature API clients
-│   └── shared/            # Shared codebase - validation schemas (Zod), global types, constants, and IPC channel definitions
+│   ├── renderer/          # React frontend - workbench interaction layer, state management, and feature API clients
+│   └── shared/            # Shared codebase - validation schemas (Zod), global types, and IPC contracts
+├── src-tauri/             # Tauri 2 / Rust backend - database, SSH/SFTP, local terminals, themes, updates
+│   ├── src/               # Rust sources (commands, runtime state)
+│   ├── capabilities/      # Tauri permission capabilities
+│   ├── compatibility.js   # Frontend adapter that injects window.russhApi
+│   └── tauri.conf.json    # Window, CSP, and bundling configuration
 ├── themes/                # Built-in VSCode-style JSON themes
 ├── docs/                  # Supplementary design and theme development guidelines
-├── scripts/               # Scripts for builds, package patches, mock update server, etc.
-└── build/                 # App icons and custom NSIS installer configurations (.nsh)
+├── scripts/               # Tauri development launcher
+└── build/                 # Bundling icon assets
 ```
 
 ---
 
 ## 💻 Script Reference
 
-| Command              | Description                                                                         |
-| :------------------- | :---------------------------------------------------------------------------------- |
-| `npm run dev`        | Starts the client local development server (with Hot Module Replacement)            |
-| `npm run build`      | Runs TypeScript type checking and builds the production Electron application        |
-| `npm run test`       | Runs all Vitest unit and integration tests                                          |
-| `npm run typecheck`  | Separately performs TS type checks on both main (Node) and renderer (Web) processes |
-| `npm run format`     | Formats all code with Prettier to maintain a consistent style                       |
-| `npm run lint`       | Runs ESLint to check for code style issues and rules violation                      |
-
----
-
-## 💡 Environment Variables
-
-RuSSH supports configuring specific runtime behaviors via environment variables:
-
-| Environment Variable           | Default | Description                                                                                                    |
-| :----------------------------- | :------ | :------------------------------------------------------------------------------------------------------------- |
-| `RUSSH_HARDWARE_ACCELERATION` | -       | Set to `false` to disable hardware acceleration on Windows (useful for solving rendering lag on some hardware) |
+| Command               | Description                                                       |
+| :-------------------- | :---------------------------------------------------------------- |
+| `npm run dev`         | Starts Tauri development (Vite frontend + Rust backend)           |
+| `npm run build`       | Runs TypeScript type checking and builds the frontend assets      |
+| `npm run test`        | Runs all Vitest unit and integration tests                        |
+| `npm run typecheck`   | Runs TS type checks for the shared/config layer and the renderer  |
+| `npm run format`      | Formats all code with Prettier to maintain a consistent style     |
+| `npm run lint`        | Runs ESLint to check for code style issues and rules violation    |
+| `npm run tauri:build` | Builds the Rust backend and produces platform installers          |
 
 ---
 

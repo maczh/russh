@@ -8,7 +8,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve('src/renderer/src'),
-      '@main': resolve('src/main'),
       '@renderer': resolve('src/renderer/src'),
       '@shared': resolve('src/shared'),
       '@test': resolve('test')
@@ -19,6 +18,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['test/renderer/helpers/setup.ts'],
     include: ['test/**/*.test.ts', 'test/**/*.test.tsx'],
-    exclude: ['node_modules/**', 'out/**', 'release/**', 'dist/**', 'package/**', 'web/**']
+    exclude: ['node_modules/**', 'dist/**', 'package/**', 'web/**']
   }
 })

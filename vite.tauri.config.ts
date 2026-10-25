@@ -6,6 +6,7 @@ import svgr from 'vite-plugin-svgr'
 
 export default defineConfig({
   root: 'src/renderer',
+  base: './',
   server: {
     host: '127.0.0.1',
     port: 5173,
@@ -28,9 +29,9 @@ export default defineConfig({
   },
   build: {
     outDir: resolve('dist/renderer'),
-    emptyOutDir: false,
+    emptyOutDir: true,
     // Monaco and the existing workbench are intentionally kept in one
-    // renderer bundle for parity with the Electron frontend. This threshold
+    // renderer bundle for parity with the desktop frontend. This threshold
     // prevents a non-fatal size warning from being mistaken for a build error.
     chunkSizeWarningLimit: 6000
   }
