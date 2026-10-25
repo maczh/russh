@@ -160,8 +160,21 @@ function enableOscProgressTracking(terminal: Terminal) {
 }
 
 function enableInlineImageRendering(terminal: Terminal) {
-  const imageAddon = new ImageAddon()
-  terminal.loadAddon(imageAddon)
+  let imageAddon: ImageAddon | undefined
+  try {
+    imageAddon = new ImageAddon()
+    terminal.loadAddon(imageAddon)
+  } catch (error) {
+    // Image decoders depend on WebAssembly support in the host WebView.
+    // An optional decoder must not prevent terminal.open or transport setup.
+    console.warn('Terminal inline images unavailable', error)
+    try {
+      imageAddon?.dispose()
+    } catch {
+      // Activation may have failed before the addon finished initializing.
+    }
+    return () => undefined
+  }
 
   return () => {
     imageAddon.dispose()
