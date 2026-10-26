@@ -459,6 +459,21 @@ describe('useTerminal', () => {
     }
   })
 
+  it('opens the terminal and binds input/output when the image decoder fails', () => {
+    imageAddonConstructor.mockImplementationOnce(() => {
+      throw new Error('WebAssembly compilation blocked')
+    })
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    try {
+      render(<TestTerminal settings={settings} theme={darkTheme} />)
+      expect(terminalInstances[0]?.open).toHaveBeenCalled()
+      expect(terminalInstances[0]?.onData).toHaveBeenCalled()
+      expect(transportOnData).toHaveBeenCalled()
+    } finally {
+      warning.mockRestore()
+    }
+  })
+
   it('updates terminal theme without recreating the instance', async () => {
     const { rerender } = render(<TestTerminal settings={settings} theme={darkTheme} />)
 

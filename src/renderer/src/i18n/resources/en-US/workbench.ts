@@ -488,7 +488,7 @@ const workbench = {
         },
         experimentalTerminalWebgl: {
           description:
-            'Experimental support. Requires available GPU acceleration. In some Windows and Electron environments it can cause blurry terminal text, incorrect font weight, or other font rendering issues. Disable it if terminal fonts look wrong.',
+            'Experimental support. Requires available GPU acceleration. In some Windows and desktop environments it can cause blurry terminal text, incorrect font weight, or other font rendering issues. Disable it if terminal fonts look wrong.',
           title: 'Experimental WebGL renderer'
         },
         resourceMonitorInterval: 'Resource monitor interval (ms)',
@@ -956,21 +956,6 @@ const workbench = {
         deleted: 'Credential deleted.',
         updated: 'Credential updated.'
       }
-    },
-    awayReminder: {
-      title: 'Safety Reminder',
-      description: 'Confirm that you are still present to continue the current connection.',
-      confirmButton: 'Confirm Continue',
-      serverIdentity: 'Server Identity',
-      localTerminal: 'Local Terminal',
-      sshInfo: 'SSH Info',
-      sshSession: 'SSH Session',
-      currentSession: 'Current session',
-      shellType: 'Shell Type',
-      timeoutSetting: 'Away Timeout',
-      enableSetting: 'Enable Away Reminder',
-      timeoutDescription: 'After this duration of inactivity, the overlay will appear.',
-      secondsUnit: 'seconds'
     },
     commandHistory: {
       title: 'Command History',

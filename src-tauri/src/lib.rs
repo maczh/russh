@@ -160,8 +160,6 @@ pub struct AppSettings {
     pub sftp_upload_concurrency: u32,
     pub sftp_download_concurrency: u32,
     pub command_history_enabled: bool,
-    pub away_reminder_enabled: bool,
-    pub away_reminder_timeout_ms: u32,
     pub proxy_mode: String,
     pub proxy_type: String,
     pub proxy_host: String,
@@ -338,8 +336,6 @@ impl Default for AppSettings {
             sftp_upload_concurrency: 3,
             sftp_download_concurrency: 3,
             command_history_enabled: true,
-            away_reminder_enabled: true,
-            away_reminder_timeout_ms: 30_000,
             proxy_mode: "none".into(),
             proxy_type: "socks5".into(),
             proxy_host: "127.0.0.1".into(),
@@ -382,12 +378,9 @@ fn list_themes(app: AppHandle) -> Result<String, String> {
         ("russh-high-contrast", "RuSSH High Contrast", "high-contrast-light", "High Contrast Light", "light", "hc-light"),
         ("russh-high-contrast", "RuSSH High Contrast", "high-contrast-dark", "High Contrast Dark", "dark", "hc-black"),
     ];
-    let roots = [std::env::current_dir().ok().map(|path| path.join("themes/builtin")), app.path().resource_dir().ok().map(|path| path.join("themes/builtin"))];
     let mut themes = Vec::new();
     for (plugin_id, plugin_name, file, label, appearance, ui_theme) in candidates {
-        let Some(root) = roots.iter().flatten().find(|root| root.join(plugin_id).join("themes").join(format!("{file}.json")).exists()) else { continue };
-        let path = root.join(plugin_id).join("themes").join(format!("{file}.json"));
-        let theme: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(path).map_err(|error| error.to_string())?).map_err(|error| error.to_string())?;
+        let theme: serde_json::Value = serde_json::from_str(builtin_theme_document(file)).map_err(|error| error.to_string())?;
         themes.push(serde_json::json!({"id": format!("russh.{}", file), "label": label, "description": label, "pluginId": plugin_id, "pluginDisplayName": plugin_name, "version": "1.0.0", "appearance": appearance, "uiTheme": ui_theme, "source": "builtin", "colors": theme.get("colors").cloned().unwrap_or_default(), "terminal": theme.get("terminal").cloned().unwrap_or_default(), "terminalDefaults": theme.get("terminalDefaults").cloned()}));
     }
     if let Ok(user_root) = theme_user_root(&app) {
@@ -412,6 +405,30 @@ fn list_themes(app: AppHandle) -> Result<String, String> {
         }
     }
     serde_json::to_string(&themes).map_err(|error| error.to_string())
+}
+
+// Built-ins must work when a standalone binary is started outside the source tree.
+fn builtin_theme_document(name: &str) -> &'static str {
+    match name {
+        "light-plus" => include_str!("../../themes/builtin/russh-default-themes/themes/light-plus.json"),
+        "dark-plus" => include_str!("../../themes/builtin/russh-default-themes/themes/dark-plus.json"),
+        "pixel-crt" => include_str!("../../themes/builtin/russh-default-themes/themes/pixel-crt.json"),
+        "high-contrast-light" => include_str!("../../themes/builtin/russh-high-contrast/themes/high-contrast-light.json"),
+        "high-contrast-dark" => include_str!("../../themes/builtin/russh-high-contrast/themes/high-contrast-dark.json"),
+        _ => unreachable!("unknown built-in theme"),
+    }
+}
+
+#[cfg(test)]
+mod embedded_theme_tests {
+    #[test]
+    fn builtin_themes_include_terminal_colors_without_filesystem_access() {
+        for name in ["light-plus", "dark-plus", "pixel-crt", "high-contrast-light", "high-contrast-dark"] {
+            let document: serde_json::Value = serde_json::from_str(super::builtin_theme_document(name)).unwrap();
+            assert!(document["colors"].is_object(), "missing colors: {name}");
+            assert!(document["terminal"].is_object(), "missing terminal colors: {name}");
+        }
+    }
 }
 
 fn theme_user_root(app: &AppHandle) -> Result<std::path::PathBuf, String> {
@@ -2309,10 +2326,6 @@ pub fn run() {
                         if let Some(is_maximized) = event_app.get_webview_window("main").and_then(|window| window.is_maximized().ok()) {
                             let _ = event_app.emit("system:windowState", WindowState { is_maximized });
                         }
-                    }
-                    tauri::WindowEvent::Focused(focused) => {
-                        let phase = if *focused { "focused" } else { "blurred" };
-                        let _ = event_app.emit("system:appFocus", serde_json::json!({ "phase": phase }));
                     }
                     _ => {}
                 }

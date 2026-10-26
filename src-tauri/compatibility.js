@@ -20,11 +20,6 @@
       }
     }
   }
-  const activityCallbacks = new Set()
-  const emitActivity = () => activityCallbacks.forEach((callback) => callback({ phase: 'wake' }))
-  ;['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel'].forEach((event) => {
-    document.addEventListener(event, emitActivity, { passive: true })
-  })
 
   const domains = [
     'groups', 'tags', 'credentials', 'servers', 'sessions', 'localTerminals',
@@ -54,13 +49,6 @@
       return typeof path === 'string' && path.length > 0 ? path : null
     },
     menu: { onAction: (callback) => listen('system:menuAction', callback) },
-    appFocus: { onStateChange: (callback) => listen('system:appFocus', callback) },
-    appActivity: {
-      onStateChange: (callback) => {
-        activityCallbacks.add(callback)
-        return () => activityCallbacks.delete(callback)
-      }
-    },
     onHostTrustRequest: (callback) => listen('system:hostTrustRequest', callback),
     window: {
       minimize: () => invoke('window_minimize'),

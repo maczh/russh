@@ -474,7 +474,7 @@ const workbench = {
         },
         experimentalTerminalWebgl: {
           description:
-            '实验性支持，需要可用 GPU 加速。在部分 Windows 和 Electron 环境下，可能导致终端字体发虚、字重异常或其他字体渲染问题；如果终端字体显示异常，建议关闭。',
+            '实验性支持，需要可用 GPU 加速。在部分 Windows 和桌面环境下，可能导致终端字体发虚、字重异常或其他字体渲染问题；如果终端字体显示异常，建议关闭。',
           title: '实验性 WebGL 渲染'
         },
         resourceMonitorInterval: '资源监控间隔（毫秒）',
@@ -930,21 +930,6 @@ const workbench = {
         deleted: '凭据已删除。',
         updated: '凭据已更新。'
       }
-    },
-    awayReminder: {
-      title: '安全提醒',
-      description: '请确认你仍在当前连接旁，以继续使用。',
-      confirmButton: '确认继续',
-      serverIdentity: '服务器标识',
-      localTerminal: '本地终端',
-      sshInfo: 'SSH 信息',
-      sshSession: 'SSH 会话',
-      currentSession: '当前会话',
-      shellType: 'Shell 类型',
-      timeoutSetting: '离开时长阈值',
-      enableSetting: '启用离开提醒',
-      timeoutDescription: '超过此时间无操作后，将弹出确认覆盖层。',
-      secondsUnit: '秒'
     },
     commandHistory: {
       title: '命令历史',

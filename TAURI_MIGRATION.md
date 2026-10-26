@@ -179,18 +179,19 @@ unchanged.
 
 ## Remaining migration work
 
-The Electron runtime is not yet removable. The following contracts still need
-Rust implementations and a Tauri-injected compatibility adapter:
+The Electron runtime (`src/main/`, `src/preload/`, electron-vite, electron-builder,
+and their tests) has been removed. The following work is still outstanding:
 
 - Signed automatic update download/install and terminal backpressure event
   production.
 - Cross-platform signing, updater artifacts, and platform-specific window
   behavior validation.
 
-The renderer currently expects the Electron preload global `window.russhApi`.
-Keeping the renderer source unchanged requires an adapter with the same runtime
-shape, including subscription cleanup and streaming semantics; replacing it
-with a partial `invoke` wrapper would break startup and terminal behavior.
+The renderer still consumes the `window.russhApi` global, which is now provided
+by `src-tauri/compatibility.js` (injected as a Tauri initialization script)
+instead of an Electron preload script. The adapter reproduces the previous
+runtime shape, including subscription cleanup and streaming semantics; replacing
+it with a partial `invoke` wrapper would break startup and terminal behavior.
 
 ## Compatibility risks
 

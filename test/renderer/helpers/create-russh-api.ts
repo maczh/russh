@@ -130,8 +130,6 @@ export function createRuSSHApiMock(overrides: DeepPartial<RuSSHApi> = {}): RuSSH
   const systemOverrides = overrides.system
   const menuOverrides = systemOverrides?.menu
   const windowOverrides = systemOverrides?.window
-  const appFocusOverrides = systemOverrides?.appFocus
-  const appActivityOverrides = systemOverrides?.appActivity
   const defaultMenuApi: RuSSHApi['system']['menu'] = {
     onAction: () => noopUnsubscribe
   }
@@ -151,12 +149,6 @@ export function createRuSSHApiMock(overrides: DeepPartial<RuSSHApi> = {}): RuSSH
     minimize: windowOverrides?.minimize ?? defaultWindowApi.minimize,
     onStateChange: windowOverrides?.onStateChange ?? defaultWindowApi.onStateChange,
     toggleMaximize: windowOverrides?.toggleMaximize ?? defaultWindowApi.toggleMaximize
-  }
-  const resolvedAppFocusApi: RuSSHApi['system']['appFocus'] = {
-    onStateChange: appFocusOverrides?.onStateChange ?? (() => noopUnsubscribe)
-  }
-  const resolvedAppActivityApi: RuSSHApi['system']['appActivity'] = {
-    onStateChange: appActivityOverrides?.onStateChange ?? (() => noopUnsubscribe)
   }
   const resolvedSystemApi: RuSSHApi['system'] = {
     getCapabilities:
@@ -185,9 +177,7 @@ export function createRuSSHApiMock(overrides: DeepPartial<RuSSHApi> = {}): RuSSH
       systemOverrides?.getShellIntegrationScript ?? (async () => 'mock-script'),
     onHostTrustRequest: systemOverrides?.onHostTrustRequest ?? (() => noopUnsubscribe),
     menu: resolvedMenuApi,
-    window: resolvedWindowApi,
-    appFocus: resolvedAppFocusApi,
-    appActivity: resolvedAppActivityApi
+    window: resolvedWindowApi
   }
 
   return {

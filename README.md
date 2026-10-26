@@ -6,7 +6,7 @@
   <img src="resources/icon.png" width="120" alt="RuSSH Logo" />
   <h1>RuSSH</h1>
   <p>🚀 <strong>现代、强大、高颜值的跨平台桌面 SSH / SFTP 客户端</strong> 🚀</p>
-  <p>基于 Electron 39 · React 19 · TypeScript 5 · Tailwind CSS 4 构建</p>
+  <p>基于 Tauri 2 (Rust) · React 19 · TypeScript 5 · Tailwind CSS 4 构建</p>
 
   <p>
     <a href="https://github.com/lantongxue/russh/releases">
@@ -22,7 +22,7 @@
 
 ## 📖 简介
 
-**RuSSH** 是一款专为开发者与系统管理员打造的跨平台 SSH 和 SFTP 客户端。我们摒弃了传统终端工具杂乱繁琐的界面设计，致力于在单个窗口内将 **SSH 会话、本地终端、SFTP 文件传输、端口转发、命令面板、凭据保险箱、暂离保护** 和 **个性化主题系统** 深度融合。免去频繁切换工具的烦恼，为您提供极速、流畅的沉浸式运维体验。
+**RuSSH** 是一款专为开发者与系统管理员打造的跨平台 SSH 和 SFTP 客户端。我们摒弃了传统终端工具杂乱繁琐的界面设计，致力于在单个窗口内将 **SSH 会话、本地终端、SFTP 文件传输、端口转发、命令面板、凭据保险箱** 和 **个性化主题系统** 深度融合。免去频繁切换工具的烦恼，为您提供极速、流畅的沉浸式运维体验。
 
 <div align="center">
   <img src="official-website/public/russh-shell-zh.png" width="100%" alt="RuSSH Dark Preview" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
@@ -42,7 +42,6 @@ RuSSH 不仅仅是一个终端渲染器，它是一个完整、闭环的运维�
 - 🌐 **灵活的端口转发** — 支持本地端口转发 (Local Port Forwarding) 与远程端口转发 (Remote Port Forwarding)，网络出现波动断连重连后，转发规则支持自动恢复。
 - 🎨 **VSCode 风格主题包** — 内置多款精美的高对比度主题，支持 VSCode 风格的标准 JSON 主题包导入，配合系统暗黑/明亮模式自动切换。
 - ☁️ **WebDAV 云端同步** — 支持基于 WebDAV 协议对本地所有主机配置、凭据和偏好设置进行一键备份与云端恢复，恢复后自动热重启。
-- ⏰ **暂离保护 (Away Reminder)** — 自动检测用户无操作暂离状态，展示保护性提示遮罩并锁定终端视窗，妥善保护数据隐私安全。
 
 ---
 
@@ -50,17 +49,17 @@ RuSSH 不仅仅是一个终端渲染器，它是一个完整、闭环的运维�
 
 RuSSH 基于成熟的前沿前端生态构建，性能卓越：
 
-- **壳体环境**: Electron 39
+- **壳体环境**: Tauri 2 (Rust)
 - **前端框架**: React 19 (Hooks) + TypeScript 5
-- **构建链**: Vite 7 + electron-vite
+- **构建链**: Vite 7 + Tauri CLI
 - **CSS 样式**: Tailwind CSS 4
 - **核心包依赖**:
   - [xterm.js](https://github.com/xtermjs/xterm.js) - 终端渲染引擎，支持 WebGL 加速与 Web 字体
   - [Monaco Editor](https://github.com/microsoft/monaco-editor) - 远端文本内联编辑利器
-  - [ssh2](https://github.com/mscdex/ssh2) - 纯 Node.js 实现的高效 SSH2 协议库
-  - [node-pty](https://github.com/microsoft/node-pty) - 本地伪终端桥接接口
-  - [better-sqlite3](https://github.com/WiseFlatfish/better-sqlite3) - 极速本地嵌入式 SQLite 驱动
-  - [electron-updater](https://github.com/electron-userland/electron-builder) - 自动更新检测更新模块
+  - [ssh2](https://github.com/alexcrichton/ssh2-rs) - Rust 侧 SSH2 协议实现
+  - [portable-pty](https://github.com/wez/wezterm/tree/main/pty) - 本地伪终端桥接
+  - [rusqlite](https://github.com/rusqlite/rusqlite) - 嵌入式 SQLite 驱动 (bundled)
+  - [tauri-plugin-dialog](https://github.com/tauri-apps/plugins-workspace) - 原生文件选择与保存对话框
 
 ---
 
@@ -70,6 +69,9 @@ RuSSH 基于成熟的前沿前端生态构建，性能卓越：
 
 - **Node.js**: `22.x` 或更高版本
 - **npm**: `10.x` 或更高版本
+- **Rust**: stable 工具链 (含 `cargo`)
+- **系统依赖**: Linux 需 GTK / WebKitGTK 开发包 (参考 Tauri 2 官方前置依赖)
+- **Linux 打包依赖**: 启用托盘图标打包时还需 `libayatana-appindicator3-dev`，否则 `tauri build` 会因无法通过 pkg-config 定位 appindicator 而中止
 
 ### 开发步骤
 
@@ -80,29 +82,29 @@ RuSSH 基于成熟的前沿前端生态构建，性能卓越：
    cd russh
    ```
 
-2. **安装依赖** (自动包含 C++ 原生模块的重构编译)：
+2. **安装依赖**：
 
    ```bash
    npm install
    ```
 
-3. **启动 Electron 开发模式** (支持主进程与渲染进程热重载)：
+3. **启动 Tauri 开发模式** (Vite 前端热更新 + Rust 后端)：
    ```bash
    npm run dev
    ```
 
 ### 打包发布
 
-项目使用 `electron-builder` 进行各平台分发打包：
+项目使用 Tauri CLI 进行各平台分发打包：
 
 ```bash
-# 构建 Windows 安装包 (NSIS 安装包与便携 ZIP)
+# 构建 Windows 安装包 (NSIS)
 npm run dist:win
 
-# 构建 macOS 安装包 (DMG 映像与 ZIP)
+# 构建 macOS 安装包 (APP 与 DMG)
 npm run dist:mac
 
-# 构建 Linux 安装包 (AppImage 与 DEB 安装包)
+# 构建 Linux 安装包 (AppImage、DEB 与 RPM)
 npm run dist:linux
 ```
 
@@ -113,14 +115,17 @@ npm run dist:linux
 ```text
 russh/
 ├── src/
-│   ├── main/              # Electron 主进程 (Node.js) — 处理底层数据库、SSH/SFTP连接、暂离活动、自动更新
-│   ├── preload/           # contextBridge 双向安全 IPC 通道定义 (仅包含 index.ts 与 index.d.ts)
-│   ├── renderer/          # React 渲染进程 — Workbench 交互层、状态管理、模块 API 代理
-│   └── shared/            # 共享资源层 — 数据校验 Schema (Zod)、全局类型、常量、IPC 通道定义
+│   ├── renderer/          # React 前端 — Workbench 交互层、状态管理、模块 API 代理
+│   └── shared/            # 共享资源层 — 数据校验 Schema (Zod)、全局类型、IPC 契约
+├── src-tauri/             # Tauri 2 / Rust 后端 — 数据库、SSH/SFTP、本地终端、主题、更新
+│   ├── src/               # Rust 源码 (命令、运行时状态)
+│   ├── capabilities/      # Tauri 权限能力声明
+│   ├── compatibility.js   # 注入 window.russhApi 的前端兼容适配器
+│   └── tauri.conf.json    # 窗口、CSP、打包配置
 ├── themes/                # 内置 VSCode 风格 JSON 主题包
 ├── docs/                  # 辅助设计与主题包开发指南文档
-├── scripts/               # 构建、打包补丁、Mock 更新静态服务器等脚本
-└── build/                 # 打包图标以及平台安装器定制配置 (.nsh)
+├── scripts/               # Tauri 开发启动脚本
+└── build/                 # 打包图标资源
 ```
 
 ---
@@ -129,22 +134,13 @@ russh/
 
 | 脚本命令             | 描述                                              |
 | :------------------- | :------------------------------------------------ |
-| `npm run dev`        | 启动客户端本地开发服务器 (支持模块热替换)         |
-| `npm run build`      | 对全量 TS 代码进行类型检查并构建 Electron 产物    |
+| `npm run dev`        | 启动 Tauri 本地开发 (Vite 前端 + Rust 后端)       |
+| `npm run build`      | 对全量 TS 代码进行类型检查并构建前端产物          |
 | `npm run test`       | 运行项目下全量 Vitest 单元与集成测试              |
-| `npm run typecheck`  | 独立对 Node 进程与 Web 渲染进程运行 TS 类型检查   |
+| `npm run typecheck`  | 分别对共享/配置层与 Web 渲染层运行 TS 类型检查    |
 | `npm run format`     | 执行 Prettier 格式化，规范全局代码风格            |
 | `npm run lint`       | 运行 ESLint 代码规范扫描与约束排查                |
-
----
-
-## 💡 环境变量参考
-
-RuSSH 支持通过环境变量修改特定运行时行为：
-
-| 环境变量                       | 默认值 | 说明                                                                  |
-| :----------------------------- | :----- | :-------------------------------------------------------------------- |
-| `RUSSH_HARDWARE_ACCELERATION` | -      | 设为 `false` 可在 Windows 平台强制关闭硬件加速 (解决部分设备渲染卡顿) |
+| `npm run tauri:build`| 构建 Rust 后端并生成各平台安装包                  |
 
 ---
 

@@ -11,7 +11,6 @@ import { MIN_TRANSFER_PANEL_REVEAL_SIZE_PX } from '@/lib/workbench'
 import { useLocalTerminalsStore } from '@/store/local-terminals-store'
 import { useSessionsStore } from '@/store/sessions-store'
 import { useWorkbenchStore } from '@/store/workbench-store'
-import { useAwayReminderStore } from '@/store/away-reminder-store'
 
 export function useSessionEvents() {
   const { t } = useTranslation()
@@ -29,10 +28,6 @@ export function useSessionEvents() {
   useEffect(() => {
     const unsubscribeState = sessionsClient.onStateChange((event) => {
       updateSessionState(event)
-
-      if (event.status === 'ready') {
-        useAwayReminderStore.getState().reset()
-      }
 
       if (event.status === 'connecting') {
         return

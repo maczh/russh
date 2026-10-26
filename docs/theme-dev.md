@@ -117,20 +117,22 @@ my-theme-pack/
     nebula.json
 ```
 
-用户主题包要放到用户主题根目录下。实际根目录以 Electron 的 `app.getPath('userData')` 为准，典型结构如下：
+用户主题包要放到用户主题根目录下。实际根目录以 Tauri 的应用数据目录 (`app.path().app_data_dir()`) 下的 `themes/` 为准，典型结构如下：
 
 ```text
-<userData>/themes/
+<appDataDir>/themes/
   my-theme-pack/
     package.json
     themes/
       nebula.json
 ```
 
-Windows 下通常会落在类似下面的位置：
+各平台通常会落在类似下面的位置 (应用标识符为 `com.russh.desktop`)：
 
 ```text
-%APPDATA%/russh/themes/
+Windows: %APPDATA%/com.russh.desktop/themes/
+macOS:   ~/Library/Application Support/com.russh.desktop/themes/
+Linux:   ~/.local/share/com.russh.desktop/themes/
 ```
 
 需要注意：
